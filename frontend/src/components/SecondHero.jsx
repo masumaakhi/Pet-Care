@@ -25,7 +25,7 @@ export default function SecondHero() {
   }}
     >
       {/* Top Navigation */}
-      <div className="mx-auto max-w-8xl px-6 lg:px-12">
+      <div className="mx-auto max-w-8xl px-6 lg:px-16">
         <div className="flex gap-6 flex-wrap mb-8">
           {navItems.map((item) => (
             <NavPill key={item.label} {...item} />
