@@ -18,10 +18,10 @@ import sechero from "../assets/bg-nature.png"
 
 export default function SmartFeatures() {
   return (
-    <section className="bg-[#f6efe6] py-16"
-      style={{
-    backgroundImage: `url(${sechero})`,
-  }}
+    <section className=" py-16"
+  //     style={{
+  //   backgroundImage: `url(${sechero})`,
+  // }}
     >
       <h2 className="text-center text-2xl font-semibold text-[#5a6b3f] mb-12">
         ───────────────────── Smart Features of Pet-Care ─────────────────────
