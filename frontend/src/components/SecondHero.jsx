@@ -20,9 +20,9 @@ export default function SecondHero() {
   return (
     <div className="min-h-screen relative px-6 text-[#3b3b3b] bg-cover bg-center"
     
-      style={{
-    backgroundImage: `url(${sechero})`,
-  }}
+  //     style={{
+  //   backgroundImage: `url(${sechero})`,
+  // }}
     >
       {/* Top Navigation */}
       <div className="mx-auto max-w-8xl px-6 lg:px-16">

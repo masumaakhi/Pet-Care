@@ -6,10 +6,10 @@ import {
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-[#e9dfcf] to-[#5b5f3a] text-[#3b3b2a]">
+    <footer className="text-[#3b3b2a]">
       {/* Top Links */}
       <div className="max-w-6xl mx-auto px-6 py-6">
-        <div className="flex flex-wrap justify-center gap-6 text-sm font-medium">
+        <div className="flex flex-wrap justify-center gap-6 text-sm font-medium py-3">
           {[
             "About Us",
             "FAQ",
@@ -29,17 +29,17 @@ export default function Footer() {
       </div>
 
       {/* Divider */}
-      <div className="border-t border-black/20" />
+      <div className="border-t border-black/20 py-2" />
 
       {/* Social Icons */}
-      <div className="flex justify-center gap-5 py-6">
+      <div className="flex justify-center gap-5 py-2">
         <SocialIcon icon={<FaFacebookF />} />
         <SocialIcon icon={<FaTwitter />} />
         <SocialIcon icon={<FaInstagram />} />
       </div>
 
       {/* Copyright */}
-      <p className="text-center text-xs text-[#e8e6d5] pb-6">
+      <p className="text-center font-md text-xs text-black pb-6">
         © 2026 Pet-Care. All Rights Reserved.
       </p>
     </footer>
