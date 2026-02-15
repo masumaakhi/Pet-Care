@@ -1,49 +1,67 @@
 import { FiMenu } from "react-icons/fi";
-import logo from "../assets/logo.png"
+import { NavLink } from "react-router-dom";
+import logo from "../assets/logo.png";
+
+const navItems = [
+  { name: "Home", path: "/" },
+  { name: "Adopt", path: "/adopt" },
+  { name: "Rescue", path: "/rescue" },
+  { name: "Services", path: "/services" },
+  { name: "Community", path: "/community" },
+  { name: "Donate", path: "/donate" },
+];
 
 export default function Nav() {
   return (
     <nav className="fixed inset-x-0 top-0 z-50">
       <div className="mx-auto max-w-8xl px-4 sm:px-6 lg:px-8 pt-4">
-        <div className="rounded-3xl px-4 sm:px-6 py-3 flex items-center justify-between">
+        <div className="rounded-3xl px-3 sm:px-6 py-2 flex items-center justify-between backdrop-blur-md shadow-sm">
+          
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <NavLink to="/" className="flex items-center gap-2">
             <div className="flex h-10 w-10 items-center justify-center rounded-3xl bg-softGreen shadow-sm">
-              <img
-                src={logo}
-                alt="Pet-Care Logo"
-                className="h-10 w-10"
-              />
+              <img src={logo} alt="Pet-Care Logo" className="h-10 w-10" />
             </div>
-            <div className="flex flex-col leading-tight">
-              <span className="text-2xl font-semibold text-primary">
-                Pet-Care
-              </span>
-            </div>
-          </div>
+            <span className="text-2xl font-semibold text-primary">
+              Pet-Care
+            </span>
+          </NavLink>
 
           {/* Desktop menu */}
-          <ul className="hidden md:flex items-center gap-6 text-md text-lg font-5px  text-black">
-            {["Home", "Adopt", "Rescue", "Services", "Community", "Donate"].map(
-              (item) => (
-                <li
-                  key={item}
-                  className="cursor-pointer transition hover:text-primary"
+          <ul className="hidden md:flex items-center gap-6 text-lg text-black">
+            {navItems.map((item) => (
+              <li key={item.name}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `transition ${
+                      isActive
+                        ? "text-primary font-semibold"
+                        : "hover:text-primary"
+                    }`
+                  }
                 >
-                  {item}
-                </li>
-              )
-            )}
+                  {item.name}
+                </NavLink>
+              </li>
+            ))}
           </ul>
 
           {/* Actions */}
           <div className="hidden md:flex items-center gap-4 text-lg font-medium">
-            <button className="text-black hover:text-primary transition">
+            <NavLink
+              to="/login"
+              className="text-black hover:text-primary transition"
+            >
               Login
-            </button>
-            <button className="rounded-full bg-primary px-5 py-2 text-white shadow-soft hover:bg-primary/90 transition">
+            </NavLink>
+
+            <NavLink
+              to="/register"
+              className="rounded-full bg-primary px-5 py-2 text-white shadow-soft hover:bg-primary/90 transition"
+            >
               Register
-            </button>
+            </NavLink>
           </div>
 
           {/* Mobile menu icon */}
