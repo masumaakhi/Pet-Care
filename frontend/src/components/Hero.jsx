@@ -1,9 +1,7 @@
 import {
     FaPaw,
-    FaFirstAid,
     FaHandHoldingHeart,
-    FaCalendarCheck,
-    FaDonate,
+    
 } from "react-icons/fa";
 
 import herobg from "../assets/hero.jpg"
