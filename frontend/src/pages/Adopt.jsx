@@ -239,6 +239,115 @@ function Adopt() {
         )}
       </div>
 
+      {/* Adoption Checklist */}
+      <motion.section
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.05 }}
+        className="max-w-5xl mx-auto mt-12 md:mt-16 bg-white/90 backdrop-blur-2xl rounded-3xl px-6 md:px-10 py-8 md:py-10 shadow-[0_20px_70px_rgba(0,0,0,0.08)] border border-[#e0ded8]"
+      >
+        <div className="mb-8 text-center md:text-left">
+          <h2 className="text-2xl md:text-3xl font-semibold text-[#2f3e2c] mb-2">
+            Adoption Checklist
+          </h2>
+          <p className="text-sm md:text-base text-[#6b7d67] max-w-2xl mx-auto md:mx-0">
+            Keep track of the next steps in your adoption journey and feel
+            prepared when it&apos;s time to bring your new friend home.
+          </p>
+        </div>
+
+        <div className="relative flex flex-col gap-8 md:gap-10 md:pl-10">
+          {/* Vertical line */}
+          <div className="hidden md:block absolute left-3 top-3 bottom-3 w-px bg-[#e4ddff]" />
+
+          {/* Step 1 */}
+          <div className="flex items-start gap-4">
+            <div className="flex flex-col items-center">
+              <div className="w-8 h-8 rounded-full bg-[#f0e9ff] border border-[#c0a6ff] flex items-center justify-center text-sm font-semibold text-[#4b2c88]">
+                1
+              </div>
+              <div className="md:flex-1 w-px bg-[#e4ddff] flex-1 mt-1 hidden md:block" />
+            </div>
+            <div>
+              <h3 className="text-lg md:text-xl font-semibold text-[#2f3e2c] mb-2">
+                Schedule a Time to Meet the Pet
+              </h3>
+              <ul className="space-y-2 text-sm md:text-[15px] text-[#4e5f4a] list-disc ml-5">
+                <li>
+                  Verify shelter or rescuer hours and whether you need an
+                  appointment.
+                </li>
+                <li>
+                  Learn more about the pet&apos;s background, temperament, and
+                  any special needs.
+                </li>
+                <li>
+                  Prepare questions about behavior, medical history, diet, and
+                  what to expect during the first visits.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="flex items-start gap-4">
+            <div className="flex flex-col items-center">
+              <div className="w-8 h-8 rounded-full bg-[#f0e9ff] border border-[#c0a6ff] flex items-center justify-center text-sm font-semibold text-[#4b2c88]">
+                2
+              </div>
+              <div className="md:flex-1 w-px bg-[#e4ddff] flex-1 mt-1 hidden md:block" />
+            </div>
+            <div>
+              <h3 className="text-lg md:text-xl font-semibold text-[#2f3e2c] mb-2">
+                Finalize the Adoption
+              </h3>
+              <ul className="space-y-2 text-sm md:text-[15px] text-[#4e5f4a] list-disc ml-5">
+                <li>
+                  Review and sign the adoption agreement and pay any adoption
+                  fee.
+                </li>
+                <li>
+                  Confirm which vaccines and treatments have already been given,
+                  and when the next vet visit is due.
+                </li>
+                <li>
+                  Arrange safe transportation home and prepare essentials like
+                  food, bed, litter, and ID tag or microchip details.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="flex items-start gap-4">
+            <div className="flex flex-col items-center">
+              <div className="w-8 h-8 rounded-full bg-[#f0e9ff] border border-[#c0a6ff] flex items-center justify-center text-sm font-semibold text-[#4b2c88]">
+                3
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg md:text-xl font-semibold text-[#2f3e2c] mb-2">
+                Welcome Your Pet Home
+              </h3>
+              <ul className="space-y-2 text-sm md:text-[15px] text-[#4e5f4a] list-disc ml-5">
+                <li>
+                  Set up a quiet, comfortable space so your pet can settle in at
+                  their own pace.
+                </li>
+                <li>
+                  Establish a simple routine for feeding, walks, and playtime to
+                  help them feel secure.
+                </li>
+                <li>
+                  Stay in touch with the shelter or rescuer if you have
+                  questions or need support during the first weeks.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+
       {/* CTA Strip */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
