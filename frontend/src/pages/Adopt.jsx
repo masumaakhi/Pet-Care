@@ -91,7 +91,7 @@ function Adopt() {
   return (
     <div className="min-h-screen px-6 md:px-16 pt-[6rem] pb-16 bg-gradient-to-b from-[#f5f3ef] via-[#f8faf5] to-[#e5eee2]">
       {/* Heading */}
-      <div className="max-w-5xl mx-auto mb-10 md:mb-14">
+      <div className="max-w-5xl mx-auto mb-10 md:mb-14 text-center">
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -104,7 +104,7 @@ function Adopt() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="text-sm md:text-base text-[#4e5f4a] max-w-2xl"
+          className="text-sm md:text-base text-[#4e5f4a] max-w-2xl mx-auto"
         >
           Every pet here is waiting for a safe and loving home. Browse through
           the available pets, learn about their personalities, and start your
@@ -324,25 +324,162 @@ function Adopt() {
               <div className="w-8 h-8 rounded-full bg-[#f0e9ff] border border-[#c0a6ff] flex items-center justify-center text-sm font-semibold text-[#4b2c88]">
                 3
               </div>
+              <div className="md:flex-1 w-px bg-[#e4ddff] flex-1 mt-1 hidden md:block" />
             </div>
             <div>
               <h3 className="text-lg md:text-xl font-semibold text-[#2f3e2c] mb-2">
-                Welcome Your Pet Home
+                Get Ready to Bring Your Pet Home
               </h3>
               <ul className="space-y-2 text-sm md:text-[15px] text-[#4e5f4a] list-disc ml-5">
                 <li>
-                  Set up a quiet, comfortable space so your pet can settle in at
-                  their own pace.
+                  Use a secure carrier, leash, or harness for safe transportation.
                 </li>
                 <li>
-                  Establish a simple routine for feeding, walks, and playtime to
-                  help them feel secure.
+                  Pet‑proof your home by moving toxic plants, medicines, and cleaning
+                  supplies out of reach.
                 </li>
                 <li>
-                  Stay in touch with the shelter or rescuer if you have
-                  questions or need support during the first weeks.
+                  Create a calm landing space with a bed, water bowl, and a few familiar
+                  toys so they can decompress.
+                </li>
+                <li>
+                  Dogs
+                  <ul className="mt-2 ml-5 list-disc space-y-1 text-[13px] md:text-sm">
+                    <li>Baby gates to block off unsafe areas (stairs, kitchen, etc.).</li>
+                    <li>
+                      Cord organizers or covers to prevent chewing on electrical wires.
+                    </li>
+                    <li>Cabinet locks for trash and cleaning supplies.</li>
+                    <li>Non‑slip rugs or mats to help prevent slips and protect floors.</li>
+                    <li>
+                      Chew toys to redirect chewing away from furniture and shoes.
+                    </li>
+                    <li>
+                      Crate or dog‑safe area for secure rest when unsupervised.
+                    </li>
+                  </ul>
+                </li>
+                <li>
+                  Cats
+                  <ul className="mt-2 ml-5 list-disc space-y-1 text-[13px] md:text-sm">
+                    <li>
+                      Window screens or guards so curious cats stay safe around heights.
+                    </li>
+                    <li>
+                      Scratch posts or pads to save your furniture and give them an outlet.
+                    </li>
+                    <li>
+                      Hide small objects (elastic bands, hair ties) that can be swallowed.
+                    </li>
+                    <li>
+                      Secure cords and blinds that could tangle or be chewed.
+                    </li>
+                  </ul>
                 </li>
               </ul>
+            </div>
+          </div>
+
+          {/* Step 4 */}
+          <div className="flex items-start gap-4">
+            <div className="flex flex-col items-center">
+              <div className="w-8 h-8 rounded-full bg-[#f0e9ff] border border-[#c0a6ff] flex items-center justify-center text-sm font-semibold text-[#4b2c88]">
+                4
+              </div>
+              <div className="md:flex-1 w-px bg-[#e4ddff] flex-1 mt-1 hidden md:block" />
+            </div>
+            <div>
+              <h3 className="text-lg md:text-xl font-semibold text-[#2f3e2c] mb-2">
+                File Your Pet&apos;s Paperwork
+              </h3>
+              <ul className="space-y-2 text-sm md:text-[15px] text-[#4e5f4a] list-disc ml-5 mb-4">
+                <li>Keep vaccination and deworming records together and up to date.</li>
+                <li>
+                  Store digital copies of vet records in case you ever need them in an
+                  emergency.
+                </li>
+                <li>
+                  Update microchip registration and contact details after adoption.
+                </li>
+                <li>
+                  Order or update an ID tag with your phone number and pet&apos;s name.
+                </li>
+              </ul>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#f36b3a] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition"
+              >
+                View Smart Pet ID Tips
+              </button>
+            </div>
+          </div>
+
+          {/* Step 5 */}
+          <div className="flex items-start gap-4">
+            <div className="flex flex-col items-center">
+              <div className="w-8 h-8 rounded-full bg-[#f0e9ff] border border-[#c0a6ff] flex items-center justify-center text-sm font-semibold text-[#4b2c88]">
+                5
+              </div>
+              <div className="md:flex-1 w-px bg-[#e4ddff] flex-1 mt-1 hidden md:block" />
+            </div>
+            <div>
+              <h3 className="text-lg md:text-xl font-semibold text-[#2f3e2c] mb-2">
+                Understand the Importance of Insurance
+              </h3>
+              <ul className="space-y-2 text-sm md:text-[15px] text-[#4e5f4a] list-disc ml-5 mb-4">
+                <li>
+                  Learn about accident, illness, and wellness plans available in your area.
+                </li>
+                <li>
+                  Compare coverage for emergencies, surgeries, and long‑term medications.
+                </li>
+                <li>
+                  Consider how insurance or a dedicated savings fund fits your budget.
+                </li>
+              </ul>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#e7622b] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition"
+              >
+                Compare Insurance Options
+              </button>
+            </div>
+          </div>
+
+          {/* Step 6 */}
+          <div className="flex items-start gap-4">
+            <div className="flex flex-col items-center">
+              <div className="w-8 h-8 rounded-full bg-[#f0e9ff] border border-[#c0a6ff] flex items-center justify-center text-sm font-semibold text-[#4b2c88]">
+                6
+              </div>
+            </div>
+            <div>
+              <h3 className="text-lg md:text-xl font-semibold text-[#2f3e2c] mb-2">
+                Establish Ongoing Support
+              </h3>
+              <ul className="space-y-2 text-sm md:text-[15px] text-[#4e5f4a] list-disc ml-5 mb-4">
+                <li>
+                  Choose a local vet and schedule an initial health check‑up and follow‑up
+                  visits.
+                </li>
+                <li>
+                  Research trainers, groomers, pet sitters, and boarding options you trust.
+                </li>
+                <li>
+                  Set reminders for flea/tick prevention, heartworm prevention, and annual
+                  vaccines.
+                </li>
+                <li>
+                  Save contact details for local shelters or lost‑pet services just in
+                  case.
+                </li>
+              </ul>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#7c3aed] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition"
+              >
+                Explore Local Pet Services
+              </button>
             </div>
           </div>
         </div>
