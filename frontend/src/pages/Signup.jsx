@@ -66,11 +66,14 @@ to-[#a18463]/35 backdrop-blur-2xl
                             placeholder="Enter your name"
                             className="w-full px-4 py-2 rounded-xl 
               bg-gradient-to-br 
-from-white/65 
-via-[#7fa37a]/35 
-via-[#6fa8dc]/25  border border-[#8b6b4c]/50 
-              focus:border-[#5f7d5a] focus:ring-2 focus:ring-[#7fa37a]/40 
-              text-black outline-none transition backdrop-blur-md"
+              from-white/65 
+              via-[#7fa37a]/35 
+              via-[#a18463]/25  
+              border border-[#8b6b4c]/50 
+              focus:border-[#5f7d5a] 
+              focus:ring-2 focus:ring-[#7fa37a]/40 
+              text-black outline-none 
+              transition backdrop-blur-md"
                         />
                     </div>
 
@@ -83,11 +86,14 @@ via-[#6fa8dc]/25  border border-[#8b6b4c]/50
                             placeholder="Enter your email"
                             className="w-full px-4 py-2 rounded-xl 
               bg-gradient-to-br 
-from-white/65 
-via-[#7fa37a]/35 
-via-[#6fa8dc]/25  border border-[#8b6b4c]/50 
-              focus:border-[#5f7d5a] focus:ring-2 focus:ring-[#7fa37a]/40 
-              text-black outline-none transition backdrop-blur-md"
+              from-white/65 
+              via-[#7fa37a]/35 
+              via-[#a18463]/25  
+              border border-[#8b6b4c]/50 
+              focus:border-[#5f7d5a] 
+              focus:ring-2 focus:ring-[#7fa37a]/40 
+              text-black outline-none 
+              transition backdrop-blur-md"
                         />
                     </div>
 
@@ -100,11 +106,14 @@ via-[#6fa8dc]/25  border border-[#8b6b4c]/50
                             placeholder="Create password"
                             className="w-full px-4 py-2 rounded-xl 
               bg-gradient-to-br 
-from-white/65 
-via-[#7fa37a]/35 
-via-[#6fa8dc]/25  border border-[#8b6b4c]/50 
-              focus:border-[#8b6b4c] focus:ring-2 focus:ring-[#8b6b4c]/40 
-              text-black outline-none transition backdrop-blur-md"
+              from-white/65 
+              via-[#7fa37a]/35 
+              via-[#a18463]/25  
+              border border-[#8b6b4c]/50 
+              focus:border-[#5f7d5a] 
+              focus:ring-2 focus:ring-[#7fa37a]/40 
+              text-black outline-none 
+              transition backdrop-blur-md"
                         />
                     </div>
 
@@ -115,11 +124,14 @@ via-[#6fa8dc]/25  border border-[#8b6b4c]/50
                         <select
                             className="w-full px-4 py-2 rounded-xl 
               bg-gradient-to-br 
-from-white/65 
-via-[#7fa37a]/35 
-via-[#6fa8dc]/25 border border-[#8b6b4c]/50  
-              focus:border-[#5f7d5a] focus:ring-2 focus:ring-[#7fa37a]/40 
-              text-[#2f3e2c] outline-none transition backdrop-blur-md"
+              from-white/65 
+              via-[#7fa37a]/35 
+              via-[#a18463]/25  
+              border border-[#8b6b4c]/50 
+              focus:border-[#5f7d5a] 
+              focus:ring-2 focus:ring-[#7fa37a]/40 
+              text-black outline-none 
+              transition backdrop-blur-md"
                         >
                             <option className="bg-[#f3eee8]">Pet Owner</option>
                             <option className="bg-[#f3eee8]">Adopter</option>
