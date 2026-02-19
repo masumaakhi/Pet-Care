@@ -8,6 +8,18 @@ In the project directory, you can run:
 
 ### `npm start`
 
+
+1. bg-gradient-to-br 
+from-white/65 
+via-[#7fa37a]/35 
+via-[#6fa8dc]/25 
+
+ 
+2. bg-gradient-to-br 
+from-white/65 
+via-[#7fa37a]/35 
+via-[#a18463]/25
+
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 

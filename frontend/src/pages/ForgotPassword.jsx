@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 
-export default function Signin() {
+export default function ForgotPassword() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 
     shadow-[0_35px_90px_rgba(0,0,0,0.18),0_10px_30px_rgba(95,125,90,0.25)] 
@@ -42,34 +42,21 @@ export default function Signin() {
         transition duration-500"
       >
         <h2 className="text-2xl sm:text-3xl font-bold text-[#2f3e2c] text-center mb-2">
-          Welcome Back
+          Forgot Password
         </h2>
 
         <p className="text-[#6b7d67] text-center mb-6 text-sm sm:text-base">
-          Login to continue caring for pets
+          Enter your email to receive a reset link
         </p>
-
-        {/* Google Login */}
-        <button
-          type="button"
-          className="w-full flex items-center justify-center gap-3 py-2.5 mb-[16px]
-          rounded-xl bg-gradient-to-r from-[#5f7d5a]/50 via-[#7fa37a] to-[#8b6b4c]
-          border border-[#d6e2d3] 
-          text-black/70 text-[15px] font-semibold
-          hover:scale-[1.02] hover:shadow-lg 
-          transition duration-300 backdrop-blur-md"
-        >
-          Continue with Google
-        </button>
 
         <form className="space-y-4">
           <div>
             <label className="block text-sm text-[#4e5f4a] mb-1">
-              Email
+              Email Address
             </label>
             <input
               type="email"
-              placeholder="Enter your email"
+              placeholder="Enter your registered email"
               className="w-full px-4 py-2 rounded-xl 
               bg-gradient-to-br 
               from-white/65 
@@ -83,41 +70,6 @@ export default function Signin() {
             />
           </div>
 
-          <div>
-            <label className="block text-sm text-[#4e5f4a] mb-1">
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="Enter your password"
-              className="w-full px-4 py-2 rounded-xl 
-              bg-gradient-to-br 
-              from-white/65 
-              via-[#7fa37a]/35 
-              via-[#a18463]/25  
-              border border-[#8b6b4c]/50 
-              focus:border-[#8b6b4c] 
-              focus:ring-2 focus:ring-[#8b6b4c]/40 
-              text-black outline-none 
-              transition backdrop-blur-md"
-            />
-          </div>
-
-          <div className="flex justify-between items-center text-sm">
-            <label className="flex items-center gap-2 text-[#4e5f4a]">
-              <input type="checkbox" className="accent-[#5f7d5a]" />
-              Remember me
-            </label>
-
-              <Link
-                to="/forgot-password"
-                className="text-[#5f7d5a] hover:underline"
-              >
-                Forgot password?
-              </Link>
-
-          </div>
-
           <button
             type="submit"
             className="w-full py-3 rounded-xl 
@@ -126,7 +78,7 @@ export default function Signin() {
             hover:scale-[1.02] hover:shadow-lg 
             transition duration-300"
           >
-            Login
+            Send Reset Link
           </button>
         </form>
 
@@ -137,15 +89,15 @@ export default function Signin() {
           <div className="flex-grow h-px bg-[#8b6b4c]"></div>
         </div>
 
-        <p className="text-center text-black text-[15px] mt-6">
-  Don’t have an account?
-  <Link
-    to="/register"
-    className="text-black text-[15px] underline hover:underline transition hover:text-black hover:font-semibold cursor-pointer ml-1"
-  >
-    Sign Up
-  </Link>
-</p>
+        <p className="text-center text-black text-[15px]">
+          Remember your password?
+          <Link
+            to="/login"
+            className="ml-1 underline hover:font-semibold transition"
+          >
+            Back to Login
+          </Link>
+        </p>
       </motion.div>
     </div>
   );
