@@ -1,7 +1,17 @@
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
-const pets = [
+// Birds (b) and Rabbits (r) from src/assets — only these images are used for adoption cards.
+import b1 from "../assets/b1.jpg";
+import b2 from "../assets/b2.jpg";
+import b3 from "../assets/b3.jpg";
+import r1 from "../assets/r1.jpg";
+import r2 from "../assets/r2.jpg";
+import r3 from "../assets/r3.jpg";
+import r4 from "../assets/r4.jpg";
+import r5 from "../assets/r5.jpg";
+
+const petsFromUrls = [
   {
     id: 1,
     name: "Bella",
@@ -75,6 +85,100 @@ const pets = [
     tag: "Quiet & Sweet",
   },
 ];
+
+// Pet profiles from assets: b = Bird, r = Rabbit (only b1–b3.jpg and r1–r5.jpg used).
+const petsFromAssets = [
+  {
+    id: 7,
+    name: "Sky",
+    type: "Bird",
+    breed: "Budgie",
+    age: "1 year",
+    size: "Small",
+    gender: "Male",
+    image: b1,
+    tag: "Talkative & Curious",
+  },
+  {
+    id: 8,
+    name: "Sunny",
+    type: "Bird",
+    breed: "Canary",
+    age: "8 months",
+    size: "Small",
+    gender: "Female",
+    image: b2,
+    tag: "Cheerful & Active",
+  },
+  {
+    id: 9,
+    name: "Blue",
+    type: "Bird",
+    breed: "Parakeet",
+    age: "1.5 years",
+    size: "Small",
+    gender: "Male",
+    image: b3,
+    tag: "Friendly & Social",
+  },
+  {
+    id: 10,
+    name: "Bunny",
+    type: "Rabbit",
+    breed: "Holland Lop",
+    age: "10 months",
+    size: "Small",
+    gender: "Male",
+    image: r1,
+    tag: "Quiet & Sweet",
+  },
+  {
+    id: 11,
+    name: "Coco",
+    type: "Rabbit",
+    breed: "Mini Lop",
+    age: "1 year",
+    size: "Small",
+    gender: "Female",
+    image: r2,
+    tag: "Calm & Affectionate",
+  },
+  {
+    id: 12,
+    name: "Dusty",
+    type: "Rabbit",
+    breed: "Netherland Dwarf",
+    age: "7 months",
+    size: "Small",
+    gender: "Male",
+    image: r3,
+    tag: "Playful & Energetic",
+  },
+  {
+    id: 13,
+    name: "Luna",
+    type: "Rabbit",
+    breed: "Lionhead",
+    age: "1.2 years",
+    size: "Small",
+    gender: "Female",
+    image: r4,
+    tag: "Gentle & Fluffy",
+  },
+  {
+    id: 14,
+    name: "Pepper",
+    type: "Rabbit",
+    breed: "Rex",
+    age: "2 years",
+    size: "Medium",
+    gender: "Male",
+    image: r5,
+    tag: "Rescued • Vaccinated",
+  },
+];
+
+const pets = [...petsFromUrls, ...petsFromAssets];
 
 function Adopt() {
   const filterOptions = useMemo(
