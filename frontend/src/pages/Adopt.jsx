@@ -267,7 +267,7 @@ const petsFromAssets = [
   },
   {
     id: 22,
-    name: "Bella", 
+    name: "Samir", 
     type: "Dog", 
     breed: "Beagle", 
     age: "2 years", 
