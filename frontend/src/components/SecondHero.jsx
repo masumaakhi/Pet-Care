@@ -8,13 +8,13 @@ import {
   BookOpen,
   Gift,
 } from "lucide-react";
-import care from "../assets/care.png"
-import find from "../assets/find.png"
-import rescue from "../assets/rescue.png"
-import milo from "../assets/milo.png"
-import luna from "../assets/luna.png"
-import tiger from "../assets/tiger.png"
-import sechero from "../assets/sechero.jpg"
+// import care from "../assets/care.png"
+// import find from "../assets/find.png"
+// import rescue from "../assets/rescue.png"
+// import milo from "../assets/milo.png"
+// import luna from "../assets/luna.png"
+// import tiger from "../assets/tiger.png"
+// import sechero from "../assets/sechero.jpg"
 // ===================== MAIN =====================
 export default function SecondHero() {
   return (
@@ -205,13 +205,13 @@ const navItems = [
 ];
 
 const pets = [
-  { name: "Milo", status: "Adopt Me", img: milo },
-  { name: "Luna", status: "Adopt Me", img: luna },
-  { name: "Tiger", status: "Adopted", img: tiger },
+  { name: "Milo", status: "Adopt Me", img: "https://6971273ec0356527951e30fc.imgix.net/milo.png?auto=format,compress&w=300" },
+  { name: "Luna", status: "Adopt Me", img: "https://6971273ec0356527951e30fc.imgix.net/luna.png?auto=format,compress&w=300" },
+  { name: "Tiger", status: "Adopted", img: "https://6971273ec0356527951e30fc.imgix.net/tiger.png?auto=format,compress&w=300" },
 ];
 
 const steps = [
-  {title: "Find & Adopt", img: find },
-  {title: "Request Rescue", img: rescue },
-  { title: "Smart Pet Care", img: care },
+  { title: "Find & Adopt", img: "https://6971273ec0356527951e30fc.imgix.net/find.png?auto=format,compress&w=800" },
+  { title: "Request Rescue", img: "https://6971273ec0356527951e30fc.imgix.net/rescue.png?auto=format,compress&w=800" },
+  { title: "Smart Pet Care", img: "https://6971273ec0356527951e30fc.imgix.net/care.png?auto=format,compress&w=800" },
 ];

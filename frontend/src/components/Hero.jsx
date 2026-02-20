@@ -4,19 +4,17 @@ import {
     
 } from "react-icons/fa";
 
-import herobg from "../assets/hero.jpg"
+// import herobg from "../assets/hero.jpg"
 
 
 const HeroSection = () => {
     return (
-        <section
-            className="relative min-h-[85vh] bg-cover bg-center"
-            style={{
-                backgroundImage: `
-      url(${herobg})
-    `,
-            }}
-        >
+      <section
+  className="relative min-h-[85vh] bg-cover bg-center"
+  style={{
+    backgroundImage: `url(https://6971273ec0356527951e30fc.imgix.net/hero.jpg?auto=format,compress&w=1600)`,
+  }}
+>
             {/* Content */}
             <div className="mx-auto max-w-8xl px-6 py-16 grid lg:px-12 lg:pb-2 lg:grid-cols-2 gap-10 items-center">
 
