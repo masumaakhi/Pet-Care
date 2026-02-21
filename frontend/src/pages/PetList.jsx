@@ -30,6 +30,24 @@ const mockPets = [
     photo:
       "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=800&q=80",
   },
+  {
+    id: 4,
+    name: "Rio",
+    species: "Bird",
+    breed: "Cockatiel",
+    age: "1 yr",
+    photo:
+      "https://images.unsplash.com/photo-1552728089-57bdde30fc3b?w=800&q=80",
+  },
+  {
+    id: 5,
+    name: "Cotton",
+    species: "Rabbit",
+    breed: "Holland Lop",
+    age: "6 mos",
+    photo:
+      "https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?w=800&q=80",
+  },
 ];
 
 export default function PetList() {

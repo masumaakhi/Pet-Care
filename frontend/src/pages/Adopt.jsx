@@ -5,11 +5,23 @@ import { motion } from "framer-motion";
 import b1 from "../assets/b1.jpg";
 import b2 from "../assets/b2.jpg";
 import b3 from "../assets/b3.jpg";
+import b4 from "../assets/b4.jpg";
+import b5 from "../assets/b5.jpg";
 import r1 from "../assets/r1.jpg";
 import r2 from "../assets/r2.jpg";
 import r3 from "../assets/r3.jpg";
 import r4 from "../assets/r4.jpg";
 import r5 from "../assets/r5.jpg";
+import cat1 from "../assets/cat1.jpg";
+import cat2 from "../assets/cat2.jpg";
+import cat3 from "../assets/cat3.jpg";
+import cat4 from "../assets/cat4.jpg";
+import dog1 from "../assets/dog1.jpg";
+import dog2 from "../assets/dog2.jpg";
+import dog3 from "../assets/dog3.jpg";
+import dog4 from "../assets/dog4.jpg";
+import dog5 from "../assets/dog5.jpg";
+
 
 const petsFromUrls = [
   {
@@ -176,6 +188,129 @@ const petsFromAssets = [
     image: r5,
     tag: "Rescued • Vaccinated",
   },
+  {
+    id: 15,
+    name: "Sunny", 
+    type: "Bird", 
+    breed: "Canary", 
+    age: "2 years", 
+    size: "Small", 
+    gender: "Female", 
+    image: b4, 
+    tag: "Cheerful & Melodious",
+  },
+  {
+    id: 16,
+    name: "Rio", 
+    type: "Bird", 
+    breed: "Macaw", 
+    age: "4 years", 
+    size: "Large", 
+    gender: "Male", 
+    image: b5, 
+    tag: "Colorful & Intelligent",
+  },
+  {
+    id: 17,
+    name: "Whiskers", 
+    type: "Cat", 
+    breed: "Persian", 
+    age: "3 years", 
+    size: "Medium", 
+    gender: "Male", 
+    image: cat1, 
+    tag: "Calm & Gentle",
+  },
+  {
+    id: 18,
+    name: "Samba", 
+    type: "Cat", 
+    breed: "Siamese", 
+    age: "2 years", 
+    size: "Small", 
+    gender: "Female", 
+    image: cat2, 
+    tag: "Curious & Vocal",
+  },
+  {
+    id: 19,
+    name: "Shadow", 
+    type: "Cat", 
+    breed: "Maine Coon", 
+    age: "4 years", 
+    size: "Large", 
+    gender: "Male", 
+    image: cat3, 
+    tag: "Playful & Affectionate",
+  },
+  {
+    id: 20,
+    name: "George", 
+    type: "Cat", 
+    breed: "Bengal", 
+    age: "1 year", 
+    size: "Medium", 
+    gender: "Female", 
+    image: cat4, 
+    tag: "Energetic & Adventurous",
+  },
+  {
+    id: 21,
+    name: "Max", 
+    type: "Dog", 
+    breed: "Golden Retriever", 
+    age: "3 years", 
+    size: "Large", 
+    gender: "Male", 
+    image: dog1, 
+    tag: "Friendly & Loyal",
+  },
+  {
+    id: 22,
+    name: "Samir", 
+    type: "Dog", 
+    breed: "Beagle", 
+    age: "2 years", 
+    size: "Medium", 
+    gender: "Female", 
+    image: dog2, 
+    tag: "Curious & Energetic",
+  },
+  {
+    id: 23,
+    name: "Rocky", 
+    type: "Dog", 
+    breed: "German Shepherd", 
+    age: "4 years", 
+    size: "Large", 
+    gender: "Male", 
+    image: dog3, 
+    tag: "Protective & Intelligent",
+  },
+  {
+    id: 24,
+    name: "Daisy", 
+    type: "Dog", 
+    breed: "Poodle", 
+    age: "1.5 years", 
+    size: "Small", 
+    gender: "Female", 
+    image: dog4, 
+    tag: "Playful & Elegant",
+  },
+  {
+    id: 25,
+    name: "Charlie", 
+    type: "Dog", 
+    breed: "Bulldog", 
+    age: "5 years", 
+    size: "Medium", 
+    gender: "Male", 
+    image: dog5, 
+    tag: "Calm & Affectionate",
+  },
+  
+  
 ];
 
 const pets = [...petsFromUrls, ...petsFromAssets];
