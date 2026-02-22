@@ -17,6 +17,7 @@ import MedicalHistory from "../pages/MedicalHistory";
 import Prescriptions from "../pages/Prescriptions";
 import PetGallery from "../pages/PetGallery";
 import CareCalendar from "../pages/CareCalendar";
+import HealthAndMedical from "../pages/HealthAndMedical";
 
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminLayout from "../pages/admin/AdminLayout";
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
     children: [
       { path: "/", index: true, element: <Home /> },
       { path: "/adopt", element: <Adopt /> },
+      { path: "/health", element: <HealthAndMedical /> },
       { path: "/register", element: <Signup /> },
       { path: "/login", element: <Signin /> },
       { path: "/forgot-password", element: <ForgotPassword /> },

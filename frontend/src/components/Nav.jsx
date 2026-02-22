@@ -5,6 +5,7 @@ import logo from "../assets/logo.png";
 const navItems = [
   { name: "Home", path: "/" },
   { name: "Adopt", path: "/adopt" },
+  { name: "Health & Medical", path: "/health" },
   { name: "Rescue", path: "/rescue" },
   { name: "Services", path: "/services" },
   { name: "Community", path: "/community" },
