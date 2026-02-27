@@ -3,7 +3,7 @@ import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import { Outlet } from "react-router-dom";
 
-import bgImage from "./assets/bg-4.png";
+// import bgImage from "./assets/bg-4.png";
 
 function App() {
   return (
@@ -13,15 +13,15 @@ function App() {
       <div/>
 
       {/* Background Image (Blurred) */}
-      <div
-        className="fixed inset-0 z-[-2]"
-        style={{
-          backgroundImage: `url(${bgImage})`,
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
-          backgroundPosition: "100% 100%",
-        }}
-      />
+    <div
+  className="fixed inset-0 z-[-2]"
+  style={{
+    backgroundImage: `url(https://res.cloudinary.com/ddgbit2hg/image/upload/v1772142332/bg-4_w9crpg.png?auto=format,compress&w=1920)`,
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "cover",
+    backgroundPosition: "100% 100%",
+  }}
+/>
 
       {/* Soft Glass Overlay */}
       <div
