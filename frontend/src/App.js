@@ -16,7 +16,7 @@ function App() {
     <div
   className="fixed inset-0 z-[-2]"
   style={{
-    backgroundImage: `url(https://6971273ec0356527951e30fc.imgix.net/bg-4.png?auto=format,compress&w=1920)`,
+    backgroundImage: `url(https://res.cloudinary.com/ddgbit2hg/image/upload/v1772142332/bg-4_w9crpg.png?auto=format,compress&w=1920)`,
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
     backgroundPosition: "100% 100%",

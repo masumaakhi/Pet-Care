@@ -39,9 +39,9 @@ export const router = createBrowserRouter([
       { path: "/pets/:id", element: <PetDetails /> },
       { path: "/pets/schedule", element: <CareScheduleList /> },
       { path: "/pets/weight", element: <WeightLog /> },
-      { path: "/pets/vaccines", element: <VaccinationRecords /> },
-      { path: "/pets/medical", element: <MedicalHistory /> },
-      { path: "/pets/prescriptions", element: <Prescriptions /> },
+      { path: "/vaccines", element: <VaccinationRecords /> },
+      { path: "/medical", element: <MedicalHistory /> },
+      { path: "/prescriptions", element: <Prescriptions /> },
       { path: "/pets/gallery", element: <PetGallery /> },
       { path: "/pets/calendar", element: <CareCalendar /> },
 

@@ -6,19 +6,19 @@ const healthLinks = [
   {
     title: "Medical History",
     description: "Track diagnoses, treatments, follow-ups & vet costs.",
-    path: "/pets/medical",
+    path: "/medical",
     icon: "📋",
   },
   {
     title: "Vaccination Records",
     description: "View and manage vaccine schedules for your pets.",
-    path: "/pets/vaccines",
+    path: "/vaccines",
     icon: "💉",
   },
   {
     title: "Prescriptions",
     description: "Keep track of medications and refill reminders.",
-    path: "/pets/prescriptions",
+    path: "/prescriptions",
     icon: "💊",
   },
   {
