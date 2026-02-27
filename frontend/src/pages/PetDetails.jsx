@@ -163,38 +163,9 @@ export default function PetDetails() {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mt-3">
-                <Link
-                  to="/pets/vaccines"
-                  className="text-center py-3 rounded-2xl
-                  bg-white/55 border border-[#8b6b4c]/40
-                  text-[#2f3e2c] font-semibold
-                  hover:bg-white/70 hover:shadow-md transition"
-                >
-                  🐾 Vaccines
-                </Link>
 
-                <Link
-                  to="/pets/medical"
-                  className="text-center py-3 rounded-2xl
-                  bg-white/55 border border-[#8b6b4c]/40
-                  text-[#2f3e2c] font-semibold
-                  hover:bg-white/70 hover:shadow-md transition"
-                >
-                  💊 Medical
-                </Link>
-              </div>
 
                 <div className="grid grid-cols-2 gap-3 mt-3">
-                <Link
-                  to="/pets/prescriptions"
-                  className="text-center py-3 rounded-2xl
-                  bg-white/55 border border-[#8b6b4c]/40
-                  text-[#2f3e2c] font-semibold
-                  hover:bg-white/70 hover:shadow-md transition"
-                >
-                   Prescriptions
-                </Link>
 
                 <Link
                   to="/pets/gallery"
@@ -205,9 +176,8 @@ export default function PetDetails() {
                 >
                   Gallery
                 </Link>
-              </div>
-                <div className="grid grid-cols-2 gap-3 mt-3">
-                <Link
+
+                                <Link
                   to="/pets/calendar"
                   className="text-center py-3 rounded-2xl
                   bg-white/55 border border-[#8b6b4c]/40
@@ -216,7 +186,6 @@ export default function PetDetails() {
                 >
                   Calendar
                 </Link>
-
               </div>
             </motion.div>
 

@@ -1,28 +1,23 @@
 import { useEffect, useState } from "react";
-import {
-  FaSearch,
-  FaHeart,
-  FaTruck,
-  FaDonate,
-} from "react-icons/fa";
+import { FaSearch, FaHeart, FaTruck, FaDonate } from "react-icons/fa";
 
-/* illustrations */
-import lostFoundImg from "../assets/lost-found.png";
-import adoptionImg from "../assets/adoption.png";
-import servicesImg from "../assets/services.png";
-import donateImg from "../assets/donate.png";
-import donateDog from "../assets/donate-dog.png";
-import volunteerCat from "../assets/volunteer-cat.png";
-import sechero from "../assets/bg-nature.png"
-
+/* ✅ Imgix CDN images */
+const lostFoundImg =
+  "https://res.cloudinary.com/ddgbit2hg/image/upload/v1772142887/lost-found_ceyojl.png?auto=format,compress&w=600";
+const adoptionImg =
+  "https://res.cloudinary.com/ddgbit2hg/image/upload/v1772142897/adoption_yayyae.png?auto=format,compress&w=600";
+const servicesImg =
+  "https://res.cloudinary.com/ddgbit2hg/image/upload/v1772142954/services_tbjght.png?auto=format,compress&w=600";
+const donateImg =
+  "https://res.cloudinary.com/ddgbit2hg/image/upload/v1772142911/donate_twm6oo.png?auto=format,compress&w=600";
+const donateDog =
+  "https://res.cloudinary.com/ddgbit2hg/image/upload/v1772142932/donate-dog_blmnye.png?auto=format,compress&w=700";
+const volunteerCat =
+  "https://res.cloudinary.com/ddgbit2hg/image/upload/v1772142971/volunteer-cat_fj3dns.png?auto=format,compress&w=700";
 
 export default function SmartFeatures() {
   return (
-    <section className=" py-16"
-  //     style={{
-  //   backgroundImage: `url(${sechero})`,
-  // }}
-    >
+    <section className="py-16">
       <h2 className="text-center text-2xl font-semibold text-[#5a6b3f] mb-12">
         ───────────────────── Smart Features of Pet-Care ─────────────────────
       </h2>
@@ -59,23 +54,23 @@ export default function SmartFeatures() {
       </div>
 
       {/* CTA */}
-<div className="max-w-6xl mx-auto mt-14 grid md:grid-cols-2 gap-6 px-6">
-  <CTA
-    title="Support Our Mission"
-    text="Help Us Save More Lives!"
-    button="Donate Now →"
-    bgImage={donateDog}
-    color="orange"
-  />
+      <div className="max-w-6xl mx-auto mt-14 grid md:grid-cols-2 gap-6 px-6">
+        <CTA
+          title="Support Our Mission"
+          text="Help Us Save More Lives!"
+          button="Donate Now →"
+          bgImage={donateDog}
+          color="orange"
+        />
 
-  <CTA
-    title="Looking to Volunteer?"
-    text="Make a Difference for Pets in Need."
-    button="Join as Volunteer →"
-    bgImage={volunteerCat}
-    color="green"
-  />
-</div>
+        <CTA
+          title="Looking to Volunteer?"
+          text="Make a Difference for Pets in Need."
+          button="Join as Volunteer →"
+          bgImage={volunteerCat}
+          color="green"
+        />
+      </div>
     </section>
   );
 }
@@ -84,19 +79,31 @@ export default function SmartFeatures() {
 
 function GlassCard({ icon, image, title, desc }) {
   return (
-    <div className="rounded-2xl p-5 text-center backdrop-blur-xl bg-white/55 border border-white/40 shadow-lg hover:shadow-xl transition">
-      <img
-        src={image}
-        alt=""
-        className="w-60 h-55 mx-auto object-contain mb-3"
-      />
-
-      <div className="text-[#5a6b3f] text-2xl mb-2 flex justify-center">
-        {icon}
+    <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-white/55 border border-white/40 shadow-lg hover:shadow-xl transition">
+      
+      {/* ✅ Image wrapper with responsive aspect ratio */}
+      <div className="w-full aspect-[16/10] md:aspect-[16/9] bg-white/40">
+        <img
+          src={image}
+          alt=""
+          className="w-full h-full object-cover"
+          loading="lazy"
+        />
       </div>
 
-      <h4 className="font-semibold mb-1">{title}</h4>
-      <p className="text-sm text-gray-700">{desc}</p>
+      {/* ✅ Content */}
+      <div className="p-4 sm:p-5 text-center">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <span className="text-[#5a6b3f] text-xl sm:text-2xl leading-none flex items-center">
+            {icon}
+          </span>
+          <h4 className="font-semibold text-base sm:text-lg text-[#5a6b3f] leading-none">
+            {title}
+          </h4>
+        </div>
+
+        <p className="text-sm text-gray-700">{desc}</p>
+      </div>
     </div>
   );
 }
@@ -137,35 +144,41 @@ const CTA = ({ title, text, button, bgImage, color }) => {
   };
 
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-[#fdf7ee] border border-white/60 shadow-lg h-36 px-6 overflow-hidden">
-      
-      {/* LEFT CONTENT */}
-      <div className="max-w-[60%]">
-        <h3 className="text-lg font-semibold text-gray-900">
-          {title}
-        </h3>
-        <p className="text-sm text-gray-700 mb-3">
-          {text}
-        </p>
+    <div className="rounded-2xl overflow-hidden bg-[#fdf7ee] border border-white/60 shadow-lg">
+      {/* ✅ Mobile/Tablet: column | ✅ Desktop(lg+): row */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 p-5 sm:p-6">
+        
+        {/* LEFT CONTENT */}
+        <div className="flex flex-col items-center text-center lg:items-start lg:text-left lg:w-[55%]">
+          <h3 className="text-lg sm:text-xl font-semibold text-gray-900">
+            {title}
+          </h3>
 
-        <button
-          className={`px-4 py-2 rounded-lg text-white text-sm font-medium ${colors[color]}`}
-        >
-          {button}
-        </button>
+          <p className="text-sm sm:text-base text-gray-700 mt-2">
+            {text}
+          </p>
+
+          <button
+            className={`mt-4 px-5 py-2.5 rounded-lg text-white text-sm font-medium ${colors[color]}`}
+          >
+            {button}
+          </button>
+        </div>
+
+        {/* ✅ IMAGE */}
+        {/* Mobile/Tablet: bottom full width */}
+        {/* Desktop: right side fixed box */}
+        <div className="w-full lg:w-[45%]">
+          <div className="w-full rounded-xl bg-white/40 overflow-hidden aspect-[16/8] sm:aspect-[16/7] lg:aspect-[16/9]">
+            <img
+              src={bgImage}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+            />
+          </div>
+        </div>
       </div>
-
-      {/* RIGHT IMAGE */}
-      <img
-        src={bgImage}
-        alt=""
-        className="h-full max-w-[40%] object-contain"
-      />
     </div>
   );
 };
-
-
-
-
-

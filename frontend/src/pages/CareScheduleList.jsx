@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
 
 const mockPets = [
   { id: "1", name: "Milo" },
