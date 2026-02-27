@@ -4,13 +4,74 @@ import { Heart, HelpingHand, Shield, BookOpen, Gift } from "lucide-react";
 // ===================== MAIN =====================
 export default function SecondHero() {
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 pt-6 sm:pt-8">
+    <div className="relative min-h-screen text-[#3b3b3b] bg-cover bg-center">
+      {/* Top Navigation */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 pt-6 sm:pt-8">
   <div className="grid ls:grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:flex lg:grid-cols-5 lg:gap-6 lg:justify-center">
     {navItems.map((item) => (
       <NavPill key={item.label} {...item} />
     ))}
   </div>
 </div>
+
+      {/* Main Grid */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 mt-4 sm:mt-6">
+        {/* ✅ mobile: 1 col | tablet: 2 col | desktop: 3 col */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Pets for Adoption */}
+          <GlassCard title="Pets for Adoption" action="View All">
+            {/* ✅ mobile: horizontal scroll | tablet+: grid */}
+            <div className="-mx-2 px-2">
+              <div className="flex gap-3 overflow-x-auto pb-2 sm:pb-0 sm:overflow-visible sm:grid sm:grid-cols-3 sm:gap-4">
+                {pets.map((pet) => (
+                  <PetCard key={pet.name} {...pet} />
+                ))}
+              </div>
+            </div>
+          </GlassCard>
+
+          {/* Urgent Rescue Alerts */}
+          <GlassCard title="Urgent Rescue Alerts">
+            <div className="space-y-3">
+              <Alert label="Injured Kitten – Downtown" level="Critical" />
+              <Alert label="Sick Cat – Riverside" level="High" />
+              <button className="w-full bg-orange-400 hover:bg-orange-500 text-white py-2.5 rounded-xl font-semibold shadow">
+                Report a Rescue
+              </button>
+            </div>
+          </GlassCard>
+
+          {/* Health Tips */}
+          <GlassCard title="Health Tips & Advice" action="Read Articles">
+            <ul className="space-y-2 text-sm sm:text-[15px]">
+              <li className="w-full py-2.5 bg-gray-200/80 rounded-2xl px-4">
+                Vaccination Reminders
+              </li>
+              <li className="w-full py-2.5 bg-gray-200/80 rounded-2xl px-4">
+                Litter Training Tips
+              </li>
+              <li className="w-full py-2.5 bg-gray-200/80 rounded-2xl px-4">
+                Seasonal Care Tips
+              </li>
+            </ul>
+          </GlassCard>
+        </div>
+      </div>
+
+      {/* How It Works */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 mt-10 sm:mt-14 pb-12">
+        <h2 className="text-center text-2xl font-semibold text-[#5a6b3f] mb-12">
+          ───────────────────── How It Works ─────────────────────
+        </h2>
+
+        {/* ✅ mobile: 1 col | tablet: 2 col | desktop: 3 col */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {steps.map((step) => (
+            <HowCard key={step.title} {...step} />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
