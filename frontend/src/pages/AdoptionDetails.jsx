@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaArrowLeft, FaHeart, FaMapMarkerAlt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import axios from "axios";
@@ -9,6 +9,7 @@ import b1 from "../assets/b1.jpg";
 
 export default function AdoptionDetails() {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [pet, setPet] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -168,7 +169,7 @@ export default function AdoptionDetails() {
                             animate={{ scale: 1 }}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => alert(`Adoption process initiated for ${pet.name}! (UI Only)`)}
+                            onClick={() => navigate(`/adopt/flow/${pet.id}`)}
                             className="mt-10 w-full py-4 rounded-2xl bg-gradient-to-r from-[#5f7d5a] via-[#7fa37a] to-[#8b6b4c] text-white text-lg font-bold shadow-[0_15px_40px_rgba(95,125,90,0.3)] hover:shadow-[0_20px_50px_rgba(95,125,90,0.4)] transition-all duration-300"
                         >
                             Confirm Adoption

@@ -20,6 +20,7 @@ import CareCalendar from "../pages/CareCalendar";
 import HealthAndMedical from "../pages/HealthAndMedical";
 import AdoptionListing from "../pages/AdoptionListing";
 import AdoptionDetails from "../pages/AdoptionDetails";
+import AdoptionFlow from "../pages/AdoptionFlow";
 
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminLayout from "../pages/admin/AdminLayout";
@@ -33,6 +34,7 @@ export const router = createBrowserRouter([
       { path: "/adopt", element: <Adopt /> },
       { path: "/adopt/listing", element: <AdoptionListing /> },
       { path: "/adopt/listing/:id", element: <AdoptionDetails /> },
+      { path: "/adopt/flow/:id", element: <AdoptionFlow /> },
       { path: "/health", element: <HealthAndMedical /> },
       { path: "/register", element: <Signup /> },
       { path: "/login", element: <Signin /> },
