@@ -451,13 +451,15 @@ function Adopt() {
             result{filteredPets.length === 1 ? "" : "s"}
             {activeFilter === "All" ? "" : ` for ${activeFilter}s`}
           </div>
-          <button
-            type="button"
-            onClick={() => setActiveFilter("All")}
-            className="text-[#5f7d5a] hover:underline font-medium"
-          >
-            Reset
-          </button>
+          {activeFilter !== "All" && (
+            <button
+              type="button"
+              onClick={() => setActiveFilter("All")}
+              className="text-[#5f7d5a] hover:underline font-medium"
+            >
+              Reset
+            </button>
+          )}
         </div>
 
         {filteredPets.length === 0 ? (
