@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaTimes } from "react-icons/fa";
 
 // Fallback image if API doesn't provide one
 import b1 from "../assets/b1.jpg";
@@ -56,6 +56,18 @@ function AdoptionListing() {
 
         fetchAdoptions();
     }, []);
+
+    const handleDeletePet = (petId) => {
+        // 1. Update UI state
+        setPets(prevPets => prevPets.filter(p => p.id !== petId));
+
+        // 2. Update LocalStorage
+        const localData = JSON.parse(localStorage.getItem("adoptions") || "[]");
+        const updatedLocal = localData.filter(p => p.id !== petId);
+        localStorage.setItem("adoptions", JSON.stringify(updatedLocal));
+
+        // (Optional) If there's an API, you'd call axios.delete(`/adoptions/${petId}`) here.
+    };
 
     const filteredPets = useMemo(() => {
         if (activeFilter === "All") return pets;
@@ -191,6 +203,15 @@ function AdoptionListing() {
                                             <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-[11px] font-medium bg-[#f1e9dd]/90 text-[#5a452f]">
                                                 {pet.tag || "Available"}
                                             </div>
+
+                                            {/* Delete Button */}
+                                            <button
+                                                onClick={() => handleDeletePet(pet.id)}
+                                                className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-red-500/80 backdrop-blur-md text-white border border-white/30 transition-all duration-300 shadow-sm"
+                                                title="Remove Listing"
+                                            >
+                                                <FaTimes size={12} />
+                                            </button>
                                         </div>
 
                                         <div className="p-4 flex-1 flex flex-col">
