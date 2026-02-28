@@ -17,6 +17,19 @@ export default function AdoptionFlow() {
     const [step, setStep] = useState(1); // 1: Policy, 2: Tracking Flow
     const [isAgreed, setIsAgreed] = useState(false);
 
+    // Form State
+    const [formData, setFormData] = useState({
+        fullName: "",
+        email: "",
+        phone: "",
+        livingSituation: "apartment"
+    });
+
+    // Check if form is completely filled out
+    const isFormValid = formData.fullName.trim() !== "" &&
+        formData.email.trim() !== "" &&
+        formData.phone.trim() !== "";
+
     // Simulate current tracking progress step (1 to 5)
     // For demo purposes, we'll start at 2 (Admin Review) after submitting
     const [trackingStep, setTrackingStep] = useState(2);
@@ -54,7 +67,7 @@ export default function AdoptionFlow() {
     }, [id]);
 
     const handleProceed = () => {
-        if (isAgreed) {
+        if (isAgreed && isFormValid) {
             setStep(2);
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
@@ -117,6 +130,57 @@ export default function AdoptionFlow() {
                                 <div className="text-center md:text-left">
                                     <h1 className="text-3xl font-bold text-[#2f3e2c] mb-2">Adoption Application</h1>
                                     <p className="text-[#4e5f4a]">You are applying to adopt <span className="font-semibold text-[#5f7d5a]">{pet.name}</span>.</p>
+                                </div>
+                            </div>
+
+                            {/* Applicant Form */}
+                            <div className="p-8 md:p-10 border-b border-[#e4efe0]">
+                                <h2 className="text-xl font-bold text-[#2f3e2c] mb-6">Adopter Information</h2>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-[#4e5f4a] mb-2">Full Name *</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Your full name"
+                                            value={formData.fullName}
+                                            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-xl border border-[#d0ddcc] bg-[#f8faf5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5f7d5a] transition"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-[#4e5f4a] mb-2">Email Address *</label>
+                                        <input
+                                            type="email"
+                                            placeholder="your@email.com"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-xl border border-[#d0ddcc] bg-[#f8faf5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5f7d5a] transition"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-[#4e5f4a] mb-2">Phone Number *</label>
+                                        <input
+                                            type="tel"
+                                            placeholder="(123) 456-7890"
+                                            value={formData.phone}
+                                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-xl border border-[#d0ddcc] bg-[#f8faf5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5f7d5a] transition"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-[#4e5f4a] mb-2">Living Situation *</label>
+                                        <select
+                                            value={formData.livingSituation}
+                                            onChange={(e) => setFormData({ ...formData, livingSituation: e.target.value })}
+                                            className="w-full px-4 py-3 rounded-xl border border-[#d0ddcc] bg-[#f8faf5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5f7d5a] transition appearance-none"
+                                        >
+                                            <option value="apartment">Apartment</option>
+                                            <option value="house_rent">House (Rented)</option>
+                                            <option value="house_own">House (Owned)</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
 
