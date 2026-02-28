@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { FaPaw } from "react-icons/fa";
 
@@ -325,8 +326,28 @@ function Adopt() {
   );
   const [activeFilter, setActiveFilter] = useState("All");
 
-  const handleAdoptionRequest = () => {
-    navigate("/adopt/listing");
+  const handleAdoptionRequest = async (pet) => {
+    try {
+      // 1. Save to localStorage for local persistence
+      const existingAdoptions = JSON.parse(localStorage.getItem("adoptions") || "[]");
+      // Check if already exists to avoid duplicates
+      if (!existingAdoptions.find(p => p.id === pet.id)) {
+        existingAdoptions.push(pet);
+        localStorage.setItem("adoptions", JSON.stringify(existingAdoptions));
+      }
+
+      // 2. Try to sync with backend if it exists
+      try {
+        await axios.post("/adoptions", pet);
+      } catch (apiErr) {
+        console.warn("Backend storage failed, using localStorage only:", apiErr.message);
+      }
+
+      navigate("/adopt/listing");
+    } catch (err) {
+      console.error("Error handling adoption request:", err);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   const filteredPets = useMemo(() => {
@@ -487,7 +508,7 @@ function Adopt() {
 
                   <button
                     type="button"
-                    onClick={handleAdoptionRequest}
+                    onClick={() => handleAdoptionRequest(pet)}
                     className="mt-auto w-full py-2.5 rounded-2xl bg-gradient-to-r from-[#5f7d5a]/60 via-[#7fa37a] to-[#8b6b4c] text-black/80 text-sm font-semibold shadow-sm group-hover:shadow-md group-hover:scale-[1.02] transition"
                   >
                     Start Adoption Request

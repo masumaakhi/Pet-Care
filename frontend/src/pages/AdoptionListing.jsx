@@ -22,8 +22,29 @@ function AdoptionListing() {
         const fetchAdoptions = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get("/adoptions");
-                setPets(response.data);
+
+                // 1. Fetch from LocalStorage first (immediate)
+                const localData = JSON.parse(localStorage.getItem("adoptions") || "[]");
+
+                // 2. Fetch from API
+                try {
+                    const response = await axios.get("/adoptions");
+                    const apiData = response.data || [];
+
+                    // Merge data, prioritizing local if there are ID conflicts (or just combine)
+                    // For now, let's just combine and unique by ID
+                    const combined = [...localData];
+                    apiData.forEach(apiPet => {
+                        if (!combined.find(p => p.id === apiPet.id)) {
+                            combined.push(apiPet);
+                        }
+                    });
+                    setPets(combined);
+                } catch (apiErr) {
+                    console.warn("API fetch failed, using local data only:", apiErr.message);
+                    setPets(localData);
+                }
+
                 setError(null);
             } catch (err) {
                 console.error("Error fetching adoptions:", err);
