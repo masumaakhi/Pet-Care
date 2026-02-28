@@ -1,5 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+import { FaPaw } from "react-icons/fa";
 
 // Birds (b) and Rabbits (r) from src/assets — only these images are used for adoption cards.
 import b1 from "../assets/b1.jpg";
@@ -190,137 +193,162 @@ const petsFromAssets = [
   },
   {
     id: 15,
-    name: "Sunny", 
-    type: "Bird", 
-    breed: "Canary", 
-    age: "2 years", 
-    size: "Small", 
-    gender: "Female", 
-    image: b4, 
+    name: "Sunny",
+    type: "Bird",
+    breed: "Canary",
+    age: "2 years",
+    size: "Small",
+    gender: "Female",
+    image: b4,
     tag: "Cheerful & Melodious",
   },
   {
     id: 16,
-    name: "Rio", 
-    type: "Bird", 
-    breed: "Macaw", 
-    age: "4 years", 
-    size: "Large", 
-    gender: "Male", 
-    image: b5, 
+    name: "Rio",
+    type: "Bird",
+    breed: "Macaw",
+    age: "4 years",
+    size: "Large",
+    gender: "Male",
+    image: b5,
     tag: "Colorful & Intelligent",
   },
   {
     id: 17,
-    name: "Whiskers", 
-    type: "Cat", 
-    breed: "Persian", 
-    age: "3 years", 
-    size: "Medium", 
-    gender: "Male", 
-    image: cat1, 
+    name: "Whiskers",
+    type: "Cat",
+    breed: "Persian",
+    age: "3 years",
+    size: "Medium",
+    gender: "Male",
+    image: cat1,
     tag: "Calm & Gentle",
   },
   {
     id: 18,
-    name: "Samba", 
-    type: "Cat", 
-    breed: "Siamese", 
-    age: "2 years", 
-    size: "Small", 
-    gender: "Female", 
-    image: cat2, 
+    name: "Samba",
+    type: "Cat",
+    breed: "Siamese",
+    age: "2 years",
+    size: "Small",
+    gender: "Female",
+    image: cat2,
     tag: "Curious & Vocal",
   },
   {
     id: 19,
-    name: "Shadow", 
-    type: "Cat", 
-    breed: "Maine Coon", 
-    age: "4 years", 
-    size: "Large", 
-    gender: "Male", 
-    image: cat3, 
+    name: "Shadow",
+    type: "Cat",
+    breed: "Maine Coon",
+    age: "4 years",
+    size: "Large",
+    gender: "Male",
+    image: cat3,
     tag: "Playful & Affectionate",
   },
   {
     id: 20,
-    name: "George", 
-    type: "Cat", 
-    breed: "Bengal", 
-    age: "1 year", 
-    size: "Medium", 
-    gender: "Female", 
-    image: cat4, 
+    name: "George",
+    type: "Cat",
+    breed: "Bengal",
+    age: "1 year",
+    size: "Medium",
+    gender: "Female",
+    image: cat4,
     tag: "Energetic & Adventurous",
   },
   {
     id: 21,
-    name: "Max", 
-    type: "Dog", 
-    breed: "Golden Retriever", 
-    age: "3 years", 
-    size: "Large", 
-    gender: "Male", 
-    image: dog1, 
+    name: "Max",
+    type: "Dog",
+    breed: "Golden Retriever",
+    age: "3 years",
+    size: "Large",
+    gender: "Male",
+    image: dog1,
     tag: "Friendly & Loyal",
   },
   {
     id: 22,
-    name: "Samir", 
-    type: "Dog", 
-    breed: "Beagle", 
-    age: "2 years", 
-    size: "Medium", 
-    gender: "Female", 
-    image: dog2, 
+    name: "Samir",
+    type: "Dog",
+    breed: "Beagle",
+    age: "2 years",
+    size: "Medium",
+    gender: "Female",
+    image: dog2,
     tag: "Curious & Energetic",
   },
   {
     id: 23,
-    name: "Rocky", 
-    type: "Dog", 
-    breed: "German Shepherd", 
-    age: "4 years", 
-    size: "Large", 
-    gender: "Male", 
-    image: dog3, 
+    name: "Rocky",
+    type: "Dog",
+    breed: "German Shepherd",
+    age: "4 years",
+    size: "Large",
+    gender: "Male",
+    image: dog3,
     tag: "Protective & Intelligent",
   },
   {
     id: 24,
-    name: "Daisy", 
-    type: "Dog", 
-    breed: "Poodle", 
-    age: "1.5 years", 
-    size: "Small", 
-    gender: "Female", 
-    image: dog4, 
+    name: "Daisy",
+    type: "Dog",
+    breed: "Poodle",
+    age: "1.5 years",
+    size: "Small",
+    gender: "Female",
+    image: dog4,
     tag: "Playful & Elegant",
   },
   {
     id: 25,
-    name: "Charlie", 
-    type: "Dog", 
-    breed: "Bulldog", 
-    age: "5 years", 
-    size: "Medium", 
-    gender: "Male", 
-    image: dog5, 
+    name: "Charlie",
+    type: "Dog",
+    breed: "Bulldog",
+    age: "5 years",
+    size: "Medium",
+    gender: "Male",
+    image: dog5,
     tag: "Calm & Affectionate",
   },
-  
-  
+
+
 ];
 
 const pets = [...petsFromUrls, ...petsFromAssets];
 
 function Adopt() {
+  const navigate = useNavigate();
   const filterOptions = useMemo(
     () => ["All", "Dog", "Cat", "Bird", "Rabbit"],
     []
   );
   const [activeFilter, setActiveFilter] = useState("All");
+
+  const handleAdoptionRequest = async (pet) => {
+    try {
+      // 1. Save to localStorage for local persistence
+      const existingAdoptions = JSON.parse(localStorage.getItem("adoptions") || "[]");
+      // Check if already exists to avoid duplicates
+      if (!existingAdoptions.find(p => p.id === pet.id)) {
+        existingAdoptions.push(pet);
+        localStorage.setItem("adoptions", JSON.stringify(existingAdoptions));
+      }
+
+      // 2. Try to sync with backend if it exists
+      try {
+        await axios.post("/adoptions", pet);
+      } catch (apiErr) {
+        console.warn("Backend storage failed, using localStorage only:", apiErr.message);
+      }
+
+      navigate("/adopt/listing");
+    } catch (err) {
+      console.error("Error handling adoption request:", err);
+      alert("Something went wrong. Please try again.");
+    }
+  };
 
   const filteredPets = useMemo(() => {
     if (activeFilter === "All") return pets;
@@ -343,12 +371,25 @@ function Adopt() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.05 }}
-          className="text-sm md:text-base text-[#4e5f4a] max-w-2xl mx-auto"
+          className="text-sm md:text-base text-[#4e5f4a] max-w-2xl mx-auto mb-8"
         >
           Every pet here is waiting for a safe and loving home. Browse through
           the available pets, learn about their personalities, and start your
           adoption journey with just a few clicks.
         </motion.p>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Link
+            to="/adopt/listing"
+            className="inline-flex items-center gap-2 bg-[#5f7d5a] text-white px-8 py-3.5 rounded-2xl font-semibold shadow-[0_15px_30px_rgba(95,125,90,0.3)] hover:bg-[#4e5f4a] hover:-translate-y-1 transition duration-300"
+          >
+            Explore Listing Pets
+            <FaPaw className="text-lg" />
+          </Link>
+        </motion.div>
       </div>
 
       {/* Filters Row */}
@@ -410,13 +451,15 @@ function Adopt() {
             result{filteredPets.length === 1 ? "" : "s"}
             {activeFilter === "All" ? "" : ` for ${activeFilter}s`}
           </div>
-          <button
-            type="button"
-            onClick={() => setActiveFilter("All")}
-            className="text-[#5f7d5a] hover:underline font-medium"
-          >
-            Reset
-          </button>
+          {activeFilter !== "All" && (
+            <button
+              type="button"
+              onClick={() => setActiveFilter("All")}
+              className="text-[#5f7d5a] hover:underline font-medium"
+            >
+              Reset
+            </button>
+          )}
         </div>
 
         {filteredPets.length === 0 ? (
@@ -467,6 +510,7 @@ function Adopt() {
 
                   <button
                     type="button"
+                    onClick={() => handleAdoptionRequest(pet)}
                     className="mt-auto w-full py-2.5 rounded-2xl bg-gradient-to-r from-[#5f7d5a]/60 via-[#7fa37a] to-[#8b6b4c] text-black/80 text-sm font-semibold shadow-sm group-hover:shadow-md group-hover:scale-[1.02] transition"
                   >
                     Start Adoption Request
