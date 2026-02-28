@@ -386,7 +386,7 @@ function Adopt() {
             to="/adopt/listing"
             className="inline-flex items-center gap-2 bg-[#5f7d5a] text-white px-8 py-3.5 rounded-2xl font-semibold shadow-[0_15px_30px_rgba(95,125,90,0.3)] hover:bg-[#4e5f4a] hover:-translate-y-1 transition duration-300"
           >
-            Explore Available Pets
+            Explore Listing Pets
             <FaPaw className="text-lg" />
           </Link>
         </motion.div>
