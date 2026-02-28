@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaPaw } from "react-icons/fa";
 
 // Birds (b) and Rabbits (r) from src/assets — only these images are used for adoption cards.
@@ -318,11 +318,16 @@ const petsFromAssets = [
 const pets = [...petsFromUrls, ...petsFromAssets];
 
 function Adopt() {
+  const navigate = useNavigate();
   const filterOptions = useMemo(
     () => ["All", "Dog", "Cat", "Bird", "Rabbit"],
     []
   );
   const [activeFilter, setActiveFilter] = useState("All");
+
+  const handleAdoptionRequest = () => {
+    navigate("/adopt/listing");
+  };
 
   const filteredPets = useMemo(() => {
     if (activeFilter === "All") return pets;
@@ -482,6 +487,7 @@ function Adopt() {
 
                   <button
                     type="button"
+                    onClick={handleAdoptionRequest}
                     className="mt-auto w-full py-2.5 rounded-2xl bg-gradient-to-r from-[#5f7d5a]/60 via-[#7fa37a] to-[#8b6b4c] text-black/80 text-sm font-semibold shadow-sm group-hover:shadow-md group-hover:scale-[1.02] transition"
                   >
                     Start Adoption Request
