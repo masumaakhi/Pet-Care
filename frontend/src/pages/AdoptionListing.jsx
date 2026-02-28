@@ -227,12 +227,12 @@ function AdoptionListing() {
                                                 {pet.breed} • {pet.gender} • {pet.age}
                                             </p>
 
-                                            <button
-                                                type="button"
-                                                className="mt-auto w-full py-2.5 rounded-2xl bg-gradient-to-r from-[#5f7d5a]/60 via-[#7fa37a] to-[#8b6b4c] text-black/80 text-sm font-semibold shadow-sm group-hover:shadow-md group-hover:scale-[1.02] transition"
+                                            <Link
+                                                to={`/adopt/listing/${pet.id}`}
+                                                className="mt-auto w-full py-2.5 rounded-2xl bg-gradient-to-r from-[#5f7d5a]/60 via-[#7fa37a] to-[#8b6b4c] text-black/80 text-sm font-semibold shadow-sm group-hover:shadow-md group-hover:scale-[1.02] transition block text-center"
                                             >
                                                 Adopt Now
-                                            </button>
+                                            </Link>
                                         </div>
                                     </motion.div>
                                 ))}
