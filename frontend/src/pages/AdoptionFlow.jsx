@@ -152,7 +152,7 @@ export default function AdoptionFlow() {
                                         <label className="block text-sm font-semibold text-[#4e5f4a] mb-2">Email Address *</label>
                                         <input
                                             type="email"
-                                            placeholder="your@email.com"
+                                            placeholder="your@gmail.com"
                                             value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                             className="w-full px-4 py-3 rounded-xl border border-[#d0ddcc] bg-[#f8faf5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5f7d5a] transition"
@@ -162,7 +162,7 @@ export default function AdoptionFlow() {
                                         <label className="block text-sm font-semibold text-[#4e5f4a] mb-2">Phone Number *</label>
                                         <input
                                             type="tel"
-                                            placeholder="(123) 456-7890"
+                                            placeholder="+8801xxxxxxxxx"
                                             value={formData.phone}
                                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                             className="w-full px-4 py-3 rounded-xl border border-[#d0ddcc] bg-[#f8faf5] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#5f7d5a] transition"
