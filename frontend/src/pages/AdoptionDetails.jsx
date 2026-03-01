@@ -79,7 +79,7 @@ export default function AdoptionDetails() {
     }
 
     return (
-        <div className="min-h-screen px-6 md:px-16 pt-[6rem] pb-16 bg-gradient-to-b from-[#f5f3ef] via-[#f8faf5] to-[#e5eee2]">
+        <div className="min-h-screen px-6 md:px-16 pt-[6rem] pb-16 ">
             <div className="max-w-5xl mx-auto">
                 {/* Header Actions */}
                 <div className="flex items-center justify-between mb-8">
