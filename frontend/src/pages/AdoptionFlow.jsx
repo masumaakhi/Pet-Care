@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaArrowLeft, FaCheckCircle, FaExclamationTriangle, FaRegClipboard, FaPhoneAlt, FaUsers, FaHome, FaCheck, FaHeart } from "react-icons/fa";
 import axios from "axios";
+import Toast from "../components/Toast";
 
 // Fallback image
 import b1 from "../assets/b1.jpg";
@@ -24,6 +25,9 @@ export default function AdoptionFlow() {
         phone: "",
         livingSituation: "apartment"
     });
+
+    const [toast, setToast] = useState(null);
+    const showToast = (message, type = "error") => setToast({ message, type });
 
     // Check if form is completely filled out
     const isFormValid = formData.fullName.trim() !== "" &&
@@ -68,7 +72,7 @@ export default function AdoptionFlow() {
 
     const handleProceed = () => {
         if (!isFormValid) {
-            alert("Please fill all the information");
+            showToast("Please fill all the information");
             return;
         }
         if (isAgreed && isFormValid) {
@@ -313,6 +317,15 @@ export default function AdoptionFlow() {
                     )}
                 </AnimatePresence>
             </div>
+            <AnimatePresence>
+                {toast && (
+                    <Toast
+                        message={toast.message}
+                        type={toast.type}
+                        onClose={() => setToast(null)}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 }

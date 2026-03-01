@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import Toast from "../components/Toast";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { FaPaw } from "react-icons/fa";
@@ -325,6 +326,8 @@ function Adopt() {
     []
   );
   const [activeFilter, setActiveFilter] = useState("All");
+  const [toast, setToast] = useState(null);
+  const showToast = (message, type = "error") => setToast({ message, type });
 
   const handleAdoptionRequest = async (pet) => {
     try {
@@ -346,7 +349,7 @@ function Adopt() {
       navigate("/adopt/listing");
     } catch (err) {
       console.error("Error handling adoption request:", err);
-      alert("Something went wrong. Please try again.");
+      showToast("Something went wrong. Please try again.");
     }
   };
 
@@ -791,6 +794,15 @@ function Adopt() {
           Get Adoption Alerts
         </button>
       </motion.div>
+      <AnimatePresence>
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
