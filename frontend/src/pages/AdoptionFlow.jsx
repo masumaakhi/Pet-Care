@@ -67,6 +67,10 @@ export default function AdoptionFlow() {
     }, [id]);
 
     const handleProceed = () => {
+        if (!isFormValid) {
+            alert("Please fill all the information");
+            return;
+        }
         if (isAgreed && isFormValid) {
             setStep(2);
             window.scrollTo({ top: 0, behavior: "smooth" });

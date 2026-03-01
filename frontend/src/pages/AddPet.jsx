@@ -67,6 +67,14 @@ export default function AddPet() {
             className="grid lg:grid-cols-2 gap-8"
             onSubmit={(e) => {
               e.preventDefault();
+              const inputs = Array.from(e.target.querySelectorAll("input:not([type='file']), select, textarea"));
+              const isAnyEmpty = inputs.some(input => !input.value.trim());
+
+              if (isAnyEmpty) {
+                alert("Please fill all the information");
+                return;
+              }
+
               // backend later
               alert("Pet saved (UI only). Backend will be added later.");
               navigate("/pets");
