@@ -1,10 +1,15 @@
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
+import Toast from "../components/Toast";
+import { AnimatePresence } from "framer-motion";
 
 export default function AddPet() {
   const navigate = useNavigate();
   const [photoFile, setPhotoFile] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = "error") => setToast({ message, type });
 
   const previewUrl = useMemo(() => {
     if (!photoFile) return "";
@@ -67,9 +72,17 @@ export default function AddPet() {
             className="grid lg:grid-cols-2 gap-8"
             onSubmit={(e) => {
               e.preventDefault();
+              const inputs = Array.from(e.target.querySelectorAll("input:not([type='file']), select, textarea"));
+              const isAnyEmpty = inputs.some(input => !input.value.trim());
+
+              if (isAnyEmpty) {
+                showToast("Please fill all the information", "error");
+                return;
+              }
+
               // backend later
-              alert("Pet saved (UI only). Backend will be added later.");
-              navigate("/pets");
+              showToast("Pet saved (UI only). Backend will be added later.", "success");
+              setTimeout(() => navigate("/pets"), 2000);
             }}
           >
             {/* Left: Form */}
@@ -199,6 +212,15 @@ export default function AddPet() {
           </form>
         </motion.div>
       </div>
+      <AnimatePresence>
+        {toast && (
+          <Toast
+            message={toast.message}
+            type={toast.type}
+            onClose={() => setToast(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
