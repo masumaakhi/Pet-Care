@@ -5,19 +5,10 @@ import {
     FaCut,
     FaVideo,
     FaStar,
-    FaMapMarkedAlt,
-    FaCalendarCheck
+    FaMapMarkedAlt
 } from "react-icons/fa";
 
 const services = [
-    {
-        id: "mizan-booking",
-        title: "Service Booking Module (Mizan)",
-        description: "Our featured all-in-one booking platform for comprehensive pet needs.",
-        icon: <FaCalendarCheck className="text-3xl" />,
-        color: "bg-[#5A7F5C]",
-        featured: true,
-    },
     {
         id: "vet",
         title: "Vet Appointment Booking",
