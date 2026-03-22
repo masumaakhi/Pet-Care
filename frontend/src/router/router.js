@@ -43,6 +43,15 @@ import AdminRescueAnalyticsPage from '../pages/rescue/AdminRescueAnalyticsPage';
 import AdminDuplicateRescuePage from '../pages/rescue/AdminDuplicateRescuePage';
 import AdminRescueNotificationsPage from '../pages/rescue/AdminRescueNotificationsPage';
 
+// Donation User Pages
+import DonatePage from '../pages/donations/DonatePage';
+import DonationCampaignDetailsPage from '../pages/donations/DonationCampaignDetailsPage';
+import MyDonationsPage from '../pages/donations/MyDonationsPage';
+
+// Donation Admin Pages
+import AdminDonationsPage from '../pages/admin/AdminDonationsPage';
+import AdminDonationReportsPage from '../pages/admin/AdminDonationReportsPage';
+
 
 export const router = createBrowserRouter([
   {
@@ -80,6 +89,11 @@ export const router = createBrowserRouter([
       { path: "/rescue/assigned/:id", element: <AssignedRescueDetailsPage /> },
       { path: "/rescue/history", element: <VolunteerRescueHistoryPage /> },
 
+      // Donation Routes
+      { path: "/donate", element: <DonatePage /> },
+      { path: "/donate/:id", element: <DonationCampaignDetailsPage /> },
+      { path: "/donations", element: <MyDonationsPage /> },
+
       // Admin inside App (so Nav/Footer/bg stays)
       {
         path: "/admin",
@@ -93,6 +107,9 @@ export const router = createBrowserRouter([
           { path: "rescues/duplicates", element: <AdminDuplicateRescuePage /> },
           { path: "rescues/notifications", element: <AdminRescueNotificationsPage /> },
           { path: "rescues/:id", element: <AdminRescueDetailsPage /> },
+          // Donation Admin Routes
+          { path: "donations", element: <AdminDonationsPage /> },
+          { path: "donations/reports", element: <AdminDonationReportsPage /> },
         ],
       },
     ],
