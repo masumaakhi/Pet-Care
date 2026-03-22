@@ -131,6 +131,12 @@ export default function Nav() {
                 {isAuthed ? (
                   <>
                     <NavLink
+                      to="/donations"
+                      className="text-black hover:text-primary transition"
+                    >
+                      My Donations
+                    </NavLink>
+                    <NavLink
                       to="/profile"
                       className="text-black hover:text-primary transition"
                     >
