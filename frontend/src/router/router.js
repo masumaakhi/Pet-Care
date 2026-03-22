@@ -25,6 +25,25 @@ import AdoptionFlow from "../pages/AdoptionFlow";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminLayout from "../pages/admin/AdminLayout";
 
+// Rescue User Pages
+import RescueRequestPage from '../pages/rescue/RescueRequestPage';
+import MyRescueRequestsPage from '../pages/rescue/MyRescueRequestsPage';
+import RescueTrackingPage from '../pages/rescue/RescueTrackingPage';
+
+// Rescue Volunteer Pages
+import NearbyRescueRequestsPage from '../pages/rescue/NearbyRescueRequestsPage';
+import AssignedRescueDetailsPage from '../pages/rescue/AssignedRescueDetailsPage';
+import VolunteerRescueHistoryPage from '../pages/rescue/VolunteerRescueHistoryPage';
+
+// Rescue Admin Pages
+import AdminRescueListPage from '../pages/rescue/AdminRescueListPage';
+import AdminRescueDetailsPage from '../pages/rescue/AdminRescueDetailsPage';
+import AdminRescueMapPage from '../pages/rescue/AdminRescueMapPage';
+import AdminRescueAnalyticsPage from '../pages/rescue/AdminRescueAnalyticsPage';
+import AdminDuplicateRescuePage from '../pages/rescue/AdminDuplicateRescuePage';
+import AdminRescueNotificationsPage from '../pages/rescue/AdminRescueNotificationsPage';
+
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -51,11 +70,30 @@ export const router = createBrowserRouter([
       { path: "/pets/gallery", element: <PetGallery /> },
       { path: "/pets/calendar", element: <CareCalendar /> },
 
-      // ✅ Admin inside App (so Nav/Footer/bg stays)
+      // Rescue User Routes
+      { path: "/rescue", element: <RescueRequestPage /> },
+      { path: "/rescue/my-requests", element: <MyRescueRequestsPage /> },
+      { path: "/rescue/:id", element: <RescueTrackingPage /> },
+
+      // Rescue Volunteer Routes
+      { path: "/rescue/nearby", element: <NearbyRescueRequestsPage /> },
+      { path: "/rescue/assigned/:id", element: <AssignedRescueDetailsPage /> },
+      { path: "/rescue/history", element: <VolunteerRescueHistoryPage /> },
+
+      // Admin inside App (so Nav/Footer/bg stays)
       {
         path: "/admin",
         element: <AdminLayout />,
-        children: [{ index: true, element: <AdminDashboard /> }],
+        children: [
+          { index: true, element: <AdminDashboard /> },
+          // Rescue Admin Routes
+          { path: "rescues", element: <AdminRescueListPage /> },
+          { path: "rescues/map", element: <AdminRescueMapPage /> },
+          { path: "rescues/analytics", element: <AdminRescueAnalyticsPage /> },
+          { path: "rescues/duplicates", element: <AdminDuplicateRescuePage /> },
+          { path: "rescues/notifications", element: <AdminRescueNotificationsPage /> },
+          { path: "rescues/:id", element: <AdminRescueDetailsPage /> },
+        ],
       },
     ],
   },
