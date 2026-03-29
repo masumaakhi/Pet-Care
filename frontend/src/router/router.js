@@ -71,6 +71,8 @@ export const router = createBrowserRouter([
       { path: "/register", element: <Signup /> },
       { path: "/login", element: <Signin /> },
       { path: "/forgot-password", element: <ForgotPassword /> },
+      { path: "/rescue", element: <RescueRequestPage /> },
+      { path: "/donate", element: <DonatePage /> },
       // Secure User Routes
       {
         element: <ProtectedRoute />,
