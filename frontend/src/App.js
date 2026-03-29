@@ -3,7 +3,6 @@ import Nav from "./components/Nav";
 import Footer from "./components/Footer";
 import { Outlet } from "react-router-dom";
 
-// import bgImage from "./assets/bg-4.png";
 
 function App() {
   return (
