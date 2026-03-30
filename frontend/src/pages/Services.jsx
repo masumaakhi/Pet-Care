@@ -96,15 +96,27 @@ const Services = () => {
                             {service.description}
                         </p>
 
-                        <Link to={`/services/${service.id}`} className="w-full block text-center py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition shadow-md">
-                            {service.buttonText || "Learn More"}
-                        </Link>
+                        {service.id === "map" ? (
+                            <button
+                                onClick={() => {
+                                    document.getElementById('map-section')?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                                className="w-full py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition shadow-md"
+                            >
+                                {service.buttonText}
+                            </button>
+                        ) : (
+                            <Link to={`/services/${service.id}`} className="w-full block text-center py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition shadow-md">
+                                {service.buttonText || "Learn More"}
+                            </Link>
+                        )}
                     </motion.div>
                 ))}
             </div>
 
             {/* Map Placeholder section */}
             <motion.section
+                id="map-section"
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
@@ -127,13 +139,14 @@ const Services = () => {
                             </div>
                         </div>
                     </div>
-                    <div className="h-64 md:h-96 rounded-3xl bg-gray-200 border-4 border-white shadow-inner flex items-center justify-center relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=1000')] bg-cover bg-center grayscale opacity-50 transition group-hover:grayscale-0 duration-700"></div>
-                        <div className="relative z-10 text-center p-6 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl">
-                            <FaMapMarkedAlt className="text-5xl text-accent mx-auto mb-4" />
-                            <p className="font-bold text-gray-800">Map Interface Placeholder</p>
-                            <p className="text-sm text-gray-600">Integration in Progress</p>
-                        </div>
+                    <div className="h-64 md:h-96 rounded-3xl bg-gray-200 border-4 border-white shadow-inner relative overflow-hidden">
+                        <iframe
+                            title="Bangladesh Map"
+                            className="absolute inset-0 w-full h-full border-0"
+                            src="https://maps.google.com/maps?q=Bangladesh&t=&z=6&ie=UTF8&iwloc=&output=embed"
+                            allowFullScreen
+                            loading="lazy"
+                        ></iframe>
                     </div>
                 </div>
             </motion.section>
