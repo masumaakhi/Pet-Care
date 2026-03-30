@@ -16,6 +16,7 @@ const services = [
         description: "Schedule visits with top-rated local veterinarians for checkups and treatments.",
         icon: <FaStethoscope className="text-3xl" />,
         color: "bg-[#E38B3A]",
+        buttonText: "Book Vet Appointment",
     },
     {
         id: "groomer",
@@ -23,6 +24,7 @@ const services = [
         description: "Professional care for your pet's appearance, behavior, and daily needs.",
         icon: <FaCut className="text-3xl" />,
         color: "bg-[#7A9A7C]",
+        buttonText: "Book Care Service",
     },
     {
         id: "consultation",
@@ -30,6 +32,7 @@ const services = [
         description: "Get quick expert advice from the comfort of your home via video call.",
         icon: <FaVideo className="text-3xl" />,
         color: "bg-[#D89B65]",
+        buttonText: "Start Consultation",
     },
     {
         id: "reviews",
@@ -37,6 +40,7 @@ const services = [
         description: "Read trusted feedback from fellow pet owners about local service providers.",
         icon: <FaStar className="text-3xl" />,
         color: "bg-[#5A7F5C]",
+        buttonText: "Read Reviews",
     },
     {
         id: "map",
@@ -44,6 +48,7 @@ const services = [
         description: "Locate emergency and general practitioners near your current location.",
         icon: <FaMapMarkedAlt className="text-3xl" />,
         color: "bg-[#E38B3A]",
+        buttonText: "View Map",
     },
 ];
 
@@ -92,7 +97,7 @@ const Services = () => {
                         </p>
 
                         <Link to={`/services/${service.id}`} className="w-full block text-center py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition shadow-md">
-                            Learn More
+                            {service.buttonText || "Learn More"}
                         </Link>
                     </motion.div>
                 ))}
