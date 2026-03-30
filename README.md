@@ -13,7 +13,7 @@
     - **Vet**
 - User profile management (name, location, contact)
 
----
+------------------------------------------------------------------------------------------------------
 
 ### 2️⃣ Pet Profile & Care Module
 
@@ -30,21 +30,28 @@
 - Weight & growth tracking chart
 - Care reminders (push/email/SMS)
 
------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
-### 3️⃣ Health & Medical Module 🏥(Mizan)
+### 3️⃣ Adoption & Shelter Module 🏠(Mizan)
 
-- Vaccination schedule & reminders
-- Deworming & medication tracker
-- Treatment history
-- Vet visit records
-- Prescription & medical reports upload
-- Medicine reminders
-- Special care notes
-- Emergency first-aid guide
-- Emergency contact button
+- Pet status:
+    - Pet adoption listing
+    - Available for adoption
+    - Under treatment
+    - Adopted
+    - Emergency rescue
+- Adoption request form & screening workflow
+- Background check info (home type, flat/house, experience with pets, kids/pets, time availability)
+- Adoption matching algorithm:
+    - Match adopter lifestyle with pet personality
+    - Adoption success probability
+- Admin approval / rejection
+- Adoption history tracking & reports
+- Adoption agreement (PDF / checkbox)
+- Shelter management
 
-----------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
 ### **4️⃣ Rescue & Emergency Module 🚨 (Enhanced Workflow)**
 
 - Any user can submit an **Emergency Rescue Request** by filling up the rescue form
@@ -78,7 +85,7 @@
     - Same or nearby location
     - Similar uploaded images
 
----
+------------------------------------------------------------------------------------------------------
 
 ## **5️⃣** Health & Medical Module 🏥(Mizan)
 
@@ -92,7 +99,7 @@
 - Emergency first-aid guide
 - Emergency contact button
 
----
+------------------------------------------------------------------------------------------------------
 
 ## **6️⃣ Service Booking Module(Mizan)**
 
@@ -102,7 +109,7 @@
 - Review & rating system
 - Find nearby vets (map)
 
----
+------------------------------------------------------------------------------------------------------
 
 ## **7️⃣ Community & Social Module(Mizan)**
 
@@ -115,7 +122,7 @@
 - Blog / article section
 - Seasonal care advice
 
-----------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
 ## **8️⃣ Donation & Support Module**
 
@@ -128,7 +135,7 @@
 - Transparent fund tracking
 - Donation analytics
 
---------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
 ## **9️⃣ Smart / Advanced Features**
 
@@ -138,7 +145,7 @@
 - Analytics dashboard: rescue/adoption stats, pet health insights
 - Notifications: care reminders, rescue updates, adoption status
 
---------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
 ## **10️⃣ Admin & Security Features**
 
@@ -167,7 +174,7 @@
     - Donation analytics
     - Cost tracking (medical + food)
 
------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
 
 ### Extra: Volunteer System
 
