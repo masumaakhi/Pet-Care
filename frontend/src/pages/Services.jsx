@@ -6,7 +6,8 @@ import {
     FaCut,
     FaVideo,
     FaStar,
-    FaMapMarkedAlt
+    FaMapMarkedAlt,
+    FaCalendarCheck
 } from "react-icons/fa";
 
 const services = [
@@ -67,8 +68,13 @@ const Services = () => {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center max-w-3xl mx-auto mb-16"
+                className="text-center max-w-3xl mx-auto mb-16 relative"
             >
+                <div className="absolute -top-4 right-0 md:-right-12 lg:-right-32">
+                    <Link to="/services/my-bookings" className="flex items-center gap-2 px-6 py-3 bg-white/70 backdrop-blur-md text-primary font-bold rounded-full shadow-lg border border-white/60 hover:bg-primary hover:text-white transition">
+                        <FaCalendarCheck /> My Bookings
+                    </Link>
+                </div>
                 <h1 className="text-4xl md:text-5xl font-bold text-primary mb-6">
                     Premium Pet Care Services
                 </h1>
