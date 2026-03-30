@@ -7,7 +7,8 @@ import {
     FaVideo,
     FaStar,
     FaMapMarkedAlt,
-    FaCalendarCheck
+    FaCalendarCheck,
+    FaInfoCircle
 } from "react-icons/fa";
 
 const services = [
@@ -78,10 +79,12 @@ const Services = () => {
                 </p>
 
                 <div className="flex flex-wrap justify-center gap-4">
-                    <Link to="/services/my-bookings" className="flex items-center gap-2 px-8 py-3 bg-white/70 backdrop-blur-md text-primary font-bold rounded-full shadow-lg border border-primary/20 hover:bg-primary hover:text-white transition">
+                    <Link to="/services/my-bookings" className="flex items-center justify-center gap-2 px-8 py-3 bg-white/70 backdrop-blur-md text-primary font-bold rounded-full shadow-lg border border-primary/20 hover:bg-primary hover:text-white transition">
                         <FaCalendarCheck /> My Bookings
                     </Link>
-
+                    <Link to="/services/bookings/b1" className="flex items-center justify-center gap-2 px-8 py-3 bg-primary text-white font-bold rounded-full shadow-lg hover:bg-primary/90 transition">
+                        <FaInfoCircle /> Booking Details (Demo)
+                    </Link>
                 </div>
             </motion.div>
 

@@ -25,6 +25,7 @@ import AdoptionFlow from "../pages/AdoptionFlow";
 import Services from "../pages/Services";
 import ServiceDetails from "../pages/ServiceDetails";
 import MyBookings from "../pages/MyBookings";
+import BookingDetails from "../pages/BookingDetails";
 
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminLayout from "../pages/admin/AdminLayout";
@@ -72,6 +73,7 @@ export const router = createBrowserRouter([
       { path: "/adopt/flow/:id", element: <AdoptionFlow /> },
       { path: "/services", element: <Services /> },
       { path: "/services/my-bookings", element: <MyBookings /> },
+      { path: "/services/bookings/:id", element: <BookingDetails /> },
       { path: "/services/:id", element: <ServiceDetails /> },
       { path: "/health", element: <HealthAndMedical /> },
       { path: "/register", element: <Signup /> },

@@ -170,6 +170,14 @@ const MyBookings = () => {
 
                                     {/* Action Buttons */}
                                     <div className="flex flex-col gap-3 w-full md:w-auto mt-4 md:mt-0">
+
+                                        <Link
+                                            to={`/services/bookings/${booking.id}`}
+                                            className="px-6 py-3 bg-white border border-gray-200 hover:border-primary text-gray-700 hover:text-primary font-bold rounded-xl transition shadow-sm flex items-center justify-center gap-2"
+                                        >
+                                            View Details
+                                        </Link>
+
                                         {booking.status === "upcoming" && booking.type === "consultation" && (
                                             <button className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl transition shadow-md flex items-center justify-center gap-2">
                                                 <FaVideo /> Join Consultation
