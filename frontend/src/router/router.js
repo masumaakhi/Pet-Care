@@ -23,7 +23,7 @@ import AdoptionListing from "../pages/AdoptionListing";
 import AdoptionDetails from "../pages/AdoptionDetails";
 import AdoptionFlow from "../pages/AdoptionFlow";
 import Services from "../pages/Services";
-
+import ServiceDetails from "../pages/ServiceDetails";
 
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminLayout from "../pages/admin/AdminLayout";
@@ -70,6 +70,7 @@ export const router = createBrowserRouter([
       { path: "/adopt/listing/:id", element: <AdoptionDetails /> },
       { path: "/adopt/flow/:id", element: <AdoptionFlow /> },
       { path: "/services", element: <Services /> },
+      { path: "/services/:id", element: <ServiceDetails /> },
       { path: "/health", element: <HealthAndMedical /> },
       { path: "/register", element: <Signup /> },
       { path: "/login", element: <Signin /> },
@@ -91,10 +92,10 @@ export const router = createBrowserRouter([
           { path: "/prescriptions", element: <Prescriptions /> },
           { path: "/pets/gallery", element: <PetGallery /> },
           { path: "/pets/calendar", element: <CareCalendar /> },
-          
+
           // Rescue User Routes
           { path: "/rescue/my-requests", element: <MyRescueRequestsPage /> },
-          
+
           // Donation Routes
           { path: "/donations", element: <MyDonationsPage /> },
         ]
@@ -120,8 +121,8 @@ export const router = createBrowserRouter([
             children: [
               { index: true, element: <AdminDashboard /> },
               { path: "users", element: <AdminUserManagementPage /> },
-              { path:"users/view/:id", element:<AdminUserProfilePage />},
-              {path: "users/edit/:id", element: <AdminEditUserPage />},
+              { path: "users/view/:id", element: <AdminUserProfilePage /> },
+              { path: "users/edit/:id", element: <AdminEditUserPage /> },
               // Rescue Admin Routes
               { path: "rescues", element: <AdminRescueListPage /> },
               { path: "rescues/map", element: <AdminRescueMapPage /> },

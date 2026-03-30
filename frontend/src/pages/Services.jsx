@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
     FaStethoscope,
@@ -90,9 +91,9 @@ const Services = () => {
                             {service.description}
                         </p>
 
-                        <button className="w-full py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition shadow-md">
+                        <Link to={`/services/${service.id}`} className="w-full block text-center py-3 rounded-xl bg-primary text-white font-medium hover:bg-primary/90 transition shadow-md">
                             Learn More
-                        </button>
+                        </Link>
                     </motion.div>
                 ))}
             </div>
