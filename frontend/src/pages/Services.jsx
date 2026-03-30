@@ -48,8 +48,16 @@ const services = [
         description: "Locate emergency and general practitioners near your current location.",
         icon: <FaMapMarkedAlt className="text-3xl" />,
         color: "bg-[#E38B3A]",
-        buttonText: "View Map",
+        buttonText: "See Vets & Map",
     },
+];
+
+const nearbyVets = [
+    { id: "v1", name: "Green Valley Vet Clinic", distance: "1.2 km", rating: 4.9, open: true },
+    { id: "v2", name: "City Care Animal Hospital", distance: "3.5 km", rating: 4.7, open: true },
+    { id: "v3", name: "Paws & Claws Emergency", distance: "4.0 km", rating: 4.8, open: true },
+    { id: "v4", name: "Sunrise Veterinary Center", distance: "5.1 km", rating: 4.6, open: false },
+    { id: "v5", name: "Oak Tree Pet Clinic", distance: "6.8 km", rating: 4.5, open: true },
 ];
 
 const Services = () => {
@@ -123,20 +131,31 @@ const Services = () => {
                 className="mt-24 rounded-[3rem] overflow-hidden bg-white/50 backdrop-blur-lg border border-white/60 shadow-2xl p-8 md:p-12"
             >
                 <div className="grid md:grid-cols-2 gap-12 items-center">
-                    <div>
-                        <h2 className="text-3xl font-bold text-primary mb-6">Locate Help Instantly</h2>
-                        <p className="text-lg text-gray-600 mb-8">
-                            Find the nearest specialized veterinary centers and emergency hospitals. Our interactive map helps you reach care when minutes matter.
+                    <div className="flex flex-col h-full max-h-[24rem]">
+                        <h2 className="text-3xl font-bold text-primary mb-2">Nearby Vets & Clinics</h2>
+                        <p className="text-gray-600 mb-6 font-medium">
+                            Find top-rated veterinary centers near your location.
                         </p>
-                        <div className="flex gap-4">
-                            <div className="bg-primary/10 p-4 rounded-2xl border border-primary/20">
-                                <span className="block font-bold text-primary text-xl">25+</span>
-                                <span className="text-sm text-gray-600">Partner Vets</span>
-                            </div>
-                            <div className="bg-accent/10 p-4 rounded-2xl border border-accent/20">
-                                <span className="block font-bold text-accent text-xl">24/7</span>
-                                <span className="text-sm text-gray-600">Emergency Support</span>
-                            </div>
+                        <div className="space-y-3 overflow-y-auto pr-2 flex-grow">
+                            {nearbyVets.map((vet) => (
+                                <div key={vet.id} className="bg-white/70 p-4 rounded-2xl border border-white/40 shadow-sm flex items-center justify-between hover:bg-white transition group">
+                                    <div>
+                                        <h4 className="font-bold text-gray-800">{vet.name}</h4>
+                                        <div className="flex items-center text-sm gap-2 mt-1 text-gray-600">
+                                            <span className="flex items-center text-yellow-500"><FaStar className="mr-1" /> {vet.rating}</span>
+                                            <span className="text-gray-300">•</span>
+                                            <span>{vet.distance}</span>
+                                            <span className="text-gray-300">•</span>
+                                            <span className={vet.open ? "text-green-500" : "text-red-500"}>
+                                                {vet.open ? "Open Now" : "Closed"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <Link to="/services/vet" className="px-4 py-2 bg-primary/10 text-primary font-semibold rounded-lg opacity-0 group-hover:opacity-100 transition hover:bg-primary hover:text-white">
+                                        Book
+                                    </Link>
+                                </div>
+                            ))}
                         </div>
                     </div>
                     <div className="h-64 md:h-96 rounded-3xl bg-gray-200 border-4 border-white shadow-inner relative overflow-hidden">
