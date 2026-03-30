@@ -68,19 +68,21 @@ const Services = () => {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-center max-w-3xl mx-auto mb-16 relative"
+                className="text-center max-w-3xl mx-auto mb-16"
             >
-                <div className="absolute -top-4 right-0 md:-right-12 lg:-right-32">
-                    <Link to="/services/my-bookings" className="flex items-center gap-2 px-6 py-3 bg-white/70 backdrop-blur-md text-primary font-bold rounded-full shadow-lg border border-white/60 hover:bg-primary hover:text-white transition">
-                        <FaCalendarCheck /> My Bookings
-                    </Link>
-                </div>
                 <h1 className="text-4xl md:text-5xl font-bold text-primary mb-6">
                     Premium Pet Care Services
                 </h1>
-                <p className="text-lg text-gray-600">
+                <p className="text-lg text-gray-600 mb-8">
                     Everything your pet needs, from health checkups to professional training, all in one place.
                 </p>
+
+                <div className="flex flex-wrap justify-center gap-4">
+                    <Link to="/services/my-bookings" className="flex items-center gap-2 px-8 py-3 bg-white/70 backdrop-blur-md text-primary font-bold rounded-full shadow-lg border border-primary/20 hover:bg-primary hover:text-white transition">
+                        <FaCalendarCheck /> My Bookings
+                    </Link>
+
+                </div>
             </motion.div>
 
             {/* Services Grid */}
