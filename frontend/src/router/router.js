@@ -26,6 +26,7 @@ import Services from "../pages/Services";
 import ServiceDetails from "../pages/ServiceDetails";
 import MyBookings from "../pages/MyBookings";
 import BookingDetails from "../pages/BookingDetails";
+import Community from "../pages/Community";
 
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminLayout from "../pages/admin/AdminLayout";
@@ -75,6 +76,7 @@ export const router = createBrowserRouter([
       { path: "/services/my-bookings", element: <MyBookings /> },
       { path: "/services/bookings/:id", element: <BookingDetails /> },
       { path: "/services/:id", element: <ServiceDetails /> },
+      { path: "/community", element: <Community /> },
       { path: "/health", element: <HealthAndMedical /> },
       { path: "/register", element: <Signup /> },
       { path: "/login", element: <Signin /> },
