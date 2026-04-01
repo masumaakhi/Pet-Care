@@ -74,6 +74,7 @@ const Community = () => {
     const [posts, setPosts] = useState(initialPosts);
     const [activeFilter, setActiveFilter] = useState("Feed");
     const [newPostText, setNewPostText] = useState("");
+    const [selectedImage, setSelectedImage] = useState(null);
 
     const filters = [
         { id: "Feed", label: "All Feed", icon: <FaUserCircle /> },
@@ -95,9 +96,20 @@ const Community = () => {
         }));
     };
 
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setSelectedImage(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
     const handleCreatePost = (e) => {
         e.preventDefault();
-        if (!newPostText.trim()) return;
+        if (!newPostText.trim() && !selectedImage) return;
 
         const newPost = {
             id: `p${Date.now()}`,
@@ -107,7 +119,7 @@ const Community = () => {
             category: activeFilter === "Feed" ? "Feed" : activeFilter,
             type: "update",
             content: newPostText,
-            image: null,
+            image: selectedImage,
             likes: 0,
             comments: 0,
             isLiked: false
@@ -115,6 +127,7 @@ const Community = () => {
 
         setPosts([newPost, ...posts]);
         setNewPostText("");
+        setSelectedImage(null); // Reset after posting
     };
 
     const filteredPosts = activeFilter === "Feed"
@@ -135,8 +148,8 @@ const Community = () => {
                                     <button
                                         onClick={() => setActiveFilter(filter.id)}
                                         className={`w-full text-left px-4 py-3 rounded-2xl flex items-center gap-4 font-medium transition ${activeFilter === filter.id
-                                                ? "bg-primary text-white shadow-md"
-                                                : "text-gray-600 hover:bg-white hover:text-primary hover:shadow-sm"
+                                            ? "bg-primary text-white shadow-md"
+                                            : "text-gray-600 hover:bg-white hover:text-primary hover:shadow-sm"
                                             }`}
                                     >
                                         <span className={activeFilter === filter.id ? "text-white" : "text-primary"}>
@@ -174,17 +187,37 @@ const Community = () => {
                                         placeholder={`Share a story, photo, or an update${activeFilter !== 'Feed' ? ' in ' + activeFilter : ''}...`}
                                         className="w-full bg-transparent border-none focus:ring-0 resize-none outline-none text-gray-700 text-lg placeholder-gray-400 min-h-[60px]"
                                     ></textarea>
+
+                                    {/* Image Preview */}
+                                    {selectedImage && (
+                                        <div className="relative mt-2 inline-block">
+                                            <img src={selectedImage} alt="Upload Preview" className="h-32 object-cover rounded-xl border border-gray-200" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedImage(null)}
+                                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-md"
+                                            >
+                                                &times;
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
                                 <div className="flex gap-4">
-                                    <button type="button" className="text-gray-500 hover:text-primary transition flex items-center gap-2 font-medium">
+                                    <label className="text-gray-500 hover:text-primary transition flex items-center gap-2 font-medium cursor-pointer">
                                         <FaImage /> <span className="hidden sm:inline">Photo/Video</span>
-                                    </button>
+                                        <input
+                                            type="file"
+                                            accept="image/*,video/*"
+                                            className="hidden"
+                                            onChange={handleImageUpload}
+                                        />
+                                    </label>
                                 </div>
                                 <button
                                     type="submit"
-                                    disabled={!newPostText.trim()}
+                                    disabled={!newPostText.trim() && !selectedImage}
                                     className="px-6 py-2 bg-primary text-white font-bold rounded-full hover:bg-primary/90 transition shadow-md disabled:opacity-50 flex items-center gap-2"
                                 >
                                     <FaPaperPlane /> Post
