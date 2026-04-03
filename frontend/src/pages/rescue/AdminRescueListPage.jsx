@@ -39,10 +39,38 @@ const AdminRescueListPage = () => {
       />
 
       <div className="relative z-10 max-w-7xl mx-auto">
-        <SectionHeader 
-          title="Admin Rescue Command Center" 
+        <SectionHeader
+          title="Admin Rescue Command Center"
           description="Monitor, manage, and dispatch all incoming emergency requests."
         />
+
+        {/* Quick Admin Links */}
+        <div className="flex flex-wrap gap-3 mt-4 justify-start">
+          <Link
+            to="/admin/rescues/map"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-white/70 to-white/50 backdrop-blur-md border border-[#8b6b4c]/30 text-[#2f3e2c] text-sm font-semibold hover:scale-[1.02] hover:shadow-md transition duration-300 shadow-sm"
+          >
+            Live Map Radar
+          </Link>
+          <Link
+            to="/admin/rescues/analytics"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-white/70 to-white/50 backdrop-blur-md border border-[#8b6b4c]/30 text-[#2f3e2c] text-sm font-semibold hover:scale-[1.02] hover:shadow-md transition duration-300 shadow-sm"
+          >
+            Analytics & Reports
+          </Link>
+          <Link
+            to="/admin/rescues/duplicates"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-white/70 to-white/50 backdrop-blur-md border border-[#8b6b4c]/30 text-[#2f3e2c] text-sm font-semibold hover:scale-[1.02] hover:shadow-md transition duration-300 shadow-sm"
+          >
+            Manage Duplicates
+          </Link>
+          <Link
+            to="/admin/rescues/notifications"
+            className="px-4 py-2 rounded-xl bg-gradient-to-r from-white/70 to-white/50 backdrop-blur-md border border-[#8b6b4c]/30 text-[#2f3e2c] text-sm font-semibold hover:scale-[1.02] hover:shadow-md transition duration-300 shadow-sm"
+          >
+            Broadcast Notifications
+          </Link>
+        </div>
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 mt-4">
@@ -71,41 +99,38 @@ const AdminRescueListPage = () => {
             <h3 className="text-lg font-bold text-[#2f3e2c]">All Rescue Tasks</h3>
 
             <div className="flex bg-white/55 backdrop-blur-xl rounded-xl p-1 border border-[#8b6b4c]/25">
-              <button 
+              <button
                 onClick={() => setFilters({ ...filters, status: '' })}
-                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${
-                  !filters.status
+                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${!filters.status
                     ? 'bg-white/80 text-[#2f3e2c] shadow-sm'
                     : 'text-[#6b7d67] hover:text-[#2f3e2c]'
-                }`}
+                  }`}
               >
                 All
               </button>
 
-              <button 
+              <button
                 onClick={() => setFilters({ ...filters, status: 'pending' })}
-                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${
-                  filters.status === 'pending'
+                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${filters.status === 'pending'
                     ? 'bg-white/80 border text-[#8b6b4c] shadow-sm border-[#8b6b4c]/25'
                     : 'text-[#6b7d67] hover:text-[#2f3e2c]'
-                }`}
+                  }`}
               >
                 Pending Team
               </button>
 
-              <button 
+              <button
                 onClick={() => setFilters({ ...filters, status: 'in_progress' })}
-                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${
-                  filters.status === 'in_progress'
+                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${filters.status === 'in_progress'
                     ? 'bg-white/80 border text-[#5f7d5a] shadow-sm border-[#5f7d5a]/25'
                     : 'text-[#6b7d67] hover:text-[#2f3e2c]'
-                }`}
+                  }`}
               >
                 Active
               </button>
             </div>
           </div>
-        
+
           <div className="p-5 border-b border-[#8b6b4c]/15 bg-white/20">
             <RescueFilters filters={filters} setFilters={setFilters} searchPlaceholder="Search ID, reporter, or desc..." />
           </div>

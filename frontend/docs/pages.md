@@ -2,15 +2,30 @@
 
 This document tracks all project pages, routes, roles, statuses, and required APIs.
 
+
 ---
 
 ## 🌐 Public Pages
 
 | Page Name | Route | Role | Status | API Needed | Notes |
 |---|---|---|---|---|---|
-| Home | / | All | UI Done | — | Landing page |
-| Adoption Listing | /adopt | All | UI Done | GET /adoptions | Filters later |
-| Health & Medical (Hub) | /health | Owner/User | UI Done | — | Hub linking to health pages |
+| Home | / | All | UI Done ✅ | — | Landing page |
+| Adopt (Landing) | /adopt | All | UI Done ✅ | — | Entry page |
+| Adoption Listing | /adopt/listing | All | UI Done ✅ | GET /adoptions | |
+| Adoption Details | /adopt/listing/:id | All | UI Done ✅ | GET /adoptions/:id | |
+| Adoption Flow | /adopt/flow/:id | User | UI Done ✅ | POST /adoptions/apply | |
+| Health Hub | /health | Owner/User | UI Done ✅ | — | |
+
+---
+
+## 🛠 Services Module
+
+| Page Name | Route | Role | Status | API Needed | Notes |
+|---|---|---|---|---|---|
+| Services | /services | All | UI Done ✅ | GET /services | |
+| Service Details | /services/:id | All | UI Done ✅ | GET /services/:id | |
+| My Bookings | /services/my-bookings | User | UI Done ✅ | GET /bookings/me | |
+| Booking Details | /services/bookings/:id | User | UI Done ✅ | GET /bookings/:id | |
 
 ---
 
@@ -18,9 +33,9 @@ This document tracks all project pages, routes, roles, statuses, and required AP
 
 | Page Name | Route | Role | Status | API Needed | Notes |
 |---|---|---|---|---|---|
-| Sign In | /login | All | UI Done | POST /auth/login | JWT later |
-| Sign Up | /register | All | UI Done | POST /auth/register | Email/OTP later |
-| Forgot Password | /forgot-password | All | UI Done | POST /auth/forgot | Reset flow |
+| Sign In | /login | All | UI Done ✅ | POST /auth/login | |
+| Sign Up | /register | All | UI Done ✅ | POST /auth/register | |
+| Forgot Password | /forgot-password | All | UI Done ✅ | POST /auth/forgot | |
 
 ---
 
@@ -28,7 +43,7 @@ This document tracks all project pages, routes, roles, statuses, and required AP
 
 | Page Name | Route | Role | Status | API Needed | Notes |
 |---|---|---|---|---|---|
-| User Profile | /profile | User | UI Done | GET /users/me | Edit profile later |
+| User Profile | /profile | User | UI Done ✅ | GET /users/me | |
 
 ---
 
@@ -36,30 +51,28 @@ This document tracks all project pages, routes, roles, statuses, and required AP
 
 | Page Name | Route | Role | Status | API Needed | Notes |
 |---|---|---|---|---|---|
-| Pet List | /pets | Owner | UI Done | GET /pets | Dashboard |
-| Add Pet | /pets/add | Owner | UI Done | POST /pets | Image upload later |
-| Pet Details (Tabs) | /pets/:id | Owner | UI Done | GET /pets/:id | Vaccines, Medical, Gallery |
-| Care Schedule List | /pets/schedule | Owner | UI Done | GET /pets/:id/schedules | Reminders later |
-| Weight Log | /pets/weight | Owner | UI Done | GET /pets/:id/weights | Charts |
-| Pet Gallery | /pets/gallery | Owner | UI Done | GET /pets/:id/gallery | Cloudinary later |
-| Care Calendar | /pets/calendar | Owner | UI Done | GET /pets/:id/calendar | Sync Google Calendar |
+| Pet List | /pets | Owner | UI Done ✅ | GET /pets | |
+| Add Pet | /pets/add | Owner | UI Done ✅ | POST /pets | |
+| Pet Details | /pets/:id | Owner | UI Done ✅ | GET /pets/:id | |
+| Care Schedule | /pets/schedule | Owner | UI Done ✅ | GET /pets/:id/schedules | |
+| Weight Log | /pets/weight | Owner | UI Done ✅ | GET /pets/:id/weights | |
+| Pet Gallery | /pets/gallery | Owner | UI Done ✅ | GET /pets/:id/gallery | |
+| Care Calendar | /pets/calendar | Owner | UI Done ✅ | GET /pets/:id/calendar | |
 
 ---
 
 ## 🏥 Health & Medical Module
 
-> Note: These routes follow current router configuration.
-
 | Page Name | Route | Role | Status | API Needed | Notes |
 |---|---|---|---|---|---|
-| Vaccination Records | /vaccines | Owner | UI Done | GET /pets/:id/vaccines | Add/Edit later |
-| Medical History | /medical | Owner | UI Done | GET /pets/:id/medical | Vet notes |
-| Prescriptions | /prescriptions | Owner | UI Done | GET /pets/:id/prescriptions | PDF upload later |
-| Deworming Schedule | (inside Vaccines) | Owner | Planned | GET /pets/:id/deworming | Could be tab |
-| Medication Tracker | (inside Prescriptions) | Owner | Planned | GET /pets/:id/medications | Refill reminders |
-| Vet Visit Records | (inside Medical) | Owner | Planned | GET /pets/:id/visits | Upload reports |
-| Health Risk Score | /health/risk | Owner | Planned | GET /pets/:id/risk-score | Optional page |
-| Special Care Notes | /health/notes | Owner | Planned | GET /pets/:id/notes | Optional page |
+| Vaccination Records | /vaccines | Owner | UI Done ✅ | GET /pets/:id/vaccines | |
+| Medical History | /medical | Owner | UI Done ✅ | GET /pets/:id/medical | |
+| Prescriptions | /prescriptions | Owner | UI Done ✅ | GET /pets/:id/prescriptions | |
+| Deworming Schedule | (inside Vaccines) | Owner | Todo ⏳ | GET /pets/:id/deworming | |
+| Medication Tracker | (inside Prescriptions) | Owner | Todo ⏳ | GET /pets/:id/medications | |
+| Vet Visit Records | (inside Medical) | Owner | Todo ⏳ | GET /pets/:id/visits | |
+| Health Risk Score | /health/risk | Owner | Todo ⏳ | GET /pets/:id/risk-score | Not in router |
+| Special Care Notes | /health/notes | Owner | Todo ⏳ | GET /pets/:id/notes | Not in router |
 
 ---
 
@@ -67,55 +80,99 @@ This document tracks all project pages, routes, roles, statuses, and required AP
 
 | Page Name | Route | Role | Status | API Needed | Notes |
 |---|---|---|---|---|---|
-| Adoption Listing | /adopt | All | UI Done | GET /adoptions | Filters later |
-| Adoption Details | /adopt/:id | All | Todo | GET /adoptions/:id | Details page |
-| Adoption Request | /adopt/apply/:id | User | Todo | POST /adoptions/apply | Approval flow |
+| Adoption Listing | /adopt/listing | All | UI Done ✅ | GET /adoptions | |
+| Adoption Details | /adopt/listing/:id | All | UI Done ✅ | GET /adoptions/:id | |
+| Adoption Flow | /adopt/flow/:id | User | UI Done ✅ | POST /adoptions/apply | |
 
 ---
 
 ## 🚨 Rescue
 
+### 👤 User
+
 | Page Name | Route | Role | Status | API Needed | Notes |
 |---|---|---|---|---|---|
-| Submit Rescue Request | /rescue | User | Todo | POST /rescues | Map picker |
-| Rescue Map | /rescue/map | Volunteer | Todo | GET /rescues/nearby | Live map |
-| Rescue Tracking | /rescue/:id | Volunteer | Todo | GET /rescues/:id | Status timeline |
+| Submit Rescue | /rescue | User | UI Done ✅ | POST /rescues | |
+| My Requests | /rescue/my-requests | User | UI Done ✅ | GET /rescues/me | |
+| Rescue Tracking | /rescue/tracking/:id | User | UI Done ✅ | GET /rescues/:id | |
+
+---
+
+### 🦸 Volunteer
+
+| Page Name | Route | Role | Status | API Needed | Notes |
+|---|---|---|---|---|---|
+| Nearby Requests | /rescue/nearby | Volunteer | UI Done ✅ | GET /rescues/nearby | |
+| Assigned Rescue | /rescue/assigned/:id | Volunteer | UI Done ✅ | GET /rescues/:id | |
+| Rescue History | /rescue/history | Volunteer | UI Done ✅ | GET /rescues/history | |
+
+---
+
+### 🛡 Admin (Rescue)
+
+| Page Name | Route | Role | Status | API Needed | Notes |
+|---|---|---|---|---|---|
+| Rescue List | /admin/rescues | Admin | UI Done ✅ | GET /admin/rescues | |
+| Rescue Details | /admin/rescues/:id | Admin | UI Done ✅ | GET /admin/rescues/:id | |
+| Rescue Map | /admin/rescues/map | Admin | UI Done ✅ | GET /admin/rescues/map | |
+| Rescue Analytics | /admin/rescues/analytics | Admin | UI Done ✅ | GET /admin/rescues/analytics | |
+| Duplicate Rescues | /admin/rescues/duplicates | Admin | UI Done ✅ | GET /admin/rescues/duplicates | |
+| Notifications | /admin/rescues/notifications | Admin | UI Done ✅ | GET /admin/rescues/notifications | |
 
 ---
 
 ## 💰 Donations
 
-| Page Name | Route | Role | Status | API Needed | Notes |
-|---|---|---|---|---|---|
-| Donate Page | /donate | All | Todo | POST /donations | Payment gateway |
-| Donation History | /donations | User | Todo | GET /donations/me | Receipts |
-
----
-
-## 🧑‍🤝‍🧑 Community (Future)
+### 👤 User
 
 | Page Name | Route | Role | Status | API Needed | Notes |
 |---|---|---|---|---|---|
-| Community Feed | /community | All | Future | GET /posts | Like/Comment |
-| Post Details | /posts/:id | All | Future | GET /posts/:id | — |
+| Donate Page | /donate | All | UI Done ✅ | POST /donations | |
+| My Donations | /donations | User | UI Done ✅ | GET /donations/me | |
+| Campaign Details | /donations/campaign/:id | All | UI Done ✅ | GET /campaigns/:id | |
 
 ---
 
-## 🛡️ Admin Panel
+### 🛡 Admin
 
 | Page Name | Route | Role | Status | API Needed | Notes |
 |---|---|---|---|---|---|
-| Admin Dashboard | /admin | Admin | UI Done | GET /admin/metrics | Charts |
-| User Management | /admin/users | Admin | Todo | GET /admin/users | Block/Verify |
-| Pet Moderation | /admin/pets | Admin | Todo | GET /admin/pets | Approve listings |
-| Adoption Requests | /admin/adoptions | Admin | Todo | GET /admin/adoptions | Approve/Reject |
-| Rescue Management | /admin/rescues | Admin | Todo | GET /admin/rescues | Emergency view |
-| Donations Overview | /admin/donations | Admin | Todo | GET /admin/donations | Finance |
-| Reports & Analytics | /admin/reports | Admin | Todo | GET /admin/reports | CSV export |
-| Alerts & Flags | /admin/alerts | Admin | Todo | GET /admin/alerts | Abuse cases |
-| Admin Settings | /admin/settings | Admin | Todo | GET /admin/settings | Roles & config |
+| Donations | /admin/donations | Admin | UI Done ✅ | GET /admin/donations | |
+| Donation Reports | /admin/donations/reports | Admin | UI Done ✅ | GET /admin/donations/reports | |
 
 ---
+
+## 👥 Community
+
+| Page Name | Route | Role | Status | API Needed | Notes |
+|---|---|---|---|---|---|
+| Community Feed | /community | All | UI Done ✅ | GET /posts | |
+| Post Details | /posts/:id | All | Todo ⏳ | GET /posts/:id | Not in router |
+
+---
+
+## 🛡️ Admin Panel (General)
+
+| Page Name | Route | Role | Status | API Needed | Notes |
+|---|---|---|---|---|---|
+| Admin Dashboard | /admin | Admin | UI Done ✅ | GET /admin/metrics | |
+| User Management | /admin/users | Admin | UI Done ✅ | GET /admin/users | |
+| View User | /admin/users/view/:id | Admin | UI Done ✅ | GET /admin/users/:id | |
+| Edit User | /admin/users/edit/:id | Admin | UI Done ✅ | PUT /admin/users/:id | |
+| Pet Moderation | /admin/pets | Admin | Todo ⏳ | GET /admin/pets | Not in router |
+| Adoption Requests | /admin/adoptions | Admin | Todo ⏳ | GET /admin/adoptions | Not in router |
+| Reports & Analytics | /admin/reports | Admin | Todo ⏳ | GET /admin/reports | Not in router |
+| Alerts & Flags | /admin/alerts | Admin | Todo ⏳ | GET /admin/alerts | Not in router |
+| Admin Settings | /admin/settings | Admin | Todo ⏳ | GET /admin/settings | Not in router |
+
+---
+
+## 📌 Status Legend
+
+- UI Done ✅ = Frontend UI complete  
+- Todo ⏳ = Planned / Backend pending  
+- Future 🚀 = Phase 2/3  
+- Planned 🧩 = Tab/section inside existing pages  
 
 ## 📌 Status Legend
 

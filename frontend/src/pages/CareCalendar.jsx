@@ -1,24 +1,15 @@
-import React, { useMemo, useState } from "react";
+// frontend/src/pages/CareCalendar.jsx
+import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
-
-// ---- Mock data (backend later) ----
-const mockPets = [
-  { id: "1", name: "Milo" },
-  { id: "2", name: "Luna" },
-];
-
-const mockEvents = [
-  { id: 1, petId: "1", title: "Feeding", date: "2026-02-19", type: "feeding" },
-  { id: 2, petId: "1", title: "Grooming", date: "2026-02-20", type: "grooming" },
-  { id: 3, petId: "2", title: "Exercise", date: "2026-02-21", type: "exercise" },
-  { id: 4, petId: "2", title: "Vaccination Due", date: "2026-02-22", type: "medical" },
-];
+import api from "../utils/api";
+import { toast } from "react-hot-toast";
 
 const typeColor = {
-  feeding: "from-emerald-200/70 to-emerald-100/70 border-emerald-300/60",
-  grooming: "from-amber-200/70 to-amber-100/70 border-amber-300/60",
-  exercise: "from-sky-200/70 to-sky-100/70 border-sky-300/60",
-  medical: "from-rose-200/70 to-rose-100/70 border-rose-300/60",
+  Feeding: "from-emerald-200/70 to-emerald-100/70 border-emerald-300/60 text-emerald-800",
+  Grooming: "from-amber-200/70 to-amber-100/70 border-amber-300/60 text-amber-800",
+  Exercise: "from-sky-200/70 to-sky-100/70 border-sky-300/60 text-sky-800",
+  Medicine: "from-rose-200/70 to-rose-100/70 border-rose-300/60 text-rose-800",
+  Other: "from-slate-200/70 to-slate-100/70 border-slate-300/60 text-slate-800",
 };
 
 function getMonthDays(year, month) {
@@ -34,130 +25,159 @@ function getMonthDays(year, month) {
 export default function CareCalendar() {
   const today = new Date();
   const [current, setCurrent] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
-  const [petId, setPetId] = useState("all");
+  const [pets, setPets] = useState([]);
+  const [selectedPetId, setSelectedPetId] = useState("all");
+  const [schedules, setSchedules] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const petsRes = await api.get("/pets");
+      if (petsRes.data.success) {
+        setPets(petsRes.data.data);
+        const petsData = petsRes.data.data;
+
+        const allSchedules = [];
+        for (const pet of petsData) {
+          const schRes = await api.get(`/pets/${pet.id}/schedules`);
+          if (schRes.data.success) {
+            allSchedules.push(...schRes.data.data.map(s => ({ ...s, petName: pet.name })));
+          }
+        }
+        setSchedules(allSchedules);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load calendar data");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const { firstDay, days } = useMemo(
     () => getMonthDays(current.getFullYear(), current.getMonth()),
     [current]
   );
 
-  const eventsFor = (dateStr) =>
-    mockEvents.filter(
-      (e) =>
-        e.date === dateStr && (petId === "all" || e.petId === petId)
-    );
+  const getEventsForDate = (date) => {
+    const dStr = date.toISOString().split('T')[0];
+    return schedules.filter(s => {
+      const sDate = s.scheduled_date.split('T')[0];
+      return sDate === dStr && (selectedPetId === "all" || s.petId === selectedPetId);
+    });
+  };
 
-  const prevMonth = () =>
-    setCurrent((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
-  const nextMonth = () =>
-    setCurrent((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
+  const prevMonth = () => setCurrent((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1));
+  const nextMonth = () => setCurrent((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1));
 
   return (
     <div className="min-h-screen pt-[6rem] pb-[4rem] px-4 sm:px-6 relative overflow-hidden">
       {/* Glow */}
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
         w-[820px] h-[820px]
         bg-gradient-to-br from-[#7fa37a]/40 via-[#5f7d5a]/30 to-[#8b6b4c]/30
-        rounded-full blur-[170px] opacity-60 pointer-events-none"
-      />
+        rounded-full blur-[170px] opacity-60 pointer-events-none" />
 
       <div className="relative z-10 max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#2f3e2c]">
+            <h1 className="text-2xl sm:text-4xl font-black text-[#2f3e2c] tracking-tight">
               Care Calendar
             </h1>
-            <p className="text-[#6b7d67] mt-1">
-              Monthly view of feeding, grooming, exercise & medical schedules.
+            <p className="text-[#6b7d67] mt-1 font-bold">
+              Visual monthly routines for your pets.
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <select
-              value={petId}
-              onChange={(e) => setPetId(e.target.value)}
-              className="px-4 py-2 rounded-xl bg-white/60 backdrop-blur-xl
-              border border-[#8b6b4c]/40 text-[#2f3e2c] font-semibold"
+              value={selectedPetId}
+              onChange={(e) => setSelectedPetId(e.target.value)}
+              className="px-5 py-2.5 rounded-2xl bg-white/60 backdrop-blur-3xl
+              border border-[#8b6b4c]/30 text-[#2f3e2c] font-black outline-none focus:ring-2 focus:ring-[#7fa37a]/50"
             >
-              <option value="all" className="bg-[#f3eee8]">All Pets</option>
-              {mockPets.map((p) => (
-                <option key={p.id} value={p.id} className="bg-[#f3eee8]">
-                  {p.name}
-                </option>
+              <option value="all">All Pets</option>
+              {pets.map((p) => (
+                <option key={p.id} value={p.id}>{p.name}</option>
               ))}
             </select>
 
-            <button onClick={prevMonth} className="px-3 py-2 rounded-xl bg-white/60 border border-[#8b6b4c]/40">◀</button>
-            <button onClick={nextMonth} className="px-3 py-2 rounded-xl bg-white/60 border border-[#8b6b4c]/40">▶</button>
+            <div className="flex bg-white/60 p-1 rounded-2xl border border-[#8b6b4c]/30 backdrop-blur-md shadow-sm">
+              <button onClick={prevMonth} className="px-4 py-1.5 rounded-xl hover:bg-white transition text-[#2f3e2c] font-bold">◀</button>
+              <button onClick={nextMonth} className="px-4 py-1.5 rounded-xl hover:bg-white transition text-[#2f3e2c] font-bold">▶</button>
+            </div>
           </div>
         </div>
 
         {/* Month label */}
-        <div className="text-center text-lg font-semibold text-[#2f3e2c] mb-3">
+        <div className="text-center text-2xl font-black text-[#2f3e2c] mb-6 uppercase tracking-widest">
           {current.toLocaleString("default", { month: "long", year: "numeric" })}
         </div>
 
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-2">
-          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-            <div key={d} className="text-center text-xs sm:text-sm text-[#6b7d67] font-semibold">
-              {d}
-            </div>
-          ))}
+        {loading ? (
+          <div className="text-center py-40">
+             <div className="w-12 h-12 border-4 border-[#7fa37a]/30 border-t-[#5f7d5a] rounded-full animate-spin mx-auto mb-4" />
+             <p className="text-[#6b7d67] font-bold">Mapping your care calendar...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-7 gap-3">
+            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+              <div key={d} className="text-center text-xs text-[#6b7d67] font-black uppercase tracking-tighter opacity-70 mb-2">
+                {d}
+              </div>
+            ))}
 
-          {/* Empty cells */}
-          {Array.from({ length: firstDay }).map((_, i) => (
-            <div key={`empty-${i}`} />
-          ))}
+            {Array.from({ length: firstDay }).map((_, i) => (
+              <div key={`empty-${i}`} className="min-h-[100px] bg-black/5 rounded-3xl opacity-30" />
+            ))}
 
-          {days.map((d) => {
-            const dateStr = d.toISOString().slice(0, 10);
-            const dayEvents = eventsFor(dateStr);
-            const isToday =
-              new Date().toISOString().slice(0, 10) === dateStr;
+            {days.map((d) => {
+              const dayEvents = getEventsForDate(d);
+              const isToday = today.toDateString() === d.toDateString();
 
-            return (
-              <motion.div
-                key={dateStr}
-                whileHover={{ y: -4, rotateX: 5 }}
-                className={`min-h-[90px] sm:min-h-[110px] rounded-2xl p-2
-                bg-white/55 backdrop-blur-2xl
-                border ${isToday ? "border-emerald-400" : "border-[#8b6b4c]/40"}
-                shadow-[0_14px_45px_rgba(0,0,0,0.10)]`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs sm:text-sm font-semibold text-[#2f3e2c]">
-                    {d.getDate()}
-                  </span>
-                  {isToday && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                      Today
+              return (
+                <motion.div
+                  key={d.toISOString()}
+                  whileHover={{ scale: 1.02 }}
+                  className={`min-h-[110px] sm:min-h-[130px] rounded-[2rem] p-3
+                  bg-white/60 backdrop-blur-3xl flex flex-col
+                  border ${isToday ? "border-[#5f7d5a] ring-2 ring-[#7fa37a]/40 shadow-xl" : "border-[#8b6b4c]/20 shadow-sm"}
+                  transition hover:shadow-lg`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-sm font-black ${isToday ? "text-[#5f7d5a]" : "text-[#2f3e2c]"}`}>
+                      {d.getDate()}
                     </span>
-                  )}
-                </div>
+                    {isToday && (
+                      <span className="text-[10px] font-black uppercase text-[#5f7d5a]">Today</span>
+                    )}
+                  </div>
 
-                <div className="mt-1 space-y-1">
-                  {dayEvents.map((e) => (
-                    <div
-                      key={e.id}
-                      className={`text-[10px] sm:text-xs rounded-lg px-2 py-1
-                      bg-gradient-to-br ${typeColor[e.type]}
-                      border`}
-                    >
-                      {e.title}
-                    </div>
-                  ))}
-
-                  {dayEvents.length === 0 && (
-                    <p className="text-[10px] text-[#9aa79a] mt-3">No tasks</p>
-                  )}
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+                  <div className="flex-1 space-y-1.5 overflow-y-auto custom-scrollbar pr-1">
+                    {dayEvents.map((e) => (
+                      <div
+                        key={e.id}
+                        className={`text-[9px] font-black rounded-xl px-2 py-1.5
+                        bg-gradient-to-br ${typeColor[e.type] || typeColor.Other}
+                        border border-black/5 shadow-sm leading-tight`}
+                      >
+                        <p className="truncate">{e.title || e.type}</p>
+                        <p className="opacity-70 text-[8px]">{e.scheduled_time}</p>
+                        {selectedPetId === "all" && <p className="text-[7px] italic mt-0.5">{e.petName}</p>}
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

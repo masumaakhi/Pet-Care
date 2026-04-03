@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -17,6 +17,10 @@ export default function UserProfile() {
     email: "",
   });
   const [isUpdating, setIsUpdating] = useState(false);
+  const [pets, setPets] = useState([]);
+  const [vaccines, setVaccines] = useState([]);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [isFetchingData, setIsFetchingData] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -24,8 +28,28 @@ export default function UserProfile() {
         fullName: user.fullName || "",
         email: user.email || "",
       });
+      fetchExtraData();
     }
   }, [user]);
+
+  const fetchExtraData = async () => {
+    try {
+      setIsFetchingData(true);
+      const [petsRes, vaccineRes, presRes] = await Promise.all([
+        api.get("/pets"),
+        api.get("/medical/vaccines"),
+        api.get("/medical/prescriptions"),
+      ]);
+
+      if (petsRes.data.success) setPets(petsRes.data.data);
+      if (vaccineRes.data.success) setVaccines(vaccineRes.data.data);
+      if (presRes.data.success) setPrescriptions(presRes.data.data);
+    } catch (error) {
+      console.error("Fetch Profile Data Error:", error);
+    } finally {
+      setIsFetchingData(false);
+    }
+  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -33,11 +57,26 @@ export default function UserProfile() {
     }
   }, [loading, user, navigate]);
 
-  if (loading) {
+  const stats = useMemo(() => {
+    const totalSchedules = pets.reduce((acc, p) => acc + (p._count?.schedules || 0), 0);
+    const totalWeights = pets.reduce((acc, p) => acc + (p._count?.weightLogs || 0), 0);
+    // Count vaccines due soon (basic logic)
+    const dueVaccines = vaccines.filter(v => v.nextDueDate && new Date(v.nextDueDate) < new Date(Date.now() + 14 * 86400000)).length;
+
+    return {
+      totalPets: pets.length,
+      schedules: totalSchedules,
+      weights: totalWeights,
+      dueVaccines,
+      activeMeds: prescriptions.length
+    };
+  }, [pets, vaccines, prescriptions]);
+
+  if (loading || isFetchingData) {
     return (
       <div className="min-h-screen px-4 sm:px-8 pt-[6rem] pb-[4rem] flex items-center justify-center">
         <div className="text-[#2f3e2c] text-lg font-medium">
-          Loading profile...
+          Loading profile data...
         </div>
       </div>
     );
@@ -103,25 +142,74 @@ export default function UserProfile() {
           </div>
 
           <div className="flex flex-wrap gap-3 justify-start lg:justify-end w-full lg:w-auto">
-            <Link
-              to="/pets"
-              className="px-5 py-2 rounded-xl 
-              bg-gradient-to-r from-[#5f7d5a] to-[#7fa37a]
-              text-white font-medium shadow-md 
-              hover:scale-[1.02] hover:shadow-lg transition"
-            >
-              🐾 My Pets
-            </Link>
+            {displayRole === "admin" && (
+              <>
+                <Link
+                  to="/admin"
+                  className="px-5 py-2 rounded-xl 
+                  bg-gradient-to-r from-[#5f7d5a] to-[#7fa37a]
+                  text-white font-medium shadow-md 
+                  hover:scale-[1.02] hover:shadow-lg transition"
+                >
+                  🛡️ Dashboard
+                </Link>
+                <Link
+                  to="/admin/users"
+                  className="px-5 py-2 rounded-xl 
+                  bg-gradient-to-r from-[#7fa37a] to-[#8b6b4c]
+                  text-white font-medium shadow-md 
+                  hover:scale-[1.02] hover:shadow-lg transition"
+                >
+                  👥 Users
+                </Link>
+              </>
+            )}
 
-            <Link
-              to="/health"
-              className="px-5 py-2 rounded-xl 
-              bg-gradient-to-r from-[#7fa37a] to-[#8b6b4c]
-              text-white font-medium shadow-md 
-              hover:scale-[1.02] hover:shadow-lg transition"
-            >
-              🏥 Health Hub
-            </Link>
+            {displayRole === "volunteer" && (
+              <>
+                <Link
+                  to="/rescue/nearby"
+                  className="px-5 py-2 rounded-xl 
+                  bg-gradient-to-r from-[#5f7d5a] to-[#7fa37a]
+                  text-white font-medium shadow-md 
+                  hover:scale-[1.02] hover:shadow-lg transition"
+                >
+                  🚑 Live Radar
+                </Link>
+                <Link
+                  to="/rescue/history"
+                  className="px-5 py-2 rounded-xl 
+                  bg-gradient-to-r from-[#7fa37a] to-[#8b6b4c]
+                  text-white font-medium shadow-md 
+                  hover:scale-[1.02] hover:shadow-lg transition"
+                >
+                  📝 History
+                </Link>
+              </>
+            )}
+
+            {displayRole !== "admin" && displayRole !== "volunteer" && (
+              <>
+                <Link
+                  to="/pets"
+                  className="px-5 py-2 rounded-xl 
+                  bg-gradient-to-r from-[#5f7d5a] to-[#7fa37a]
+                  text-white font-medium shadow-md 
+                  hover:scale-[1.02] hover:shadow-lg transition"
+                >
+                  🐾 My Pets
+                </Link>
+                <Link
+                  to="/health"
+                  className="px-5 py-2 rounded-xl 
+                  bg-gradient-to-r from-[#7fa37a] to-[#8b6b4c]
+                  text-white font-medium shadow-md 
+                  hover:scale-[1.02] hover:shadow-lg transition"
+                >
+                  🏥 Health Hub
+                </Link>
+              </>
+            )}
 
             <button
               type="button"
@@ -136,39 +224,93 @@ export default function UserProfile() {
           </div>
         </div>
 
-        <div className="grid sm:grid-cols-3 gap-6 mb-8">
-          <SummaryCard title="Total Pets" value="0" accent="text-[#5f7d5a]" />
-          <SummaryCard title="Upcoming Schedules" value="0" accent="text-[#7fa37a]" />
-          <SummaryCard title="Weight Logs" value="0" accent="text-[#8b6b4c]" />
-        </div>
+        {displayRole === "admin" && (
+          <>
+            <div className="grid sm:grid-cols-3 gap-6 mb-8">
+              <SummaryCard title="System Alerts" value="3" accent="text-[#5f7d5a]" />
+              <SummaryCard title="Pending Rescues" value="12" accent="text-[#7fa37a]" />
+              <SummaryCard title="Active Campaigns" value="4" accent="text-[#8b6b4c]" />
+            </div>
+            <div className="grid sm:grid-cols-2 gap-6 mb-10">
+              <MiniStat
+                title="Manage Admin Metrics"
+                value="Active"
+                hint="View complete site performance"
+                ctaLabel="Open Dashboard →"
+                to="/admin"
+              />
+              <MiniStat
+                title="System Reports"
+                value="Latest"
+                hint="View global donations & rescues"
+                ctaLabel="View Reports →"
+                to="/admin/reports"
+              />
+            </div>
+          </>
+        )}
 
-        <div className="grid sm:grid-cols-2 gap-6 mb-10">
-          <MiniStat
-            title="Due Vaccines"
-            value="0"
-            hint="Booster / upcoming vaccinations"
-            ctaLabel="Open Vaccines →"
-            to="/vaccines"
-          />
-          <MiniStat
-            title="Active Medications"
-            value="0"
-            hint="Currently ongoing prescriptions"
-            ctaLabel="Open Prescriptions →"
-            to="/prescriptions"
-          />
-        </div>
+        {displayRole === "volunteer" && (
+          <>
+            <div className="grid sm:grid-cols-3 gap-6 mb-8">
+              <SummaryCard title="Active Missions" value="1" accent="text-[#5f7d5a]" />
+              <SummaryCard title="Rescues Completed" value="14" accent="text-[#7fa37a]" />
+              <SummaryCard title="Avg Response Time" value="12m" accent="text-[#8b6b4c]" />
+            </div>
+            <div className="grid sm:grid-cols-2 gap-6 mb-10">
+              <MiniStat
+                title="Nearby Emergencies"
+                value="3"
+                hint="SOS calls needing volunteer assigned"
+                ctaLabel="View Map →"
+                to="/rescue/nearby"
+              />
+              <MiniStat
+                title="Volunteer Rating"
+                value="4.9/5"
+                hint="Excellent performance!"
+                ctaLabel="My History →"
+                to="/rescue/history"
+              />
+            </div>
+          </>
+        )}
+
+        {displayRole !== "admin" && displayRole !== "volunteer" && (
+          <>
+            <div className="grid sm:grid-cols-3 gap-6 mb-8">
+              <SummaryCard title="Total Pets" value={stats.totalPets} accent="text-[#5f7d5a]" />
+              <SummaryCard title="Upcoming Schedules" value={stats.schedules} accent="text-[#7fa37a]" />
+              <SummaryCard title="Weight Logs" value={stats.weights} accent="text-[#8b6b4c]" />
+            </div>
+            <div className="grid sm:grid-cols-2 gap-6 mb-10">
+              <MiniStat
+                title="Due Vaccines"
+                value={stats.dueVaccines}
+                hint="Booster / upcoming vaccinations"
+                ctaLabel="Open Vaccines →"
+                to="/vaccines"
+              />
+              <MiniStat
+                title="Active Medications"
+                value={stats.activeMeds}
+                hint="Currently ongoing prescriptions"
+                ctaLabel="Open Prescriptions →"
+                to="/prescriptions"
+              />
+            </div>
+          </>
+        )}
 
         <div className="flex gap-6 border-b border-[#8b6b4c]/40 mb-6">
           {["profile", "security", "settings"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3 capitalize font-medium transition ${
-                activeTab === tab
+              className={`pb-3 capitalize font-medium transition ${activeTab === tab
                   ? "text-[#2f3e2c] border-b-2 border-[#5f7d5a]"
                   : "text-[#6b7d67] hover:text-[#2f3e2c]"
-              }`}
+                }`}
             >
               {tab}
             </button>
@@ -180,14 +322,14 @@ export default function UserProfile() {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-xl font-semibold text-[#2f3e2c]">Personal Information</h3>
               {!isEditing ? (
-                <button 
+                <button
                   onClick={() => setIsEditing(true)}
                   className="text-sm font-medium text-[#5f7d5a] bg-[#5f7d5a]/10 px-4 py-1.5 rounded-lg hover:bg-[#5f7d5a]/20 transition"
                 >
                   Edit Profile
                 </button>
               ) : (
-                <button 
+                <button
                   onClick={() => {
                     setIsEditing(false);
                     setEditForm({ fullName: user.fullName, email: user.email });
@@ -219,7 +361,7 @@ export default function UserProfile() {
                   type="text"
                   value={isEditing ? editForm.fullName : displayName}
                   readOnly={!isEditing}
-                  onChange={(e) => setEditForm(prev => ({...prev, fullName: e.target.value}))}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, fullName: e.target.value }))}
                   className={`w-full px-4 py-2 rounded-xl border outline-none transition ${isEditing ? 'bg-white/80 border-[#5f7d5a] focus:ring-2 focus:ring-[#7fa37a]/40' : 'bg-white/60 border-[#8b6b4c]/40 opacity-80 cursor-default'}`}
                   required
                 />
@@ -231,7 +373,7 @@ export default function UserProfile() {
                   type="email"
                   value={isEditing ? editForm.email : displayEmail}
                   readOnly={!isEditing}
-                  onChange={(e) => setEditForm(prev => ({...prev, email: e.target.value}))}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, email: e.target.value }))}
                   className={`w-full px-4 py-2 rounded-xl border outline-none transition ${isEditing ? 'bg-white/80 border-[#5f7d5a] focus:ring-2 focus:ring-[#7fa37a]/40' : 'bg-white/60 border-[#8b6b4c]/40 opacity-80 cursor-default'}`}
                   required
                 />
