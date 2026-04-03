@@ -1,6 +1,7 @@
 // src/pages/admin/AdminDashboard.jsx
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import api from "../../utils/api";
 
 /**
  * Admin Dashboard (UI Only)
@@ -15,22 +16,53 @@ import { motion } from "framer-motion";
 
 export default function AdminDashboard() {
   const [range, setRange] = useState("7d"); // "7d" | "30d"
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const metrics = useMemo(
-    () => ({
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/dashboard/stats");
+      if (res.data.success) {
+        setData(res.data.data);
+      }
+    } catch (error) {
+      console.error("Dashboard fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const metrics = useMemo(() => {
+    if (!data) return {
+      users: { total: 0, owners: 0, adopters: 0, vets: 0, volunteers: 0 },
+      pets: { total: 0, registered: 0, adoptable: 0, adopted: 0 },
+      adoptionRequests: { total: 0, pending: 0, approved: 0, rejected: 0 },
+      rescueRequests: { total: 0, active: 0, completed: 0, emergency: 0 },
+      donations: { today: 0, month: 0, total: 0, todayDisplay: 0 },
+      kpi: { adoptionSuccess: 0, rescueSuccess: 0, avgRescueResponseMin: 0, volunteerScore: 0 }
+    };
+
+    const m = data.metrics;
+    return {
       users: {
-        total: 6245,
-        owners: 4320,
-        adopters: 1520,
-        vets: 245,
-        volunteers: 160,
+        total: m.users.total || 0,
+        owners: m.users.owner || 0,
+        adopters: m.users.user || 0,
+        vets: m.users.vet || 0,
+        volunteers: m.users.volunteer || 0,
       },
       pets: {
-        total: 1280,
-        registered: 750,
-        adoptable: 340,
-        adopted: 190,
+        total: m.pets.total || 0,
+        registered: m.pets.approved || 0,
+        adoptable: m.pets.approved || 0,
+        adopted: 0, // Not in schema yet
       },
+      // Keep mock data for missing modules as per instruction
       adoptionRequests: { total: 27, pending: 15, approved: 22, rejected: 5 },
       rescueRequests: { total: 15, active: 9, completed: 4, emergency: 2 },
       donations: { today: 520, month: 2780, total: 18430, todayDisplay: 5320 },
@@ -40,9 +72,8 @@ export default function AdminDashboard() {
         avgRescueResponseMin: 8,
         volunteerScore: 82,
       },
-    }),
-    []
-  );
+    };
+  }, [data]);
 
   const chartData = useMemo(() => {
     // fake chart data
@@ -52,6 +83,16 @@ export default function AdminDashboard() {
 
     return { users: base, adoption: adopt, rescue };
   }, [range]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen px-4 sm:px-8 pt-[6rem] pb-[4rem] flex items-center justify-center">
+        <div className="text-[#2f3e2c] text-lg font-medium">
+          Synchronizing analytics...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -375,10 +416,10 @@ function StatLine({ label, value, accent }) {
     accent === "ok"
       ? "bg-emerald-500/70"
       : accent === "warn"
-      ? "bg-amber-500/70"
-      : accent === "danger"
-      ? "bg-rose-500/70"
-      : "bg-[#5f7d5a]/60";
+        ? "bg-amber-500/70"
+        : accent === "danger"
+          ? "bg-rose-500/70"
+          : "bg-[#5f7d5a]/60";
 
   return (
     <div className="flex items-center justify-between gap-3">
@@ -396,21 +437,19 @@ function RangeToggle({ value, onChange }) {
     <div className="p-1 rounded-2xl bg-white/55 border border-[#8b6b4c]/35 backdrop-blur-xl flex">
       <button
         onClick={() => onChange("7d")}
-        className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
-          value === "7d"
+        className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${value === "7d"
             ? "bg-gradient-to-r from-[#5f7d5a]/55 via-[#7fa37a] to-[#8b6b4c] text-black/75 shadow"
             : "text-[#2f3e2c] hover:bg-white/60"
-        }`}
+          }`}
       >
         7 days
       </button>
       <button
         onClick={() => onChange("30d")}
-        className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${
-          value === "30d"
+        className={`px-4 py-2 rounded-xl text-sm font-semibold transition ${value === "30d"
             ? "bg-gradient-to-r from-[#5f7d5a]/55 via-[#7fa37a] to-[#8b6b4c] text-black/75 shadow"
             : "text-[#2f3e2c] hover:bg-white/60"
-        }`}
+          }`}
       >
         30 days
       </button>
@@ -423,10 +462,10 @@ function AlertItem({ tone = "info", title, desc, meta }) {
     tone === "danger"
       ? "bg-rose-500/15 border-rose-500/30 text-rose-700"
       : tone === "warn"
-      ? "bg-amber-500/15 border-amber-500/30 text-amber-800"
-      : tone === "ok"
-      ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-800"
-      : "bg-sky-500/15 border-sky-500/30 text-sky-800";
+        ? "bg-amber-500/15 border-amber-500/30 text-amber-800"
+        : tone === "ok"
+          ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-800"
+          : "bg-sky-500/15 border-sky-500/30 text-sky-800";
 
   return (
     <div
@@ -561,8 +600,8 @@ function useSvgPath(data) {
 
   const d = points.length
     ? points
-        .map((p, i) => (i === 0 ? `M ${p[0].toFixed(2)} ${p[1].toFixed(2)}` : `L ${p[0].toFixed(2)} ${p[1].toFixed(2)}`))
-        .join(" ")
+      .map((p, i) => (i === 0 ? `M ${p[0].toFixed(2)} ${p[1].toFixed(2)}` : `L ${p[0].toFixed(2)} ${p[1].toFixed(2)}`))
+      .join(" ")
     : "M 0 48 L 120 48";
 
   return { d };

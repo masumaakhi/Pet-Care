@@ -110,7 +110,7 @@ const MyRescueRequestsPage = () => {
               >
                 <RescueCard 
                   rescue={rescue} 
-                  linkTo={`/rescue/${rescue.id}`} 
+                  linkTo={`/rescue/tracking/${rescue.id}`} 
                 />
               </div>
             ))}

@@ -94,7 +94,7 @@ const RescueRequestPage = () => {
             </Link>
 
             <Link
-              to="/rescue/REQ-001"
+              to="/rescue/tracking/REQ-001"
               className="px-6 py-3 rounded-xl 
                 bg-gradient-to-r from-[#5f7d5a]/50 via-[#7fa37a] to-[#8b6b4c]
                 border border-[#d6e2d3]

@@ -128,6 +128,11 @@ const getAllUsers = async () => {
       role: true,
       googleId: true,
       createdAt: true,
+      _count: {
+        select: {
+          pets: true,
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });

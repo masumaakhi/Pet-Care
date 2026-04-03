@@ -16,7 +16,7 @@ const DonationCampaignCard = ({ campaign }) => {
       backdrop-blur-2xl border border-[#8b6b4c]/45
       shadow-[0_25px_80px_rgba(0,0,0,0.12)] hover:shadow-[0_55px_160px_rgba(95,125,90,0.35)]
       transition duration-500 flex flex-col cursor-pointer"
-      onClick={() => navigate(`/donate/${campaign.id}`)}
+      onClick={() => navigate(`/donations/campaign/${campaign.id}`)}
       style={{ transformStyle: "preserve-3d" }}
     >
       <div className="relative h-48 overflow-hidden">

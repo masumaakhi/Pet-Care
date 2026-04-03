@@ -65,52 +65,26 @@ export default function AdminUserManagementPage() {
     return users.map((u, index) => ({
       ...u,
       status: u.status || "active",
-      lastActive: u.lastActive || u.updatedAt || u.createdAt || new Date(),
-      petsCount:
-        typeof u.petsCount === "number"
-          ? u.petsCount
-          : typeof u.totalPets === "number"
-            ? u.totalPets
-            : 0,
-      trustScore: typeof u.trustScore === "number" ? u.trustScore : 80,
-      adoptionCount:
-        typeof u.adoptionCount === "number" ? u.adoptionCount : 0,
+      lastActive: u.updatedAt || u.createdAt || new Date(),
+      petsCount: u._count?.pets || 0,
+      trustScore: typeof u.trustScore === "number" ? u.trustScore : 85,
+      adoptionCount: typeof u.adoptionCount === "number" ? u.adoptionCount : 0,
       rescueCount: typeof u.rescueCount === "number" ? u.rescueCount : 0,
-      activeListings:
-        typeof u.activeListings === "number" ? u.activeListings : 0,
-      completedActions:
-        typeof u.completedActions === "number"
-          ? u.completedActions
-          : (typeof u.adoptionCount === "number" ? u.adoptionCount : 0) +
-          (typeof u.rescueCount === "number" ? u.rescueCount : 0),
+      activeListings: u._count?.pets || 0,
+      completedActions: (typeof u.adoptionCount === "number" ? u.adoptionCount : 0) + (typeof u.rescueCount === "number" ? u.rescueCount : 0),
       reportsCount: typeof u.reportsCount === "number" ? u.reportsCount : 0,
       phone: u.phone || "Not provided",
       address: u.address || "Not provided",
       bio: u.bio || "No bio added yet.",
-      emailVerified:
-        typeof u.emailVerified === "boolean" ? u.emailVerified : true,
-      phoneVerified:
-        typeof u.phoneVerified === "boolean" ? u.phoneVerified : false,
-      profileCompletion:
-        typeof u.profileCompletion === "number" ? u.profileCompletion : 78,
+      emailVerified: !!u.googleId || !!u.emailVerified,
+      phoneVerified: !!u.phoneVerified,
+      profileCompletion: typeof u.profileCompletion === "number" ? u.profileCompletion : 75,
       petsOverview: Array.isArray(u.petsOverview) ? u.petsOverview : [],
-      recentActivities: Array.isArray(u.recentActivities)
-        ? u.recentActivities
-        : [
-          "Logged in recently",
-          "Updated profile information",
-          "Viewed dashboard activity",
-        ],
-      engagementScore:
-        typeof u.engagementScore === "number"
-          ? u.engagementScore
-          : Math.min(
-            100,
-            45 +
-            (typeof u.petsCount === "number" ? u.petsCount * 8 : 0) +
-            (typeof u.adoptionCount === "number" ? u.adoptionCount * 6 : 0) +
-            (typeof u.rescueCount === "number" ? u.rescueCount * 6 : 0)
-          ),
+      recentActivities: [
+        u.googleId ? "Connected via Google" : "Registered with Email",
+        u.createdAt ? `Joined ${new Date(u.createdAt).toLocaleDateString()}` : "Active member"
+      ],
+      engagementScore: Math.min(100, 45 + (u._count?.pets || 0) * 10),
       joinedDateLabel: u.createdAt
         ? new Date(u.createdAt).toLocaleDateString("en-US", {
           day: "numeric",
@@ -118,10 +92,7 @@ export default function AdminUserManagementPage() {
           year: "numeric",
         })
         : "N/A",
-      healthScore:
-        typeof u.healthScore === "number"
-          ? u.healthScore
-          : Math.max(60, 90 - index * 3),
+      healthScore: 100,
     }));
   }, [users]);
 
@@ -138,7 +109,7 @@ export default function AdminUserManagementPage() {
   const analytics = useMemo(() => {
     const total = enhancedUsers.length;
     const activeUsers = enhancedUsers.filter((u) => u.status === "active").length;
-    const verifiedUsers = enhancedUsers.filter((u) => u.emailVerified).length;
+    const verifiedUsers = enhancedUsers.filter((u) => u.emailVerified || u.googleId).length;
     const totalPets = enhancedUsers.reduce((sum, u) => sum + (u.petsCount || 0), 0);
     const totalAdoptions = enhancedUsers.reduce(
       (sum, u) => sum + (u.adoptionCount || 0),

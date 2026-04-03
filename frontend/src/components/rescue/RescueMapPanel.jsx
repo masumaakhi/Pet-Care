@@ -11,17 +11,17 @@ const RescueMapPanel = ({ className = "", height = "h-96", title = "Rescue Maps"
     >
       {/* Fake Map Background */}
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/connected.png')] opacity-10"></div>
-      
+
       {/* Fake Streets */}
       <div className="absolute inset-0 opacity-20">
-         <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="gray" strokeWidth="1"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
-          </svg>
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="gray" strokeWidth="1" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
       </div>
 
       <div
@@ -34,8 +34,8 @@ const RescueMapPanel = ({ className = "", height = "h-96", title = "Rescue Maps"
       </div>
 
       {markers.map((marker, idx) => (
-        <div 
-          key={idx} 
+        <div
+          key={idx}
           className="absolute z-10 animate-bounce cursor-pointer group"
           style={{ top: marker.top || '50%', left: marker.left || '50%' }}
         >

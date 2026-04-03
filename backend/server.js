@@ -2,6 +2,11 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const authRoutes = require("./routes/authRoutes");
+const petRoutes = require("./routes/petRoutes");
+const medicalRoutes = require("./routes/medicalRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
+
+const path = require("path");
 
 const app = express();
 
@@ -9,8 +14,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Static Files
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 // Routes
 app.use("/api/auth", authRoutes);
+app.use("/api/pets", petRoutes);
+app.use("/api/medical", medicalRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Root route for testing
 app.get("/", (req, res) => {

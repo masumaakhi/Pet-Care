@@ -15,6 +15,65 @@ model User {
   role      Role     @default(user)
   googleId  String?
   createdAt DateTime @default(now())
+  pets      Pet[]
+}
+
+model Pet {
+  id          String   @id @default(uuid())
+  name        String
+  species     String
+  breed       String
+  age_months  Int
+  gender      String
+  weight_kg   Float
+  description String?
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id])
+  status      PetStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  schedules   Schedule[]
+  weightLogs  WeightLog[]
+  photos      PetPhoto[]
+  vaccinations Vaccination[]
+  medicalRecords MedicalRecord[]
+  prescriptions Prescription[]
+}
+
+model PetPhoto {
+  id        String   @id @default(uuid())
+  url       String
+  petId     String
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  ownerId   String
+  createdAt DateTime @default(now())
+}
+
+model Schedule {
+  id              String   @id @default(uuid())
+  type            String   // Feeding, Grooming, Exercise, etc.
+  title           String?
+  scheduled_date  DateTime
+  scheduled_time  String
+  frequency       String?  // Daily, Weekly, Once
+  notes           String?
+  petId           String
+  pet             Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  ownerId         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model WeightLog {
+  id        String   @id @default(uuid())
+  weight_kg Float
+  date      DateTime @default(now())
+  note      String?
+  petId     String
+  pet       Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {
@@ -23,4 +82,60 @@ enum Role {
   owner
   volunteer
   vet
+}
+
+enum PetStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  FLAGGED
+}
+
+model Vaccination {
+  id              String   @id @default(uuid())
+  vaccineName     String
+  dose            String
+  givenDate       DateTime
+  nextDueDate     DateTime?
+  vetName         String?
+  status          String    // Computed in frontend but stored for quick reference if needed
+  reminder        Boolean  @default(true)
+  proofUrl        String?
+  petId           String
+  pet             Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  ownerId         String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model MedicalRecord {
+  id          String   @id @default(uuid())
+  date        DateTime
+  diagnosis   String
+  treatment   String
+  vet         String?
+  followUp    DateTime?
+  cost        Float    @default(0)
+  emergency   Boolean  @default(false)
+  reportUrl   String?
+  petId       String
+  pet             Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Prescription {
+  id          String   @id @default(uuid())
+  date        DateTime
+  vet         String?
+  fileName    String?
+  fileUrl     String?
+  medicines   Json?     // Storing as JSON array for flexibility
+  notes       String?
+  petId       String
+  pet             Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

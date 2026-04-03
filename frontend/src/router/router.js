@@ -1,6 +1,5 @@
 //src/router/router.js
 import { createBrowserRouter } from "react-router-dom";
-import ProtectedRoute from "../components/ProtectedRoute";
 import App from "../App";
 import Home from "../pages/Home";
 import Adopt from "../pages/Adopt";
@@ -31,6 +30,8 @@ import Community from "../pages/Community";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminLayout from "../pages/admin/AdminLayout";
 import AdminUserManagementPage from "../pages/admin/AdminUserManagementPage";
+import AdminAdoptionManagementPage from "../pages/admin/AdminAdoptionManagementPage";
+import AdminAdoptionDetailPage from "../pages/admin/AdminAdoptionDetailPage";
 
 // Rescue User Pages
 import RescueRequestPage from '../pages/rescue/RescueRequestPage';
@@ -60,6 +61,7 @@ import AdminDonationsPage from '../pages/admin/AdminDonationsPage';
 import AdminDonationReportsPage from '../pages/admin/AdminDonationReportsPage';
 import AdminUserProfilePage from "../pages/admin/AdminUserProfilePage";
 import AdminEditUserPage from "../pages/admin/AdminEditUserPage";
+import AdminPetsPage from "../pages/admin/AdminPetsPage";
 
 
 export const router = createBrowserRouter([
@@ -81,67 +83,59 @@ export const router = createBrowserRouter([
       { path: "/register", element: <Signup /> },
       { path: "/login", element: <Signin /> },
       { path: "/forgot-password", element: <ForgotPassword /> },
+      
+      // User Profile & Pet Management Routes
+      { path: "/profile", element: <UserProfile /> },
+      { path: "/pets", element: <PetList /> },
+      { path: "/pets/add", element: <AddPet /> },
+      { path: "/pets/:id", element: <PetDetails /> },
+      { path: "/pets/schedule", element: <CareScheduleList /> },
+      { path: "/pets/weight", element: <WeightLog /> },
+      { path: "/vaccines", element: <VaccinationRecords /> },
+      { path: "/medical", element: <MedicalHistory /> },
+      { path: "/prescriptions", element: <Prescriptions /> },
+      { path: "/pets/gallery", element: <PetGallery /> },
+      { path: "/pets/calendar", element: <CareCalendar /> },
+
+      // Rescue User Routes
       { path: "/rescue", element: <RescueRequestPage /> },
-      { path: "/donate", element: <DonatePage /> },
-      // Secure User Routes
-      {
-        element: <ProtectedRoute />,
-        children: [
-          { path: "/profile", element: <UserProfile /> },
-          { path: "/pets", element: <PetList /> },
-          { path: "/pets/add", element: <AddPet /> },
-          { path: "/pets/:id", element: <PetDetails /> },
-          { path: "/pets/schedule", element: <CareScheduleList /> },
-          { path: "/pets/weight", element: <WeightLog /> },
-          { path: "/vaccines", element: <VaccinationRecords /> },
-          { path: "/medical", element: <MedicalHistory /> },
-          { path: "/prescriptions", element: <Prescriptions /> },
-          { path: "/pets/gallery", element: <PetGallery /> },
-          { path: "/pets/calendar", element: <CareCalendar /> },
-
-          // Rescue User Routes
-          { path: "/rescue/my-requests", element: <MyRescueRequestsPage /> },
-
-          // Donation Routes
-          { path: "/donations", element: <MyDonationsPage /> },
-        ]
-      },
+      { path: "/rescue/my-requests", element: <MyRescueRequestsPage /> },
+      { path: "/rescue/tracking/:id", element: <RescueTrackingPage /> },
 
       // Rescue Volunteer Routes
-      {
-        element: <ProtectedRoute allowedRoles={["volunteer", "vet", "owner"]} />,
-        children: [
-          { path: "/rescue/nearby", element: <NearbyRescueRequestsPage /> },
-          { path: "/rescue/assigned/:id", element: <AssignedRescueDetailsPage /> },
-          { path: "/rescue/history", element: <VolunteerRescueHistoryPage /> },
-        ]
-      },
+      { path: "/rescue/nearby", element: <NearbyRescueRequestsPage /> },
+      { path: "/rescue/assigned/:id", element: <AssignedRescueDetailsPage /> },
+      { path: "/rescue/history", element: <VolunteerRescueHistoryPage /> },
+
+      // Donation Routes
+      { path: "/donate", element: <DonatePage /> },
+      { path: "/donations", element: <MyDonationsPage /> },
+      { path: "/donations/campaign/:id", element: <DonationCampaignDetailsPage /> },
 
       // Admin inside App (so Nav/Footer/bg stays)
       {
         path: "/admin",
-        element: <ProtectedRoute allowedRoles={["owner"]} />, // Assuming owner is admin based on role list
+        element: <AdminLayout />,
         children: [
-          {
-            element: <AdminLayout />,
-            children: [
-              { index: true, element: <AdminDashboard /> },
-              { path: "users", element: <AdminUserManagementPage /> },
-              { path: "users/view/:id", element: <AdminUserProfilePage /> },
-              { path: "users/edit/:id", element: <AdminEditUserPage /> },
-              // Rescue Admin Routes
-              { path: "rescues", element: <AdminRescueListPage /> },
-              { path: "rescues/map", element: <AdminRescueMapPage /> },
-              { path: "rescues/analytics", element: <AdminRescueAnalyticsPage /> },
-              { path: "rescues/duplicates", element: <AdminDuplicateRescuePage /> },
-              { path: "rescues/notifications", element: <AdminRescueNotificationsPage /> },
-              { path: "rescues/:id", element: <AdminRescueDetailsPage /> },
-              // Donation Admin Routes
-              { path: "donations", element: <AdminDonationsPage /> },
-              { path: "donations/reports", element: <AdminDonationReportsPage /> },
-            ],
-          }
-        ]
+          { index: true, element: <AdminDashboard /> },
+          { path: "users", element: <AdminUserManagementPage /> },
+          { path: "users/view/:id", element: <AdminUserProfilePage /> },
+          { path: "users/edit/:id", element: <AdminEditUserPage /> },
+          { path: "pets", element: <AdminPetsPage /> },
+          // Rescue Admin Routes
+          { path: "rescues", element: <AdminRescueListPage /> },
+          { path: "rescues/map", element: <AdminRescueMapPage /> },
+          { path: "rescues/analytics", element: <AdminRescueAnalyticsPage /> },
+          { path: "rescues/duplicates", element: <AdminDuplicateRescuePage /> },
+          { path: "rescues/notifications", element: <AdminRescueNotificationsPage /> },
+          { path: "rescues/:id", element: <AdminRescueDetailsPage /> },
+          // Donation Admin Routes
+          { path: "donations", element: <AdminDonationsPage /> },
+          { path: "donations/reports", element: <AdminDonationReportsPage /> },
+          // Adoption Admin Routes
+          { path: "adoptions", element: <AdminAdoptionManagementPage /> },
+          { path: "adoptions/:id", element: <AdminAdoptionDetailPage /> },
+        ],
       },
     ],
   },

@@ -1,20 +1,67 @@
+// frontend/src/pages/AddPet.jsx
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import Toast from "../components/Toast";
+import { toast } from "react-hot-toast";
+import api from "../utils/api";
 import { AnimatePresence } from "framer-motion";
 
 export default function AddPet() {
   const navigate = useNavigate();
   const [photoFile, setPhotoFile] = useState(null);
-  const [toast, setToast] = useState(null);
-
-  const showToast = (message, type = "error") => setToast({ message, type });
+  const [loading, setLoading] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    name: "",
+    species: "Dog",
+    gender: "Male",
+    breed: "",
+    age_months: "",
+    weight_kg: "",
+    description: "",
+  });
 
   const previewUrl = useMemo(() => {
     if (!photoFile) return "";
     return URL.createObjectURL(photoFile);
   }, [photoFile]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Basic validation
+    const requiredFields = ["name", "species", "gender", "breed", "age_months", "weight_kg"];
+    const isAnyEmpty = requiredFields.some((field) => !formData[field].toString().trim());
+
+    if (isAnyEmpty) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const res = await api.post("/pets", {
+        ...formData,
+        age_months: parseInt(formData.age_months),
+        weight_kg: parseFloat(formData.weight_kg),
+      });
+
+      if (res.data.success) {
+        toast.success("Pet added successfully!");
+        navigate("/pets");
+      }
+    } catch (error) {
+      console.error("Add Pet Error:", error);
+      toast.error(error.response?.data?.message || "Failed to add pet");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div
@@ -68,74 +115,96 @@ export default function AddPet() {
           shadow-[0_25px_80px_rgba(0,0,0,0.12)]
           p-6 sm:p-10"
         >
-          <form
-            className="grid lg:grid-cols-2 gap-8"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const inputs = Array.from(e.target.querySelectorAll("input:not([type='file']), select, textarea"));
-              const isAnyEmpty = inputs.some(input => !input.value.trim());
-
-              if (isAnyEmpty) {
-                showToast("Please fill all the information", "error");
-                return;
-              }
-
-              // backend later
-              showToast("Pet saved (UI only). Backend will be added later.", "success");
-              setTimeout(() => navigate("/pets"), 2000);
-            }}
-          >
+          <form className="grid lg:grid-cols-2 gap-8" onSubmit={handleSubmit}>
             {/* Left: Form */}
             <div className="space-y-4">
               <Field label="Name">
-                <Input placeholder="e.g., Milo" />
+                <Input 
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="e.g., Milo" 
+                />
               </Field>
 
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Species">
-                  <Select>
-                    <option className="bg-[#f3eee8]">Cat</option>
-                    <option className="bg-[#f3eee8]">Dog</option>
-                    <option className="bg-[#f3eee8]">Bird</option>
-                    <option className="bg-[#f3eee8]">Other</option>
+                  <Select 
+                    name="species"
+                    value={formData.species}
+                    onChange={handleChange}
+                  >
+                    <option value="Dog" className="bg-[#f3eee8]">Dog</option>
+                    <option value="Cat" className="bg-[#f3eee8]">Cat</option>
+                    <option value="Bird" className="bg-[#f3eee8]">Bird</option>
+                    <option value="Rabbit" className="bg-[#f3eee8]">Rabbit</option>
+                    <option value="Other" className="bg-[#f3eee8]">Other</option>
                   </Select>
                 </Field>
 
                 <Field label="Gender">
-                  <Select>
-                    <option className="bg-[#f3eee8]">Male</option>
-                    <option className="bg-[#f3eee8]">Female</option>
-                    <option className="bg-[#f3eee8]">Unknown</option>
+                  <Select 
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                  >
+                    <option value="Male" className="bg-[#f3eee8]">Male</option>
+                    <option value="Female" className="bg-[#f3eee8]">Female</option>
+                    <option value="Unknown" className="bg-[#f3eee8]">Unknown</option>
                   </Select>
                 </Field>
               </div>
 
               <Field label="Breed">
-                <Input placeholder="e.g., Persian / Mixed" />
+                <Input 
+                  name="breed"
+                  value={formData.breed}
+                  onChange={handleChange}
+                  placeholder="e.g., Persian / Mixed" 
+                />
               </Field>
 
               <div className="grid grid-cols-2 gap-4">
-                <Field label="Age">
-                  <Input placeholder="e.g., 2 years" />
+                <Field label="Age (Months)">
+                  <Input 
+                    type="number"
+                    name="age_months"
+                    value={formData.age_months}
+                    onChange={handleChange}
+                    placeholder="e.g., 24" 
+                  />
                 </Field>
                 <Field label="Weight (kg)">
-                  <Input placeholder="e.g., 4.5" />
+                  <Input 
+                    type="number"
+                    step="0.1"
+                    name="weight_kg"
+                    value={formData.weight_kg}
+                    onChange={handleChange}
+                    placeholder="e.g., 4.5" 
+                  />
                 </Field>
               </div>
 
               <Field label="Description">
-                <Textarea placeholder="Short note about your pet..." />
+                <Textarea 
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Short note about your pet..." 
+                />
               </Field>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   type="submit"
+                  disabled={loading}
                   className="flex-1 py-3 rounded-xl
                   bg-gradient-to-r from-[#5f7d5a]/55 via-[#7fa37a] to-[#8b6b4c]
                   text-black/75 font-semibold
-                  hover:scale-[1.02] hover:shadow-lg transition duration-300"
+                  hover:scale-[1.02] hover:shadow-lg transition duration-300 disabled:opacity-50"
                 >
-                  Save Pet
+                  {loading ? "Saving..." : "Save Pet"}
                 </button>
 
                 <button
@@ -204,23 +273,14 @@ export default function AddPet() {
                   </button>
                 </div>
 
-                <p className="text-xs text-[#6b7d67] mt-3">
-                  Tip: Use a front-facing image for best recognition later (AI).
+                <p className="text-xs text-[#6b7d67] mt-3 font-medium">
+                  Note: Photo upload integration (Multer) is in Phase 3.
                 </p>
               </div>
             </div>
           </form>
         </motion.div>
       </div>
-      <AnimatePresence>
-        {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }
@@ -228,7 +288,7 @@ export default function AddPet() {
 function Field({ label, children }) {
   return (
     <div>
-      <label className="block text-sm text-[#4e5f4a] mb-1">{label}</label>
+      <label className="block text-sm font-semibold text-[#4e5f4a] mb-1">{label}</label>
       {children}
     </div>
   );
@@ -239,7 +299,7 @@ function baseInputClass() {
     bg-gradient-to-br from-white/65 via-[#7fa37a]/20 to-[#a18463]/20
     border border-[#8b6b4c]/45
     focus:border-[#5f7d5a] focus:ring-2 focus:ring-[#7fa37a]/40
-    text-black outline-none transition backdrop-blur-md`;
+    text-black outline-none transition backdrop-blur-md font-medium placeholder-[#6b7d67]/60`;
 }
 
 function Input(props) {

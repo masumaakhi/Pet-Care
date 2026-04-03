@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import SectionHeader from '../../components/rescue/SectionHeader';
 import KPIStatCard from '../../components/rescue/KPIStatCard';
 import RescueTable from '../../components/rescue/RescueTable';
@@ -98,9 +99,9 @@ const VolunteerRescueHistoryPage = () => {
                 </td>
 
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-right">
-                  <button className="text-[#8b6b4c] font-semibold hover:text-[#2f3e2c] hover:underline transition">
+                  <Link to={`/rescue/assigned/${rescue.id}`} className="text-[#8b6b4c] font-semibold hover:text-[#2f3e2c] hover:underline transition">
                     Review Details
-                  </button>
+                  </Link>
                 </td>
               </tr>
             ))}
