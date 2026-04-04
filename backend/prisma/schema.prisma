@@ -16,6 +16,7 @@ model User {
   googleId  String?
   createdAt DateTime @default(now())
   pets      Pet[]
+  adoptionApplications AdoptionApplication[]
 }
 
 model Pet {
@@ -138,4 +139,33 @@ model Prescription {
   ownerId     String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model AdoptionPet {
+  id        String   @id @default(uuid())
+  name      String
+  type      String
+  breed     String
+  age       String
+  gender    String
+  size      String?
+  image     String?
+  tag       String?  @default("Available for Adoption")
+  createdAt DateTime @default(now())
+
+  applications AdoptionApplication[]
+}
+
+model AdoptionApplication {
+  id              String   @id @default(uuid())
+  adoptionPetId   String
+  adoptionPet     AdoptionPet @relation(fields: [adoptionPetId], references: [id])
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id])
+  fullName        String
+  email           String
+  phone           String
+  livingSituation String
+  status          String   @default("PENDING")
+  createdAt       DateTime @default(now())
 }
