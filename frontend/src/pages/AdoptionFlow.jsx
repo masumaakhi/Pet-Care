@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaArrowLeft, FaCheckCircle, FaExclamationTriangle, FaRegClipboard, FaPhoneAlt, FaUsers, FaHome, FaCheck, FaHeart } from "react-icons/fa";
-import axios from "axios";
+import api from "../utils/api";
 import Toast from "../components/Toast";
 
 // Fallback image
@@ -47,7 +47,7 @@ export default function AdoptionFlow() {
 
                 if (!foundPet) {
                     try {
-                        const response = await axios.get(`/adoptions/${id}`);
+                        const response = await api.get(`/adoptions/${id}`);
                         foundPet = response.data;
                     } catch (apiErr) {
                         console.warn("API fetch failed", apiErr);
@@ -56,6 +56,9 @@ export default function AdoptionFlow() {
 
                 if (foundPet) {
                     setPet(foundPet);
+                    // Match tracking step if previously adopted or pending
+                    if (foundPet.status === "ADOPTED") setTrackingStep(5);
+                    else if (foundPet.status === "PENDING") setTrackingStep(2);
                 } else {
                     setError("Pet details not found.");
                 }
@@ -77,13 +80,23 @@ export default function AdoptionFlow() {
         }
         if (isAgreed && isFormValid) {
             try {
-                await axios.post("/api/adoptions/apply", {
+                await api.post("/adoptions/apply", {
                     petId: id,
                     fullName: formData.fullName,
                     email: formData.email,
                     phone: formData.phone,
                     livingSituation: formData.livingSituation
                 });
+                // Update LocalStorage status to PENDING
+                const localData = JSON.parse(localStorage.getItem("adoptions") || "[]");
+                const updatedData = localData.map(p =>
+                    String(p.id) === String(id) ? { ...p, status: "PENDING" } : p
+                );
+                localStorage.setItem("adoptions", JSON.stringify(updatedData));
+
+                // Update local pet state so UI knows instantly
+                if (pet) setPet({ ...pet, status: "PENDING" });
+
                 setStep(2);
                 window.scrollTo({ top: 0, behavior: "smooth" });
             } catch (err) {
@@ -293,7 +306,23 @@ export default function AdoptionFlow() {
                                         const Icon = stage.icon;
 
                                         return (
-                                            <div key={stage.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+                                            <div
+                                                key={stage.id}
+                                                className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group cursor-pointer"
+                                                onClick={() => {
+                                                    setTrackingStep(stage.id);
+                                                    if (stage.id === 5) {
+                                                        const localData = JSON.parse(localStorage.getItem("adoptions") || "[]");
+                                                        const updatedData = localData.map(p =>
+                                                            String(p.id) === String(id) ? { ...p, status: "ADOPTED" } : p
+                                                        );
+                                                        localStorage.setItem("adoptions", JSON.stringify(updatedData));
+                                                        setPet(prev => ({ ...prev, status: "ADOPTED" }));
+                                                        showToast("Pet officially adopted!", "success");
+                                                    }
+                                                }}
+                                                title="Click to simulate advancing stages for testing!"
+                                            >
 
                                                 {/* Icon Node */}
                                                 <div className={`flex items-center justify-center w-12 h-12 rounded-full border-4 shadow-sm shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 transition-colors duration-500 ${isCompleted ? "bg-[#5f7d5a] border-white text-white" :

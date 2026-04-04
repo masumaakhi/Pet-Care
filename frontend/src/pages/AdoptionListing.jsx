@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import axios from "axios";
+import api from "../utils/api";
 import { Link } from "react-router-dom";
 import { FaArrowLeft, FaTimes } from "react-icons/fa";
 
@@ -28,7 +28,7 @@ function AdoptionListing() {
 
                 // 2. Fetch from API
                 try {
-                    const response = await axios.get("/api/adoptions");
+                    const response = await api.get("/adoptions");
                     const apiData = response.data || [];
 
                     // Merge data, prioritizing local if there are ID conflicts (or just combine)
@@ -70,8 +70,9 @@ function AdoptionListing() {
     };
 
     const filteredPets = useMemo(() => {
-        if (activeFilter === "All") return pets;
-        return pets.filter((p) => p.type === activeFilter);
+        let base = pets.filter(p => p.status !== "ADOPTED");
+        if (activeFilter === "All") return base;
+        return base.filter((p) => p.type === activeFilter);
     }, [activeFilter, pets]);
 
     return (
@@ -229,9 +230,11 @@ function AdoptionListing() {
 
                                             <Link
                                                 to={`/adopt/listing/${pet.id}`}
-                                                className="mt-auto w-full py-2.5 rounded-2xl bg-gradient-to-r from-[#5f7d5a]/60 via-[#7fa37a] to-[#8b6b4c] text-black/80 text-sm font-semibold shadow-sm group-hover:shadow-md group-hover:scale-[1.02] transition block text-center"
+                                                className={`mt-auto w-full py-2.5 rounded-2xl text-sm font-semibold shadow-sm group-hover:shadow-md transition block text-center ${pet.status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
+                                                        'bg-gradient-to-r from-[#5f7d5a]/60 via-[#7fa37a] to-[#8b6b4c] text-black/80 group-hover:scale-[1.02]'
+                                                    }`}
                                             >
-                                                Adopt Now
+                                                {pet.status === 'PENDING' ? 'Request Pending' : 'Adopt Now'}
                                             </Link>
                                         </div>
                                     </motion.div>
