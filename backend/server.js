@@ -5,6 +5,7 @@ const authRoutes = require("./routes/authRoutes");
 const petRoutes = require("./routes/petRoutes");
 const medicalRoutes = require("./routes/medicalRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const adoptionRoutes = require("./routes/adoptionRoutes");
 
 const path = require("path");
 
@@ -22,6 +23,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/pets", petRoutes);
 app.use("/api/medical", medicalRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/adoptions", adoptionRoutes);
 
 // Root route for testing
 app.get("/", (req, res) => {

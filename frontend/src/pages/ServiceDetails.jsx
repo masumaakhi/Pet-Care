@@ -60,6 +60,24 @@ const serviceProviders = {
             { id: 2, author: "Tom H.", rating: 5, text: "Very convenient and professional." },
         ],
         slots: ["Anytime (Queue-based)", "Scheduled 05:00 PM", "Scheduled 06:30 PM"],
+    },
+    reviews: {
+        id: "reviews",
+        name: "Community Pet Service Reviews",
+        title: "Trusted Feedback",
+        specialty: "Read and Share Experiences",
+        bio: "Browse through hundreds of genuine reviews from our community. Find the best caregivers, vets, and groomers based on honest feedback.",
+        fees: "Free",
+        rating: 4.8,
+        reviewCount: 1540,
+        image: "https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?auto=format&fit=crop&q=80&w=200&h=200",
+        reviews: [
+            { id: 1, author: "Mark T.", rating: 5, text: "Found an amazing groomer through this review system!" },
+            { id: 2, author: "Lily K.", rating: 5, text: "Very helpful for finding reliable vets when I moved here." },
+            { id: 3, author: "John D.", rating: 4, text: "Great detailed reviews by others." },
+        ],
+        slots: [],
+        hideBooking: true
     }
 };
 
@@ -86,16 +104,14 @@ const ServiceDetails = () => {
     const provider = serviceProviders[id] || defaultProvider;
 
     const [selectedSlot, setSelectedSlot] = useState("");
-    const [selectedPet, setSelectedPet] = useState("");
+    const [petType, setPetType] = useState("");
+    const [petName, setPetName] = useState("");
     const [notes, setNotes] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [bookingSuccess, setBookingSuccess] = useState(false);
 
-    // Dummy user pets
-    const userPets = [
-        { id: "p1", name: "Max", type: "Dog", icon: <FaDog /> },
-        { id: "p2", name: "Bella", type: "Cat", icon: <FaCat /> },
-    ];
+    // Dynamic Pet Categories
+    const petCategories = ["Dog", "Cat", "Bird", "Rabbit", "Reptile", "Small Mammal", "Other"];
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -104,6 +120,26 @@ const ServiceDetails = () => {
         setTimeout(() => {
             setIsSubmitting(false);
             setBookingSuccess(true);
+
+            // Save to localStorage
+            const storedBookings = localStorage.getItem("userBookings");
+            let bookings = storedBookings ? JSON.parse(storedBookings) : [];
+            const newBooking = {
+                id: `b${Date.now()}`,
+                providerName: provider.name,
+                type: provider.id,
+                serviceTitle: provider.specialty,
+                date: "Today",
+                time: selectedSlot,
+                status: "upcoming",
+                petName: petName || "Your Pet",
+                petType: petType || "Dog",
+                amount: provider.fees.split(" ")[0], // simple hack to extract just the amount or text
+                providerNotes: notes || "No notes provided"
+            };
+            bookings.push(newBooking);
+            localStorage.setItem("userBookings", JSON.stringify(bookings));
+
             setTimeout(() => {
                 navigate(-1);
             }, 3000);
@@ -126,7 +162,7 @@ const ServiceDetails = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Left Column: Provider Details */}
-                    <div className="lg:col-span-2 space-y-8">
+                    <div className={`space-y-8 ${provider.hideBooking ? 'lg:col-span-3' : 'lg:col-span-2'}`}>
                         {/* Provider Header Card */}
                         <div className="bg-white/60 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/40 flex flex-col md:flex-row gap-8 items-start">
                             <img
@@ -176,93 +212,104 @@ const ServiceDetails = () => {
                     </div>
 
                     {/* Right Column: Booking Form */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-primary/20 sticky top-24">
-                            <h2 className="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
-                                <FaCalendarCheck /> Book Appointment
-                            </h2>
+                    {!provider.hideBooking && (
+                        <div className="lg:col-span-1">
+                            <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-primary/20 sticky top-24">
+                                <h2 className="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+                                    <FaCalendarCheck /> Book Appointment
+                                </h2>
 
-                            {bookingSuccess ? (
-                                <motion.div
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    className="text-center py-12"
-                                >
-                                    <FaCheckCircle className="text-6xl text-green-500 mx-auto mb-4" />
-                                    <h3 className="text-2xl font-bold text-gray-800 mb-2">Booking Confirmed!</h3>
-                                    <p className="text-gray-600">You will be redirected shortly.</p>
-                                </motion.div>
-                            ) : (
-                                <form onSubmit={handleSubmit} className="space-y-6">
+                                {bookingSuccess ? (
+                                    <motion.div
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="text-center py-12"
+                                    >
+                                        <FaCheckCircle className="text-6xl text-green-500 mx-auto mb-4" />
+                                        <h3 className="text-2xl font-bold text-gray-800 mb-2">Booking Confirmed!</h3>
+                                        <p className="text-gray-600">You will be redirected shortly.</p>
+                                    </motion.div>
+                                ) : (
+                                    <form onSubmit={handleSubmit} className="space-y-6">
 
-                                    {/* Pet Selection */}
-                                    <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">Select Pet</label>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {userPets.map((pet) => (
-                                                <div
-                                                    key={pet.id}
-                                                    onClick={() => setSelectedPet(pet.id)}
-                                                    className={`cursor-pointer border-2 rounded-xl p-3 flex items-center gap-3 transition ${selectedPet === pet.id
-                                                            ? "border-primary bg-primary/10 text-primary"
-                                                            : "border-gray-200 hover:border-primary/50 text-gray-600"
-                                                        }`}
+                                        {/* Pet Selection */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-sm font-bold text-gray-700 mb-2">Pet Name</label>
+                                                <input
+                                                    type="text"
+                                                    value={petName}
+                                                    onChange={(e) => setPetName(e.target.value)}
+                                                    placeholder="e.g. Max"
+                                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+                                                    required
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-bold text-gray-700 mb-2">Pet Type</label>
+                                                <select
+                                                    value={petType}
+                                                    onChange={(e) => setPetType(e.target.value)}
+                                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition appearance-none cursor-pointer"
+                                                    required
                                                 >
-                                                    <span className="text-xl">{pet.icon}</span>
-                                                    <span className="font-medium">{pet.name}</span>
-                                                </div>
-                                            ))}
+                                                    <option value="" disabled>Select type...</option>
+                                                    {petCategories.map((category) => (
+                                                        <option key={category} value={category}>{category}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    {/* Available Slots */}
-                                    <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">Available Slots (Today)</label>
-                                        <div className="flex flex-wrap gap-2">
-                                            {provider.slots.map((slot, index) => (
-                                                <button
-                                                    key={index}
-                                                    type="button"
-                                                    onClick={() => setSelectedSlot(slot)}
-                                                    className={`px-4 py-2 rounded-lg text-sm font-medium transition ${selectedSlot === slot
+                                        {/* Available Slots */}
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-700 mb-2">Available Slots (Today)</label>
+                                            <div className="flex flex-wrap gap-2">
+                                                {provider.slots.map((slot, index) => (
+                                                    <button
+                                                        key={index}
+                                                        type="button"
+                                                        onClick={() => setSelectedSlot(slot)}
+                                                        className={`px-4 py-2 rounded-lg text-sm font-medium transition ${selectedSlot === slot
                                                             ? "bg-accent text-white shadow-md"
                                                             : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                                        }`}
-                                                >
-                                                    <FaClock className="inline mr-1 mb-0.5" /> {slot}
-                                                </button>
-                                            ))}
+                                                            }`}
+                                                    >
+                                                        <FaClock className="inline mr-1 mb-0.5" /> {slot}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    {/* Problem / Notes */}
-                                    <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">Problem / Notes</label>
-                                        <textarea
-                                            value={notes}
-                                            onChange={(e) => setNotes(e.target.value)}
-                                            placeholder="Briefly describe the reason for this appointment..."
-                                            className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition min-h-[100px] resize-none"
-                                            required
-                                        ></textarea>
-                                    </div>
+                                        {/* Problem / Notes */}
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-700 mb-2">Problem / Notes</label>
+                                            <textarea
+                                                value={notes}
+                                                onChange={(e) => setNotes(e.target.value)}
+                                                placeholder="Briefly describe the reason for this appointment..."
+                                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition min-h-[100px] resize-none"
+                                                required
+                                            ></textarea>
+                                        </div>
 
-                                    {/* Submit Button */}
-                                    <button
-                                        type="submit"
-                                        disabled={isSubmitting || !selectedSlot || !selectedPet}
-                                        className="w-full py-4 rounded-xl bg-primary text-white font-bold text-lg hover:bg-primary/90 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
-                                    >
-                                        {isSubmitting ? (
-                                            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                        ) : (
-                                            "Confirm Booking"
-                                        )}
-                                    </button>
-                                </form>
-                            )}
+                                        {/* Submit Button */}
+                                        <button
+                                            type="submit"
+                                            disabled={isSubmitting || !selectedSlot || !petName || !petType}
+                                            className="w-full py-4 rounded-xl bg-primary text-white font-bold text-lg hover:bg-primary/90 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
+                                        >
+                                            {isSubmitting ? (
+                                                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                            ) : (
+                                                "Confirm Booking"
+                                            )}
+                                        </button>
+                                    </form>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </motion.div>
         </div>
