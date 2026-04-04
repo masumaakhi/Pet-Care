@@ -2,6 +2,19 @@
 const prisma = require("../prisma/prismaClient");
 const { sendSuccess, sendError } = require("../utils/response");
 
+// Create a single adoption internally (Mocked)
+const createAdoption = async (req, res) => {
+    try {
+        const pet = req.body;
+        console.log("\n[Adoption Backend] -------- ADOPT NOW BUTTON CLICKED --------");
+        console.log(`[Adoption Backend] User moved pet "${pet.name}" (${pet.type}) to adoption listings.`);
+        return sendSuccess(res, 201, "Pet listed successfully", pet);
+    } catch (error) {
+        console.error(error);
+        return sendError(res, 500, "Server Error pushing adoption");
+    }
+};
+
 const getAdoptions = async (req, res) => {
     try {
         // Mock success so frontend doesn't crash UI
@@ -60,6 +73,7 @@ const applyForAdoption = async (req, res) => {
 };
 
 module.exports = {
+    createAdoption,
     getAdoptions,
     getAdoptionById,
     applyForAdoption

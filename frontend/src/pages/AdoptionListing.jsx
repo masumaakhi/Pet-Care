@@ -205,14 +205,16 @@ function AdoptionListing() {
                                                 {pet.tag || "Available"}
                                             </div>
 
-                                            {/* Delete Button */}
-                                            <button
-                                                onClick={() => handleDeletePet(pet.id)}
-                                                className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-red-500/80 backdrop-blur-md text-white border border-white/30 transition-all duration-300 shadow-sm"
-                                                title="Remove Listing"
-                                            >
-                                                <FaTimes size={12} />
-                                            </button>
+                                            {/* Delete Button - Only shown if not pending */}
+                                            {pet.status !== "PENDING" && (
+                                                <button
+                                                    onClick={() => handleDeletePet(pet.id)}
+                                                    className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-red-500/80 backdrop-blur-md text-white border border-white/30 transition-all duration-300 shadow-sm"
+                                                    title="Remove Listing"
+                                                >
+                                                    <FaTimes size={12} />
+                                                </button>
+                                            )}
                                         </div>
 
                                         <div className="p-4 flex-1 flex flex-col">
@@ -231,7 +233,7 @@ function AdoptionListing() {
                                             <Link
                                                 to={`/adopt/listing/${pet.id}`}
                                                 className={`mt-auto w-full py-2.5 rounded-2xl text-sm font-semibold shadow-sm group-hover:shadow-md transition block text-center ${pet.status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
-                                                        'bg-gradient-to-r from-[#5f7d5a]/60 via-[#7fa37a] to-[#8b6b4c] text-black/80 group-hover:scale-[1.02]'
+                                                    'bg-gradient-to-r from-[#5f7d5a]/60 via-[#7fa37a] to-[#8b6b4c] text-black/80 group-hover:scale-[1.02]'
                                                     }`}
                                             >
                                                 {pet.status === 'PENDING' ? 'Request Pending' : 'Adopt Now'}
