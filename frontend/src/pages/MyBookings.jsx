@@ -81,7 +81,30 @@ const MyBookings = () => {
     const [rating, setRating] = useState(0);
     const [reviewText, setReviewText] = useState("");
 
-    const filteredBookings = allBookings.filter(b => b.status === activeTab);
+    const [bookings, setBookings] = useState([]);
+
+    React.useEffect(() => {
+        const storedBookings = localStorage.getItem("userBookings");
+        if (storedBookings) {
+            setBookings(JSON.parse(storedBookings));
+        } else {
+            setBookings(allBookings);
+            localStorage.setItem("userBookings", JSON.stringify(allBookings));
+        }
+    }, []);
+
+    const filteredBookings = bookings.filter(b => b.status === activeTab);
+
+    const handleCancelBooking = (bookingId) => {
+        const updatedBookings = bookings.map(b => {
+            if (b.id === bookingId) {
+                return { ...b, status: "cancelled", cancelReason: "Cancelled by user" };
+            }
+            return b;
+        });
+        setBookings(updatedBookings);
+        localStorage.setItem("userBookings", JSON.stringify(updatedBookings));
+    };
 
     const handleReviewSubmit = (e) => {
         e.preventDefault();
@@ -185,7 +208,9 @@ const MyBookings = () => {
                                         )}
 
                                         {booking.status === "upcoming" && (
-                                            <button className="px-6 py-3 bg-red-100 hover:bg-red-200 text-red-600 font-bold rounded-xl transition">
+                                            <button
+                                                onClick={() => handleCancelBooking(booking.id)}
+                                                className="px-6 py-3 bg-red-100 hover:bg-red-200 text-red-600 font-bold rounded-xl transition">
                                                 Cancel Booking
                                             </button>
                                         )}

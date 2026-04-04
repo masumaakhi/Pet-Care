@@ -67,8 +67,12 @@ const BookingDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    // Fetch from dummy DB or fallback
-    const booking = bookingDb[id] || { ...defaultBooking, id };
+    // Fetch from localStorage first, then dummy DB, then fallback
+    const storedBookings = localStorage.getItem("userBookings");
+    const parsedBookings = storedBookings ? JSON.parse(storedBookings) : [];
+    const localBooking = parsedBookings.find(b => b.id === id);
+
+    const booking = localBooking || bookingDb[id] || { ...defaultBooking, id };
 
     return (
         <div className="min-h-screen pt-24 pb-16 px-6 md:px-12 lg:px-24">
@@ -96,8 +100,8 @@ const BookingDetails = () => {
                                 <div>
                                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Status</p>
                                     <span className={`px-4 py-1 rounded-full text-sm font-bold capitalize ${booking.status === 'upcoming' ? 'bg-blue-100 text-blue-700' :
-                                            booking.status === 'completed' ? 'bg-green-100 text-green-700' :
-                                                'bg-red-100 text-red-700'
+                                        booking.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                            'bg-red-100 text-red-700'
                                         }`}>
                                         {booking.status}
                                     </span>
@@ -138,8 +142,8 @@ const BookingDetails = () => {
 
                         {/* Consultation Link Card */}
                         <div className={`rounded-3xl p-8 shadow-xl border border-white/60 backdrop-blur-lg ${booking.type === 'consultation' && booking.status === 'upcoming'
-                                ? 'bg-gradient-to-br from-green-50 to-emerald-100'
-                                : 'bg-white/70'
+                            ? 'bg-gradient-to-br from-green-50 to-emerald-100'
+                            : 'bg-white/70'
                             }`}>
                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                                 <div>

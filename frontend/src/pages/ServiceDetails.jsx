@@ -104,6 +104,25 @@ const ServiceDetails = () => {
         setTimeout(() => {
             setIsSubmitting(false);
             setBookingSuccess(true);
+
+            // Save to localStorage
+            const storedBookings = localStorage.getItem("userBookings");
+            let bookings = storedBookings ? JSON.parse(storedBookings) : [];
+            const newBooking = {
+                id: `b${Date.now()}`,
+                providerName: provider.name,
+                type: provider.id,
+                serviceTitle: provider.specialty,
+                date: "Today",
+                time: selectedSlot,
+                status: "upcoming",
+                petName: userPets.find(p => p.id === selectedPet)?.name || "Your Pet",
+                amount: provider.fees.split(" ")[0], // simple hack to extract just the amount or text
+                providerNotes: notes || "No notes provided"
+            };
+            bookings.push(newBooking);
+            localStorage.setItem("userBookings", JSON.stringify(bookings));
+
             setTimeout(() => {
                 navigate(-1);
             }, 3000);
@@ -204,8 +223,8 @@ const ServiceDetails = () => {
                                                     key={pet.id}
                                                     onClick={() => setSelectedPet(pet.id)}
                                                     className={`cursor-pointer border-2 rounded-xl p-3 flex items-center gap-3 transition ${selectedPet === pet.id
-                                                            ? "border-primary bg-primary/10 text-primary"
-                                                            : "border-gray-200 hover:border-primary/50 text-gray-600"
+                                                        ? "border-primary bg-primary/10 text-primary"
+                                                        : "border-gray-200 hover:border-primary/50 text-gray-600"
                                                         }`}
                                                 >
                                                     <span className="text-xl">{pet.icon}</span>
@@ -225,8 +244,8 @@ const ServiceDetails = () => {
                                                     type="button"
                                                     onClick={() => setSelectedSlot(slot)}
                                                     className={`px-4 py-2 rounded-lg text-sm font-medium transition ${selectedSlot === slot
-                                                            ? "bg-accent text-white shadow-md"
-                                                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                                        ? "bg-accent text-white shadow-md"
+                                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                                         }`}
                                                 >
                                                     <FaClock className="inline mr-1 mb-0.5" /> {slot}
