@@ -29,7 +29,7 @@ export default function AdoptionDetails() {
                     // Fallback to API if not in localStorage. 
                     // This assumes an endpoint like /adoptions/:id exists.
                     try {
-                        const response = await axios.get(`/adoptions/${id}`);
+                        const response = await axios.get(`/api/adoptions/${id}`);
                         foundPet = response.data;
                     } catch (apiErr) {
                         console.warn("API fetch for details failed, using only local storage", apiErr);

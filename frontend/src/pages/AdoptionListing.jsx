@@ -28,7 +28,7 @@ function AdoptionListing() {
 
                 // 2. Fetch from API
                 try {
-                    const response = await axios.get("/adoptions");
+                    const response = await axios.get("/api/adoptions");
                     const apiData = response.data || [];
 
                     // Merge data, prioritizing local if there are ID conflicts (or just combine)

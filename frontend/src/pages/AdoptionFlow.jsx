@@ -70,14 +70,26 @@ export default function AdoptionFlow() {
         fetchPetDetails();
     }, [id]);
 
-    const handleProceed = () => {
+    const handleProceed = async () => {
         if (!isFormValid) {
             showToast("Please fill all the information");
             return;
         }
         if (isAgreed && isFormValid) {
-            setStep(2);
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            try {
+                await axios.post("/api/adoptions/apply", {
+                    petId: id,
+                    fullName: formData.fullName,
+                    email: formData.email,
+                    phone: formData.phone,
+                    livingSituation: formData.livingSituation
+                });
+                setStep(2);
+                window.scrollTo({ top: 0, behavior: "smooth" });
+            } catch (err) {
+                console.error("Failed to submit application", err);
+                showToast("Failed to submit application! " + (err.response?.data?.message || err.message));
+            }
         }
     };
 
