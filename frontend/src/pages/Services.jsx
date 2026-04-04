@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -55,14 +55,16 @@ const services = [
 ];
 
 const nearbyVets = [
-    { id: "v1", name: "Green Valley Vet Clinic", distance: "1.2 km", rating: 4.9, open: true },
-    { id: "v2", name: "City Care Animal Hospital", distance: "3.5 km", rating: 4.7, open: true },
-    { id: "v3", name: "Paws & Claws Emergency", distance: "4.0 km", rating: 4.8, open: true },
-    { id: "v4", name: "Sunrise Veterinary Center", distance: "5.1 km", rating: 4.6, open: false },
-    { id: "v5", name: "Oak Tree Pet Clinic", distance: "6.8 km", rating: 4.5, open: true },
+    { id: "v1", name: "Obhoyaronno Animal Welfare", locationQuery: "Obhoyaronno Animal Welfare Foundation Dhaka", distance: "3.2 km", rating: 4.8, open: true },
+    { id: "v2", name: "Gulshan Pet Clinic", locationQuery: "Gulshan Pet Clinic, Dhaka", distance: "4.5 km", rating: 4.7, open: true },
+    { id: "v3", name: "Care & Cure Vet Clinic", locationQuery: "Care & Cure Vet Clinic, Dhanmondi, Dhaka", distance: "5.1 km", rating: 4.9, open: true },
+    { id: "v4", name: "Advance Pet Clinic", locationQuery: "Advance Pet Clinic, Mirpur, Dhaka", distance: "7.0 km", rating: 4.6, open: true },
+    { id: "v5", name: "Central Veterinary Hospital", locationQuery: "Central Veterinary Hospital, Dhaka", distance: "8.2 km", rating: 4.5, open: false },
 ];
 
 const Services = () => {
+    const [selectedVet, setSelectedVet] = useState(nearbyVets[0]);
+
     return (
         <div className="min-h-screen pt-24 pb-16 px-6 md:px-12 lg:px-24">
             {/* Hero Section */}
@@ -146,7 +148,11 @@ const Services = () => {
                         </p>
                         <div className="space-y-3 overflow-y-auto pr-2 flex-grow">
                             {nearbyVets.map((vet) => (
-                                <div key={vet.id} className="bg-white/70 p-4 rounded-2xl border border-white/40 shadow-sm flex items-center justify-between hover:bg-white transition group">
+                                <div
+                                    key={vet.id}
+                                    onClick={() => setSelectedVet(vet)}
+                                    className={`cursor-pointer p-4 rounded-2xl border shadow-sm flex items-center justify-between transition group ${selectedVet.id === vet.id ? 'bg-white border-primary ring-1 ring-primary' : 'bg-white/70 border-white/40 hover:bg-white'}`}
+                                >
                                     <div>
                                         <h4 className="font-bold text-gray-800">{vet.name}</h4>
                                         <div className="flex items-center text-sm gap-2 mt-1 text-gray-600">
@@ -159,18 +165,31 @@ const Services = () => {
                                             </span>
                                         </div>
                                     </div>
-                                    <Link to="/services/vet" className="px-4 py-2 bg-primary/10 text-primary font-semibold rounded-lg opacity-0 group-hover:opacity-100 transition hover:bg-primary hover:text-white">
-                                        Book
-                                    </Link>
+                                    <div className={`flex flex-col gap-2 transition duration-300 ${selectedVet.id === vet.id ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto'}`}>
+                                        <Link to="/services/vet" className="text-center px-4 py-2 bg-primary/10 text-primary font-semibold rounded-lg transition hover:bg-primary hover:text-white" onClick={(e) => e.stopPropagation()}>
+                                            Book
+                                        </Link>
+                                        <a
+                                            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(vet.locationQuery)}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="whitespace-nowrap text-center px-4 py-2 bg-blue-100 text-blue-700 font-semibold rounded-lg transition hover:bg-blue-600 hover:text-white text-sm"
+                                            onClick={(e) => e.stopPropagation()}
+                                        >
+                                            Map & Routes
+                                        </a>
+                                    </div>
                                 </div>
                             ))}
                         </div>
                     </div>
                     <div className="h-64 md:h-96 rounded-3xl bg-gray-200 border-4 border-white shadow-inner relative overflow-hidden">
                         <iframe
-                            title="Bangladesh Map"
-                            className="absolute inset-0 w-full h-full border-0"
-                            src="https://maps.google.com/maps?q=Bangladesh&t=&z=6&ie=UTF8&iwloc=&output=embed"
+                            key={selectedVet.id}
+                            title={`${selectedVet.name} Location`}
+                            className="absolute inset-0 w-full h-full border-0 animate-pulse"
+                            onLoad={(e) => e.target.classList.remove('animate-pulse')}
+                            src={`https://maps.google.com/maps?q=${encodeURIComponent(selectedVet.locationQuery)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
                             allowFullScreen
                             loading="lazy"
                         ></iframe>
