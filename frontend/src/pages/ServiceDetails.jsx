@@ -86,16 +86,14 @@ const ServiceDetails = () => {
     const provider = serviceProviders[id] || defaultProvider;
 
     const [selectedSlot, setSelectedSlot] = useState("");
-    const [selectedPet, setSelectedPet] = useState("");
+    const [petType, setPetType] = useState("");
+    const [petName, setPetName] = useState("");
     const [notes, setNotes] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [bookingSuccess, setBookingSuccess] = useState(false);
 
-    // Dummy user pets
-    const userPets = [
-        { id: "p1", name: "Max", type: "Dog", icon: <FaDog /> },
-        { id: "p2", name: "Bella", type: "Cat", icon: <FaCat /> },
-    ];
+    // Dynamic Pet Categories
+    const petCategories = ["Dog", "Cat", "Bird", "Rabbit", "Reptile", "Small Mammal", "Other"];
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -116,7 +114,8 @@ const ServiceDetails = () => {
                 date: "Today",
                 time: selectedSlot,
                 status: "upcoming",
-                petName: userPets.find(p => p.id === selectedPet)?.name || "Your Pet",
+                petName: petName || "Your Pet",
+                petType: petType || "Dog",
                 amount: provider.fees.split(" ")[0], // simple hack to extract just the amount or text
                 providerNotes: notes || "No notes provided"
             };
@@ -215,22 +214,31 @@ const ServiceDetails = () => {
                                 <form onSubmit={handleSubmit} className="space-y-6">
 
                                     {/* Pet Selection */}
-                                    <div>
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">Select Pet</label>
-                                        <div className="grid grid-cols-2 gap-3">
-                                            {userPets.map((pet) => (
-                                                <div
-                                                    key={pet.id}
-                                                    onClick={() => setSelectedPet(pet.id)}
-                                                    className={`cursor-pointer border-2 rounded-xl p-3 flex items-center gap-3 transition ${selectedPet === pet.id
-                                                        ? "border-primary bg-primary/10 text-primary"
-                                                        : "border-gray-200 hover:border-primary/50 text-gray-600"
-                                                        }`}
-                                                >
-                                                    <span className="text-xl">{pet.icon}</span>
-                                                    <span className="font-medium">{pet.name}</span>
-                                                </div>
-                                            ))}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-700 mb-2">Pet Name</label>
+                                            <input
+                                                type="text"
+                                                value={petName}
+                                                onChange={(e) => setPetName(e.target.value)}
+                                                placeholder="e.g. Max"
+                                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-bold text-gray-700 mb-2">Pet Type</label>
+                                            <select
+                                                value={petType}
+                                                onChange={(e) => setPetType(e.target.value)}
+                                                className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition appearance-none cursor-pointer"
+                                                required
+                                            >
+                                                <option value="" disabled>Select type...</option>
+                                                {petCategories.map((category) => (
+                                                    <option key={category} value={category}>{category}</option>
+                                                ))}
+                                            </select>
                                         </div>
                                     </div>
 
@@ -269,7 +277,7 @@ const ServiceDetails = () => {
                                     {/* Submit Button */}
                                     <button
                                         type="submit"
-                                        disabled={isSubmitting || !selectedSlot || !selectedPet}
+                                        disabled={isSubmitting || !selectedSlot || !petName || !petType}
                                         className="w-full py-4 rounded-xl bg-primary text-white font-bold text-lg hover:bg-primary/90 transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center"
                                     >
                                         {isSubmitting ? (
