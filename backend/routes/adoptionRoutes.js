@@ -9,6 +9,9 @@ const adoptionController = require("../controllers/adoptionController");
 // GET /api/adoptions -> Fetch all
 router.get("/", adoptionController.getAdoptions);
 
+// POST /api/adoptions -> List a new pet
+router.post("/", adoptionController.createAdoption);
+
 // GET /api/adoptions/:id -> Fetch single adoption
 router.get("/:id", adoptionController.getAdoptionById);
 

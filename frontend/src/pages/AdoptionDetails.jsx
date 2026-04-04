@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaArrowLeft, FaHeart, FaMapMarkerAlt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
-import axios from "axios";
+import api from "../utils/api";
 
 // Fallback image
 import b1 from "../assets/b1.jpg";
@@ -29,7 +29,7 @@ export default function AdoptionDetails() {
                     // Fallback to API if not in localStorage. 
                     // This assumes an endpoint like /adoptions/:id exists.
                     try {
-                        const response = await axios.get(`/adoptions/${id}`);
+                        const response = await api.get(`/adoptions/${id}`);
                         foundPet = response.data;
                     } catch (apiErr) {
                         console.warn("API fetch for details failed, using only local storage", apiErr);
@@ -167,12 +167,16 @@ export default function AdoptionDetails() {
                         <motion.button
                             initial={{ scale: 0.95 }}
                             animate={{ scale: 1 }}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
+                            whileHover={pet.status !== "PENDING" && pet.status !== "ADOPTED" ? { scale: 1.02 } : {}}
+                            whileTap={pet.status !== "PENDING" && pet.status !== "ADOPTED" ? { scale: 0.98 } : {}}
+                            disabled={pet.status === "PENDING" || pet.status === "ADOPTED"}
                             onClick={() => navigate(`/adopt/flow/${pet.id}`)}
-                            className="mt-10 w-full py-4 rounded-2xl bg-gradient-to-r from-[#5f7d5a] via-[#7fa37a] to-[#8b6b4c] text-white text-lg font-bold shadow-[0_15px_40px_rgba(95,125,90,0.3)] hover:shadow-[0_20px_50px_rgba(95,125,90,0.4)] transition-all duration-300"
+                            className={`mt-10 w-full py-4 rounded-2xl text-white text-lg font-bold transition-all duration-300 ${pet.status === 'PENDING' ? 'bg-orange-400 cursor-not-allowed shadow-none' :
+                                    pet.status === 'ADOPTED' ? 'bg-gray-400 cursor-not-allowed shadow-none' :
+                                        'bg-gradient-to-r from-[#5f7d5a] via-[#7fa37a] to-[#8b6b4c] shadow-[0_15px_40px_rgba(95,125,90,0.3)] hover:shadow-[0_20px_50px_rgba(95,125,90,0.4)]'
+                                }`}
                         >
-                            Confirm Adoption
+                            {pet.status === 'PENDING' ? 'Request Pending' : pet.status === 'ADOPTED' ? 'Already Adopted' : 'Confirm Adoption'}
                         </motion.button>
                         <p className="text-center text-xs text-[#6b7d67] mt-4">
                             By clicking this, you agree to our adoption terms & conditions.

@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Toast from "../components/Toast";
-import axios from "axios";
+import api from "../utils/api";
 import { Link, useNavigate } from "react-router-dom";
 import { FaPaw } from "react-icons/fa";
 
@@ -325,8 +325,16 @@ function Adopt() {
     () => ["All", "Dog", "Cat", "Bird", "Rabbit"],
     []
   );
+
   const [activeFilter, setActiveFilter] = useState("All");
+  const [availablePets, setAvailablePets] = useState(pets);
   const [toast, setToast] = useState(null);
+
+  React.useEffect(() => {
+    // Hide pets that are already in active adoptions list
+    const existingAdoptions = JSON.parse(localStorage.getItem("adoptions") || "[]");
+    setAvailablePets(pets.filter(p => !existingAdoptions.find(ex => String(ex.id) === String(p.id))));
+  }, []);
   const showToast = (message, type = "error") => setToast({ message, type });
 
   const handleAdoptionRequest = async (pet) => {
@@ -339,9 +347,9 @@ function Adopt() {
         localStorage.setItem("adoptions", JSON.stringify(existingAdoptions));
       }
 
-      // 2. Try to sync with backend if it exists
+      // 2. Try to sync with backend to log it in terminal
       try {
-        await axios.post("/adoptions", pet);
+        await api.post("/adoptions", pet);
       } catch (apiErr) {
         console.warn("Backend storage failed, using localStorage only:", apiErr.message);
       }
@@ -354,9 +362,9 @@ function Adopt() {
   };
 
   const filteredPets = useMemo(() => {
-    if (activeFilter === "All") return pets;
-    return pets.filter((p) => p.type === activeFilter);
-  }, [activeFilter]);
+    if (activeFilter === "All") return availablePets;
+    return availablePets.filter((p) => p.type === activeFilter);
+  }, [activeFilter, availablePets]);
 
   return (
     <div className="min-h-screen px-6 md:px-16 pt-[6rem] pb-16">
