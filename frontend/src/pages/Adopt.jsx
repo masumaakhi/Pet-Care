@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Toast from "../components/Toast";
 import api from "../utils/api";
 import { Link, useNavigate } from "react-router-dom";
-import { FaPaw } from "react-icons/fa";
+import { FaPaw, FaTimes, FaShieldAlt, FaIdCard, FaMapMarkerAlt } from "react-icons/fa";
 
 // Birds (b) and Rabbits (r) from src/assets — only these images are used for adoption cards.
 import b1 from "../assets/b1.jpg";
@@ -330,6 +330,9 @@ function Adopt() {
   const [availablePets, setAvailablePets] = useState(pets);
   const [toast, setToast] = useState(null);
 
+  // Modal States
+  const [activeModal, setActiveModal] = useState(null); // 'idTips' | 'insurance' | null
+
   React.useEffect(() => {
     // Hide pets that are already in active adoptions list
     const existingAdoptions = JSON.parse(localStorage.getItem("adoptions") || "[]");
@@ -365,6 +368,59 @@ function Adopt() {
     if (activeFilter === "All") return availablePets;
     return availablePets.filter((p) => p.type === activeFilter);
   }, [activeFilter, availablePets]);
+
+  // Modal Component
+  const Modal = ({ isOpen, onClose, title, icon: Icon, children }) => (
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-[#2f3e2c]/40 backdrop-blur-sm"
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            className="relative bg-white rounded-3xl p-6 md:p-8 max-w-2xl w-full shadow-2xl border border-[#d0ddcc] overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#5f7d5a]/5 rounded-bl-full -z-10" />
+
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-[#f8faf5] border border-[#5f7d5a]/20 flex items-center justify-center text-[#5f7d5a] text-xl shadow-sm">
+                  <Icon />
+                </div>
+                <h2 className="text-2xl font-bold text-[#2f3e2c]">{title}</h2>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-10 h-10 rounded-full bg-[#f8faf5] hover:bg-[#e4efe0] flex items-center justify-center text-[#4e5f4a] transition"
+              >
+                <FaTimes />
+              </button>
+            </div>
+
+            <div className="max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
+              {children}
+            </div>
+
+            <div className="mt-8">
+              <button
+                onClick={onClose}
+                className="w-full py-3 rounded-2xl bg-[#5f7d5a] text-white font-bold hover:bg-[#4e5f4a] transition shadow-lg shadow-[#5f7d5a]/20"
+              >
+                Got it, thanks!
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
+  );
 
   return (
     <div className="min-h-screen px-6 md:px-16 pt-[6rem] pb-16">
@@ -701,9 +757,10 @@ function Adopt() {
               </ul>
               <button
                 type="button"
+                onClick={() => setActiveModal('idTips')}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#f36b3a] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition"
               >
-                View Smart Pet ID Tips
+                <FaIdCard /> View Smart Pet ID Tips
               </button>
             </div>
           </div>
@@ -733,9 +790,10 @@ function Adopt() {
               </ul>
               <button
                 type="button"
+                onClick={() => setActiveModal('insurance')}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#e7622b] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition"
               >
-                Compare Insurance Options
+                <FaShieldAlt /> Compare Insurance Options
               </button>
             </div>
           </div>
@@ -768,12 +826,12 @@ function Adopt() {
                   case.
                 </li>
               </ul>
-              <button
-                type="button"
+              <Link
+                to="/services"
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#7c3aed] text-white text-sm font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition"
               >
-                Explore Local Pet Services
-              </button>
+                <FaMapMarkerAlt /> Explore Local Pet Services
+              </Link>
             </div>
           </div>
         </div>
@@ -811,6 +869,74 @@ function Adopt() {
           />
         )}
       </AnimatePresence>
+
+      {/* ID Tips Modal */}
+      <Modal
+        isOpen={activeModal === 'idTips'}
+        onClose={() => setActiveModal(null)}
+        title="Smart Pet ID Tips"
+        icon={FaIdCard}
+      >
+        <div className="space-y-6">
+          <div className="p-4 bg-orange-50 rounded-2xl border border-orange-100 text-orange-800 text-sm">
+            Maintaining a visible and digital ID for your pet is the #1 way to ensure they return home safely if lost.
+          </div>
+          <div className="grid gap-4">
+            <div className="flex gap-4">
+              <div className="w-8 h-8 rounded-full bg-[#f8faf5] flex items-center justify-center shrink-0 text-[#5f7d5a] font-bold border border-[#5f7d5a]/20">1</div>
+              <div>
+                <h4 className="font-bold text-[#2f3e2c]">Always use an Physical Tag</h4>
+                <p className="text-sm text-[#4e5f4a]">Include your phone number and second contact. Avoid putting the pet's name on the outside to prevent theft.</p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="w-8 h-8 rounded-full bg-[#f8faf5] flex items-center justify-center shrink-0 text-[#5f7d5a] font-bold border border-[#5f7d5a]/20">2</div>
+              <div>
+                <h4 className="font-bold text-[#2f3e2c]">The Microchip is Vital</h4>
+                <p className="text-sm text-[#4e5f4a]">A chip can't fall off. Ensure it's registered in a national database with your *current* address and phone number.</p>
+              </div>
+            </div>
+            <div className="flex gap-4">
+              <div className="w-8 h-8 rounded-full bg-[#f8faf5] flex items-center justify-center shrink-0 text-[#5f7d5a] font-bold border border-[#5f7d5a]/20">3</div>
+              <div>
+                <h4 className="font-bold text-[#2f3e2c]">Smart QR Tags</h4>
+                <p className="text-sm text-[#4e5f4a]">Modern tags allow finders to scan a QR code to see your contact details and send you a GPS alert of their location.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Insurance Modal */}
+      <Modal
+        isOpen={activeModal === 'insurance'}
+        onClose={() => setActiveModal(null)}
+        title="Compare Insurance Options"
+        icon={FaShieldAlt}
+      >
+        <div className="space-y-6">
+          <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 text-blue-800 text-sm">
+            Pet insurance helps cover unexpected vet bills. Most plans fall into these three categories.
+          </div>
+          <div className="space-y-4">
+            <div className="border border-[#d0ddcc] rounded-2xl p-4 hover:bg-[#f8faf5] transition cursor-pointer group">
+              <h4 className="font-bold text-[#2f3e2c] group-hover:text-[#5f7d5a]">Accident & Illness</h4>
+              <p className="text-sm text-[#4e5f4a]">Covers emergencies, surgeries, and chronic conditions. Most comprehensive and recommended for new rescues.</p>
+            </div>
+            <div className="border border-[#d0ddcc] rounded-2xl p-4 hover:bg-[#f8faf5] transition cursor-pointer group">
+              <h4 className="font-bold text-[#2f3e2c] group-hover:text-[#5f7d5a]">Accident Only</h4>
+              <p className="text-sm text-[#4e5f4a]">Lower premiums. Only covers injuries (broken bones, bites, etc.) but not hereditary diseases or flu.</p>
+            </div>
+            <div className="border border-[#d0ddcc] rounded-2xl p-4 hover:bg-[#f8faf5] transition cursor-pointer group">
+              <h4 className="font-bold text-[#2f3e2c] group-hover:text-[#5f7d5a]">Wellness (Add-on)</h4>
+              <p className="text-sm text-[#4e5f4a]">Helps pay for routine checkups, vaccinations, and deworming. Great for budgeting annual costs.</p>
+            </div>
+          </div>
+          <div className="text-xs text-center text-[#6b7d67] italic">
+            *Always check for pre-existing condition exclusions before signing up.
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
