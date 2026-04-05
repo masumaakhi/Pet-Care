@@ -11,6 +11,7 @@ import {
     FaStethoscope,
     FaCalendarAlt
 } from "react-icons/fa";
+import api from "../utils/api";
 
 // Dummy data for bookings
 const allBookings = [
@@ -84,13 +85,31 @@ const MyBookings = () => {
     const [bookings, setBookings] = useState([]);
 
     React.useEffect(() => {
-        const storedBookings = localStorage.getItem("userBookings");
-        if (storedBookings) {
-            setBookings(JSON.parse(storedBookings));
-        } else {
-            setBookings(allBookings);
-            localStorage.setItem("userBookings", JSON.stringify(allBookings));
-        }
+        const fetchBookings = async () => {
+            try {
+                const response = await api.get("/services/bookings");
+                if (response.data && response.data.length > 0) {
+                    setBookings(response.data);
+                    localStorage.setItem("userBookings", JSON.stringify(response.data));
+                } else {
+                    const storedBookings = localStorage.getItem("userBookings");
+                    if (storedBookings) {
+                        setBookings(JSON.parse(storedBookings));
+                    } else {
+                        setBookings(allBookings);
+                        localStorage.setItem("userBookings", JSON.stringify(allBookings));
+                    }
+                }
+            } catch (err) {
+                console.error("Fetch Bookings Error:", err);
+                const storedBookings = localStorage.getItem("userBookings");
+                if (storedBookings) {
+                    setBookings(JSON.parse(storedBookings));
+                }
+            }
+        };
+
+        fetchBookings();
     }, []);
 
     const filteredBookings = bookings.filter(b => b.status === activeTab);
