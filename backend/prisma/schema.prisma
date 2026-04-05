@@ -17,6 +17,7 @@ model User {
   createdAt DateTime @default(now())
   pets      Pet[]
   adoptionApplications AdoptionApplication[]
+  serviceBookings ServiceBooking[]
 }
 
 model Pet {
@@ -168,4 +169,27 @@ model AdoptionApplication {
   livingSituation String
   status          String   @default("PENDING")
   createdAt       DateTime @default(now())
+}
+
+model ServiceBooking {
+  id            String   @id @default(uuid())
+  providerName  String
+  type          String   // vet, groomer, consultation
+  serviceTitle  String
+  date          String
+  time          String
+  status        String   @default("upcoming") // upcoming, completed, cancelled
+  petName       String
+  petType       String?
+  amount        String?
+  providerNotes String?
+  cancelReason  String?
+  prescription  String?
+  meetingLink   String?
+  summary       String?
+  reviewed      Boolean  @default(false)
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

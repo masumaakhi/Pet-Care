@@ -10,6 +10,7 @@ import {
     FaCat,
     FaCheckCircle
 } from "react-icons/fa";
+import api from "../utils/api";
 
 // Dummy data for providers based on service ID
 const serviceProviders = {
@@ -113,37 +114,41 @@ const ServiceDetails = () => {
     // Dynamic Pet Categories
     const petCategories = ["Dog", "Cat", "Bird", "Rabbit", "Reptile", "Small Mammal", "Other"];
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-        // Simulate API call
-        setTimeout(() => {
-            setIsSubmitting(false);
-            setBookingSuccess(true);
-
-            // Save to localStorage
-            const storedBookings = localStorage.getItem("userBookings");
-            let bookings = storedBookings ? JSON.parse(storedBookings) : [];
-            const newBooking = {
-                id: `b${Date.now()}`,
+        try {
+            const bookingData = {
                 providerName: provider.name,
                 type: provider.id,
                 serviceTitle: provider.specialty,
                 date: "Today",
                 time: selectedSlot,
-                status: "upcoming",
                 petName: petName || "Your Pet",
                 petType: petType || "Dog",
-                amount: provider.fees.split(" ")[0], // simple hack to extract just the amount or text
+                amount: provider.fees.split(" ")[0],
                 providerNotes: notes || "No notes provided"
             };
-            bookings.push(newBooking);
+
+            const response = await api.post("/services/bookings", bookingData);
+
+            setIsSubmitting(false);
+            setBookingSuccess(true);
+
+            // Keep localStorage update to avoid breaking other components yet
+            const storedBookings = localStorage.getItem("userBookings");
+            let bookings = storedBookings ? JSON.parse(storedBookings) : [];
+            bookings.push(response.data.booking);
             localStorage.setItem("userBookings", JSON.stringify(bookings));
 
             setTimeout(() => {
                 navigate(-1);
             }, 3000);
-        }, 1500);
+        } catch (err) {
+            console.error("Booking Error:", err);
+            setIsSubmitting(false);
+            alert("Failed to confirm booking! " + (err.response?.data?.message || err.message));
+        }
     };
 
     return (
