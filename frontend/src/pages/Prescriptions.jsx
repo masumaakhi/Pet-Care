@@ -75,7 +75,7 @@ export default function Prescriptions() {
                       </div>
                       <div className="flex gap-2">
                          {p.fileUrl && (
-                            <a href={`http://localhost:5000${p.fileUrl}`} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl bg-white border border-[#8b6b4c]/20 font-black text-xs hover:bg-[#5f7d5a] hover:text-white transition group flex items-center gap-2">
+                            <a href={`${process.env.REACT_APP_UPLOAD_URL || 'http://localhost:5250'}${p.fileUrl}`} target="_blank" rel="noreferrer" className="px-4 py-2 rounded-xl bg-white border border-[#8b6b4c]/20 font-black text-xs hover:bg-[#5f7d5a] hover:text-white transition group flex items-center gap-2">
                                📄 <span className="group-hover:inline hidden">View File</span>
                             </a>
                          )}

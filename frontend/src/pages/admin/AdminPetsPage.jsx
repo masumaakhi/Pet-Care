@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../../utils/api";
 import { toast } from "react-hot-toast";
 
-const BACKEND_URL = "http://localhost:5250";
+const BACKEND_URL = process.env.REACT_APP_UPLOAD_URL || "http://localhost:5250";
 
 export default function AdminPetsPage() {
   const [pets, setPets] = useState([]);
