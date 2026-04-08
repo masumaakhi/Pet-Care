@@ -114,23 +114,52 @@ const MyBookings = () => {
 
     const filteredBookings = bookings.filter(b => b.status === activeTab);
 
-    const handleCancelBooking = (bookingId) => {
-        const updatedBookings = bookings.map(b => {
-            if (b.id === bookingId) {
-                return { ...b, status: "cancelled", cancelReason: "Cancelled by user" };
-            }
-            return b;
-        });
-        setBookings(updatedBookings);
-        localStorage.setItem("userBookings", JSON.stringify(updatedBookings));
+    const handleCancelBooking = async (bookingId) => {
+        try {
+            await api.patch(`/services/bookings/${bookingId}/cancel`, {
+                cancelReason: "Cancelled by user"
+            });
+
+            const updatedBookings = bookings.map(b => {
+                if (b.id === bookingId) {
+                    return { ...b, status: "cancelled", cancelReason: "Cancelled by user" };
+                }
+                return b;
+            });
+            setBookings(updatedBookings);
+            localStorage.setItem("userBookings", JSON.stringify(updatedBookings));
+        } catch (err) {
+            console.error("Cancel Booking Error:", err);
+            alert("Failed to cancel booking. " + (err.response?.data?.message || err.message));
+        }
     };
 
-    const handleReviewSubmit = (e) => {
+    const handleReviewSubmit = async (e) => {
         e.preventDefault();
-        // Handle submission...
-        setReviewModalOpen(false);
-        setRating(0);
-        setReviewText("");
+        try {
+            await api.patch(`/services/bookings/${selectedBooking.id}/review`, {
+                rating,
+                reviewText
+            });
+
+            // Update local state and localStorage
+            const updatedBookings = bookings.map(b => {
+                if (b.id === selectedBooking.id) {
+                    return { ...b, reviewed: true, rating, reviewText };
+                }
+                return b;
+            });
+
+            setBookings(updatedBookings);
+            localStorage.setItem("userBookings", JSON.stringify(updatedBookings));
+
+            setReviewModalOpen(false);
+            setRating(0);
+            setReviewText("");
+        } catch (err) {
+            console.error("Review Submission Error:", err);
+            alert("Failed to submit review. " + (err.response?.data?.message || err.message));
+        }
     };
 
     return (

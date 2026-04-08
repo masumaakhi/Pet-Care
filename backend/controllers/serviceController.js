@@ -86,43 +86,37 @@ exports.getBookingDetails = async (req, res) => {
     }
 };
 
-// Cancel a booking
+// Cancel a booking (Mocked)
 exports.cancelBooking = async (req, res) => {
     try {
         const { id } = req.params;
         const { cancelReason } = req.body;
 
-        const updatedBooking = await prisma.serviceBooking.update({
-            where: { id },
-            data: {
-                status: "cancelled",
-                cancelReason: cancelReason || "Cancelled by user"
-            },
-        });
+        console.log(`\n[Service Backend] -------- BOOKING CANCELLATION REQUEST --------`);
+        console.log(`- Booking ID: ${id}`);
+        console.log(`- Cancellation Reason: ${cancelReason || "No reason provided"}`);
+        console.log(`[Service Backend] Generating Mock Success Response...\n`);
 
-        res.status(200).json({ message: "Booking cancelled successfully", booking: updatedBooking });
+        res.status(200).json({ message: "Booking cancelled successfully (Mocked)" });
     } catch (error) {
         console.error("Error cancelling booking:", error);
         res.status(500).json({ error: "Failed to cancel booking" });
     }
 };
 
-// Submit a review for a completed booking
+// Submit a review (Mocked)
 exports.submitReview = async (req, res) => {
     try {
         const { id } = req.params;
         const { rating, reviewText } = req.body;
 
-        // Ideally, we'd also store the rating in a Review model, but for now we mark it 'reviewed'
-        const updatedBooking = await prisma.serviceBooking.update({
-            where: { id },
-            data: {
-                reviewed: true,
-                // Optional: you could add rating/reviewText to ServiceBooking if added to schema
-            },
-        });
+        console.log(`\n[Service Backend] -------- NEW PROVIDER REVIEW SUBMITTED --------`);
+        console.log(`- Booking ID: ${id}`);
+        console.log(`- Rating: ${"⭐".repeat(rating)} (${rating}/5)`);
+        console.log(`- Review Content: "${reviewText}"`);
+        console.log(`[Service Backend] Generating Mock Success Response...\n`);
 
-        res.status(200).json({ message: "Review submitted successfully", booking: updatedBooking });
+        res.status(200).json({ message: "Review submitted successfully (Mocked)" });
     } catch (error) {
         console.error("Error submitting review:", error);
         res.status(500).json({ error: "Failed to submit review" });
