@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../utils/api";
 import { toast } from "react-hot-toast";
+import { getPetImageUrl } from "../utils/helpers";
 
 const BACKEND_URL = process.env.REACT_APP_UPLOAD_URL || "http://localhost:5250";
 
@@ -151,7 +152,7 @@ export default function PetGallery() {
                 shadow-[0_15px_45px_rgba(0,0,0,0.08)] aspect-square"
               >
                 <img
-                  src={`${BACKEND_URL}${p.url}`}
+                  src={getPetImageUrl(p)}
                   alt="pet"
                   className="w-full h-full object-cover cursor-pointer hover:scale-110 transition duration-700"
                   onClick={() => setLightbox(p)}
@@ -205,7 +206,7 @@ export default function PetGallery() {
               className="relative max-w-5xl w-full h-full flex items-center justify-center"
             >
               <img 
-                src={`${BACKEND_URL}${lightbox.url}`} 
+                src={getPetImageUrl(lightbox)} 
                 alt="preview" 
                 className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" 
               />

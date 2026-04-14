@@ -9,6 +9,7 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Toaster } from "react-hot-toast";
 import { AuthProvider } from "./context/AuthContext";
 import { PetProvider } from "./context/PetContext";
+import { SocketProvider } from "./context/SocketContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -17,8 +18,10 @@ root.render(
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <AuthProvider>
         <PetProvider>
-          <Toaster position="top-right" />
-          <RouterProvider router={router} />
+          <SocketProvider>
+            <Toaster position="top-right" />
+            <RouterProvider router={router} />
+          </SocketProvider>
         </PetProvider>
       </AuthProvider>
     </GoogleOAuthProvider>

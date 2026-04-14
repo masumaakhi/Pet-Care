@@ -1,8 +1,10 @@
 // src/pages/admin/AdminAdoptionManagementPage.jsx
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import { toast } from "react-hot-toast";
+import api from "../../utils/api";
+import { getAdoptionListingImage } from "../../utils/helpers";
 
 /**
  * Admin Adoption Management
@@ -11,58 +13,51 @@ import { toast } from "react-hot-toast";
 export default function AdminAdoptionManagementPage() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [adoptions, setAdoptions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for initial frontend setup
-  const [adoptions, setAdoptions] = useState([
-    {
-      id: "adp-001",
-      applicant: { name: "Sarah Ahmed", email: "sarah@example.com", avatar: "SA" },
-      pet: { name: "Bella", species: "Dog", breed: "Golden Retriever" },
-      date: "2024-03-28",
-      matchScore: 92,
-      status: "pending",
-    },
-    {
-      id: "adp-002",
-      applicant: { name: "John Doe", email: "john@example.com", avatar: "JD" },
-      pet: { name: "Luna", species: "Cat", breed: "Persian" },
-      date: "2024-03-25",
-      matchScore: 75,
-      status: "approved",
-    },
-    {
-      id: "adp-003",
-      applicant: { name: "Emily Watson", email: "emily@example.com", avatar: "EW" },
-      pet: { name: "Charlie", species: "Dog", breed: "Beagle" },
-      date: "2024-03-20",
-      matchScore: 60,
-      status: "rejected",
-    },
-    {
-      id: "adp-004",
-      applicant: { name: "David Miller", email: "david@example.com", avatar: "DM" },
-      pet: { name: "Max", species: "Dog", breed: "Poodle" },
-      date: "2024-03-15",
-      matchScore: 88,
-      status: "pending",
-    },
-  ]);
+  useEffect(() => {
+    fetchAdoptions();
+  }, []);
+
+  const fetchAdoptions = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/adoptions/admin/all");
+      if (res.data.success) {
+        setAdoptions(res.data.data);
+      }
+    } catch (error) {
+      console.error("Admin Fetch Adoptions Error:", error);
+      toast.error("Failed to load adoption requests");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredAdoptions = useMemo(() => {
     return adoptions.filter((adp) => {
-      const matchFilter = filter === "all" || adp.status === filter;
+      const matchFilter = filter === "all" || adp.status.toLowerCase() === filter.toLowerCase();
       const matchSearch =
-        adp.applicant.name.toLowerCase().includes(search.toLowerCase()) ||
-        adp.pet.name.toLowerCase().includes(search.toLowerCase());
+        adp.name.toLowerCase().includes(search.toLowerCase()) ||
+        adp.breed.toLowerCase().includes(search.toLowerCase());
       return matchFilter && matchSearch;
     });
   }, [adoptions, filter, search]);
 
-  const handleAction = (id, newStatus) => {
-    setAdoptions((prev) =>
-      prev.map((adp) => (adp.id === id ? { ...adp, status: newStatus } : adp))
-    );
-    toast.success(`Application ${newStatus} successfully.`);
+  const handleAction = async (id, newStatus) => {
+    try {
+      const res = await api.patch(`/adoptions/admin/status/${id}`, { status: newStatus });
+      if (res.data.success) {
+         toast.success(`Application ${newStatus.toLowerCase()} successfully.`);
+         setAdoptions((prev) =>
+           prev.map((adp) => (adp.id === id ? { ...adp, status: newStatus } : adp))
+         );
+      }
+    } catch (error) {
+       console.error("Action Error:", error);
+       toast.error("Failed to update status");
+    }
   };
 
   return (
@@ -72,13 +67,21 @@ export default function AdminAdoptionManagementPage() {
 
       <div className="relative z-10 max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-3xl font-extrabold text-[#2f3e2c] tracking-tight">
-            Adoption Management
-          </h1>
-          <p className="text-[#6b7d67] mt-2 font-medium">
-            Review and oversee and management pet adoption applications.
-          </p>
+        <div className="mb-10 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-extrabold text-[#2f3e2c] tracking-tight">
+              Adoption Management
+            </h1>
+            <p className="text-[#6b7d67] mt-2 font-medium">
+              User requests stay pending until you approve; admin-added listings go live immediately.
+            </p>
+          </div>
+          <Link
+            to="/admin/adoptions/add"
+            className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl font-bold text-black/80 bg-gradient-to-r from-[#5f7d5a]/55 via-[#7fa37a] to-[#8b6b4c] hover:shadow-lg transition shrink-0"
+          >
+            + Add live listing
+          </Link>
         </div>
 
         {/* Filter Bar */}
@@ -116,17 +119,26 @@ export default function AdminAdoptionManagementPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-[#f3eee8]/80 text-[#2f3e2c] font-black uppercase text-[10px] tracking-[0.2em] border-b border-[#8b6b4c]/10">
-                  <th className="px-8 py-6">Applicant</th>
-                  <th className="px-8 py-6">Pet</th>
-                  <th className="px-8 py-6">Date</th>
-                  <th className="px-8 py-6 text-center">Match Score</th>
+                  <th className="px-8 py-6">Pet Listing</th>
+                  <th className="px-8 py-6">Type & Breed</th>
+                  <th className="px-8 py-6">Date Listed</th>
+                  <th className="px-8 py-6 text-center">Applications</th>
                   <th className="px-8 py-6">Status</th>
                   <th className="px-8 py-6 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 <AnimatePresence mode="popLayout">
-                  {filteredAdoptions.map((adp) => (
+                  {loading ? (
+                    <tr>
+                       <td colSpan="6" className="px-8 py-20 text-center">
+                          <div className="w-10 h-10 border-4 border-[#7fa37a]/30 border-t-[#5f7d5a] rounded-full animate-spin mx-auto mb-4" />
+                          <p className="text-[#6b7d67] font-bold">Loading listings...</p>
+                       </td>
+                    </tr>
+                  ) : filteredAdoptions.map((adp) => {
+                    const thumb = getAdoptionListingImage(adp);
+                    return (
                     <motion.tr
                       key={adp.id}
                       initial={{ opacity: 0 }}
@@ -137,30 +149,34 @@ export default function AdminAdoptionManagementPage() {
                     >
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#5f7d5a] to-[#7fa37a] flex items-center justify-center text-white font-black text-xs shadow-md">
-                            {adp.applicant.avatar}
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#5f7d5a] to-[#7fa37a] flex items-center justify-center text-white font-black text-xs shadow-md overflow-hidden">
+                            {thumb ? (
+                               <img src={thumb} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                               adp.name[0]
+                            )}
                           </div>
                           <div>
-                            <div className="font-bold text-[#2f3e2c] hover:underline cursor-pointer">
-                              {adp.applicant.name}
+                            <div className="font-bold text-[#2f3e2c]">
+                              {adp.name}
                             </div>
                             <div className="text-[10px] text-[#6b7d67] font-bold">
-                              {adp.applicant.email}
+                              ID: {adp.id.split("-")[0]}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-8 py-6">
                         <div>
-                          <div className="font-bold text-[#2f3e2c]">{adp.pet.name}</div>
+                          <div className="font-bold text-[#2f3e2c]">{adp.type}</div>
                           <div className="text-[10px] text-[#6b7d67] font-bold uppercase tracking-wider">
-                            {adp.pet.species} • {adp.pet.breed}
+                             {adp.breed}
                           </div>
                         </div>
                       </td>
                       <td className="px-8 py-6">
                         <div className="text-xs font-black text-[#6b7d67]">
-                          {new Date(adp.date).toLocaleDateString("en-US", {
+                          {new Date(adp.createdAt).toLocaleDateString("en-US", {
                             day: "numeric",
                             month: "short",
                             year: "numeric",
@@ -168,27 +184,17 @@ export default function AdminAdoptionManagementPage() {
                         </div>
                       </td>
                       <td className="px-8 py-6">
-                        <div className="flex flex-col items-center gap-1">
-                          <div className={`text-lg font-black ${
-                            adp.matchScore >= 80 ? "text-[#5f7d5a]" : adp.matchScore >= 60 ? "text-amber-600" : "text-rose-600"
-                          }`}>
-                            {adp.matchScore}%
-                          </div>
-                          <div className="w-16 h-1 bg-black/5 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full transition-all duration-500 ${
-                                adp.matchScore >= 80 ? "bg-[#5f7d5a]" : adp.matchScore >= 60 ? "bg-amber-600" : "bg-rose-600"
-                              }`}
-                              style={{ width: `${adp.matchScore}%` }}
-                            />
-                          </div>
-                        </div>
+                         <div className="flex flex-col items-center">
+                            <span className="text-lg font-black text-[#2f3e2c]">
+                               {adp.applications?.length || 0}
+                            </span>
+                         </div>
                       </td>
                       <td className="px-8 py-6">
                         <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border transition-all ${
-                          adp.status === "pending"
+                          adp.status === "PENDING"
                             ? "bg-amber-50 text-amber-700 border-amber-200"
-                            : adp.status === "approved"
+                            : adp.status === "APPROVED"
                             ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                             : "bg-rose-50 text-rose-700 border-rose-200"
                         }`}>
@@ -200,20 +206,30 @@ export default function AdminAdoptionManagementPage() {
                           <Link
                             to={`/admin/adoptions/${adp.id}`}
                             className="p-2 rounded-xl bg-white/80 border border-[#8b6b4c]/20 text-[#2f3e2c] hover:bg-white hover:shadow-lg transition"
+                            title="Admin detail"
                           >
                             👁️
                           </Link>
-                          {adp.status === "pending" && (
+                          <Link
+                            to={`/adopt/listing/${adp.id}`}
+                            className="p-2 rounded-xl bg-white/80 border border-[#8b6b4c]/20 text-[#2f3e2c] hover:bg-white hover:shadow-lg transition text-xs font-bold"
+                            title="Public listing"
+                          >
+                            ↗
+                          </Link>
+                          {adp.status === "PENDING" && (
                             <>
                               <button
-                                onClick={() => handleAction(adp.id, "approved")}
+                                onClick={() => handleAction(adp.id, "APPROVED")}
                                 className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 hover:bg-emerald-500 hover:text-white transition"
+                                title="Approve Listing"
                               >
                                 ✓
                               </button>
                               <button
-                                onClick={() => handleAction(adp.id, "rejected")}
+                                onClick={() => handleAction(adp.id, "REJECTED")}
                                 className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-700 hover:bg-rose-500 hover:text-white transition"
+                                title="Reject Listing"
                               >
                                 ✕
                               </button>
@@ -222,12 +238,12 @@ export default function AdminAdoptionManagementPage() {
                         </div>
                       </td>
                     </motion.tr>
-                  ))}
+                  );})}
                 </AnimatePresence>
               </tbody>
             </table>
           </div>
-          {filteredAdoptions.length === 0 && (
+          {!loading && filteredAdoptions.length === 0 && (
             <div className="py-20 text-center">
               <div className="text-4xl mb-4">📂</div>
               <div className="text-[#2f3e2c] font-black uppercase text-xs tracking-widest">

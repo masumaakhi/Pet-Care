@@ -4,9 +4,11 @@ import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import api from "../utils/api";
-import { AnimatePresence } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 
 export default function AddPet() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
   const navigate = useNavigate();
   const [photoFile, setPhotoFile] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -19,6 +21,7 @@ export default function AddPet() {
     age_months: "",
     weight_kg: "",
     description: "",
+    isForAdoption: false,
   });
 
   const previewUrl = useMemo(() => {
@@ -27,8 +30,11 @@ export default function AddPet() {
   }, [photoFile]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({ 
+      ...prev, 
+      [name]: type === "checkbox" ? checked : value 
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -52,6 +58,17 @@ export default function AddPet() {
       });
 
       if (res.data.success) {
+        const petId = res.data.data.id;
+        
+        // 2. Upload photo if selected
+        if (photoFile) {
+          const photoData = new FormData();
+          photoData.append("photo", photoFile);
+          await api.post(`/pets/${petId}/gallery`, photoData, {
+            headers: { "Content-Type": "multipart/form-data" },
+          });
+        }
+
         toast.success("Pet added successfully!");
         navigate("/pets");
       }
@@ -195,6 +212,22 @@ export default function AddPet() {
                 />
               </Field>
 
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/40 border border-[#8b6b4c]/30 backdrop-blur-md">
+                <input
+                  type="checkbox"
+                  id="isForAdoption"
+                  name="isForAdoption"
+                  checked={formData.isForAdoption}
+                  onChange={handleChange}
+                  className="w-5 h-5 rounded border-[#8b6b4c]/50 text-[#5f7d5a] focus:ring-[#7fa37a]/40"
+                />
+                <label htmlFor="isForAdoption" className="text-sm font-bold text-[#2f3e2c]">
+                  {isAdmin
+                    ? "List for adoption (published immediately on adoption listing)"
+                    : "List this pet for adoption? (Requires admin approval)"}
+                </label>
+              </div>
+
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   type="submit"
@@ -272,10 +305,6 @@ export default function AddPet() {
                     Remove
                   </button>
                 </div>
-
-                <p className="text-xs text-[#6b7d67] mt-3 font-medium">
-                  Note: Photo upload integration (Multer) is in Phase 3.
-                </p>
               </div>
             </div>
           </form>

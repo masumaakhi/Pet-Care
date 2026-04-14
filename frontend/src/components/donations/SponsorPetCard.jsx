@@ -1,9 +1,12 @@
 // src/components/donations/SponsorPetCard.jsx
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { formatCurrency } from '../../utils/donationHelpers';
 
 const SponsorPetCard = ({ pet }) => {
+  const navigate = useNavigate();
+
   return (
     <div className="group rounded-3xl overflow-hidden bg-gradient-to-br from-white/75 via-[#e5e3df]/75 to-[#a18463]/30 backdrop-blur-2xl border border-[#8b6b4c]/45 shadow-[0_25px_80px_rgba(0,0,0,0.12)] hover:shadow-[0_55px_160px_rgba(95,125,90,0.35)] transition duration-500 flex flex-col relative">
       <div className="absolute top-4 right-4 bg-white/70 backdrop-blur-md p-2 rounded-full shadow-sm z-10 cursor-pointer hover:bg-white/90 border border-white/40 transition-colors">
@@ -31,7 +34,11 @@ const SponsorPetCard = ({ pet }) => {
             <span className="text-xl font-bold text-[#5f7d5a]">{formatCurrency(pet.monthlySponsorshipAmount)}<span className="text-sm font-normal text-[#6b7d67]">/mo</span></span>
           </div>
 
-          <button className="w-full py-3 rounded-xl bg-white/55 border border-[#8b6b4c]/40 text-[#2f3e2c] font-semibold hover:bg-white/70 hover:shadow-md transition flex items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => navigate(`/donations/sponsor/${pet.id}`)}
+            className="w-full py-3 rounded-xl bg-white/55 border border-[#8b6b4c]/40 text-[#2f3e2c] font-semibold hover:bg-white/70 hover:shadow-md transition flex items-center justify-center gap-2"
+          >
             <Heart className="w-4 h-4 fill-[#2f3e2c]" /> Become a Sponsor
           </button>
         </div>

@@ -15,6 +15,9 @@ export default function UserProfile() {
   const [editForm, setEditForm] = useState({
     fullName: "",
     email: "",
+    phone: "",
+    address: "",
+    bio: "",
   });
   const [isUpdating, setIsUpdating] = useState(false);
   const [pets, setPets] = useState([]);
@@ -27,6 +30,9 @@ export default function UserProfile() {
       setEditForm({
         fullName: user.fullName || "",
         email: user.email || "",
+        phone: user.phone || "",
+        address: user.address || "",
+        bio: user.bio || "",
       });
       fetchExtraData();
     }
@@ -208,6 +214,15 @@ export default function UserProfile() {
                 >
                   🏥 Health Hub
                 </Link>
+                <Link
+                  to="/rescue/my-requests"
+                  className="px-5 py-2 rounded-xl 
+                  bg-gradient-to-r from-[#7fa37a] to-[#8b6b4c]
+                  text-white font-medium shadow-md 
+                  hover:scale-[1.02] hover:shadow-lg transition"
+                >
+                  📝 Rescue Requst History
+                </Link>
               </>
             )}
 
@@ -332,7 +347,13 @@ export default function UserProfile() {
                 <button
                   onClick={() => {
                     setIsEditing(false);
-                    setEditForm({ fullName: user.fullName, email: user.email });
+                    setEditForm({ 
+                      fullName: user.fullName, 
+                      email: user.email,
+                      phone: user.phone || "",
+                      address: user.address || "",
+                      bio: user.bio || ""
+                    });
                   }}
                   className="text-sm font-medium text-red-500 bg-red-50 px-4 py-1.5 rounded-lg hover:bg-red-100 transition"
                 >
@@ -377,6 +398,45 @@ export default function UserProfile() {
                   className={`w-full px-4 py-2 rounded-xl border outline-none transition ${isEditing ? 'bg-white/80 border-[#5f7d5a] focus:ring-2 focus:ring-[#7fa37a]/40' : 'bg-white/60 border-[#8b6b4c]/40 opacity-80 cursor-default'}`}
                   required
                 />
+              </div>
+
+              <div className="mt-6">
+                 <h4 className="text-sm font-bold text-[#2f3e2c] mb-3 uppercase tracking-wider">Additional Information</h4>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-[#4e5f4a] mb-1">Phone Number</label>
+                      <input
+                        type="text"
+                        value={isEditing ? editForm.phone : (user.phone || "Not provided")}
+                        readOnly={!isEditing}
+                        placeholder="e.g. +1 234 567 890"
+                        onChange={(e) => setEditForm(prev => ({ ...prev, phone: e.target.value }))}
+                        className={`w-full px-4 py-2 rounded-xl border outline-none transition ${isEditing ? 'bg-white/80 border-[#5f7d5a] focus:ring-2 focus:ring-[#7fa37a]/40' : 'bg-white/60 border-[#8b6b4c]/40 opacity-80 cursor-default'}`}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-[#4e5f4a] mb-1">Address</label>
+                      <input
+                        type="text"
+                        value={isEditing ? editForm.address : (user.address || "Not provided")}
+                        readOnly={!isEditing}
+                        placeholder="e.g. 123 Street, City"
+                        onChange={(e) => setEditForm(prev => ({ ...prev, address: e.target.value }))}
+                        className={`w-full px-4 py-2 rounded-xl border outline-none transition ${isEditing ? 'bg-white/80 border-[#5f7d5a] focus:ring-2 focus:ring-[#7fa37a]/40' : 'bg-white/60 border-[#8b6b4c]/40 opacity-80 cursor-default'}`}
+                      />
+                    </div>
+                 </div>
+                 <div className="mt-4">
+                    <label className="block text-sm text-[#4e5f4a] mb-1">Bio</label>
+                    <textarea
+                      value={isEditing ? editForm.bio : (user.bio || "No bio added yet.")}
+                      readOnly={!isEditing}
+                      rows={3}
+                      placeholder="Tell us a bit about yourself..."
+                      onChange={(e) => setEditForm(prev => ({ ...prev, bio: e.target.value }))}
+                      className={`w-full px-4 py-2 rounded-xl border outline-none transition resize-none ${isEditing ? 'bg-white/80 border-[#5f7d5a] focus:ring-2 focus:ring-[#7fa37a]/40' : 'bg-white/60 border-[#8b6b4c]/40 opacity-80 cursor-default'}`}
+                    />
+                 </div>
               </div>
 
               {isEditing && (

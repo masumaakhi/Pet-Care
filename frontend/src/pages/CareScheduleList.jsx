@@ -10,6 +10,7 @@ export default function CareScheduleList() {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState(null);
 
   useEffect(() => {
     fetchPetsAndSchedules();
@@ -40,6 +41,19 @@ export default function CareScheduleList() {
       toast.error("Failed to load care data");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (scheduleId) => {
+    if (!window.confirm("Are you sure you want to delete this schedule?")) return;
+    try {
+      const res = await api.delete(`/pets/schedules/${scheduleId}`);
+      if (res.data.success) {
+        toast.success("Schedule deleted");
+        setSchedules(prev => prev.filter(s => s.id !== scheduleId));
+      }
+    } catch (error) {
+       toast.error("Delete failed");
     }
   };
 
@@ -147,7 +161,10 @@ export default function CareScheduleList() {
                   <button
                     className="px-4 py-2 rounded-xl bg-white/60 border border-[#8b6b4c]/40
                     text-[#2f3e2c] font-semibold hover:bg-white/75 transition"
-                    onClick={() => toast.success("Edit feature coming in Phase 3")}
+                    onClick={() => {
+                        setEditingSchedule(s);
+                        setIsOpen(true);
+                    }}
                   >
                     ✏️ Edit
                   </button>
@@ -155,7 +172,7 @@ export default function CareScheduleList() {
                   <button
                     className="px-4 py-2 rounded-xl bg-white/60 border border-red-300/60
                     text-red-600 font-semibold hover:bg-red-50 transition"
-                    onClick={() => toast.error("Delete feature coming soon")}
+                    onClick={() => handleDelete(s.id)}
                   >
                     🗑 Delete
                   </button>
@@ -170,9 +187,13 @@ export default function CareScheduleList() {
       <AnimatePresence>
         {isOpen && (
           <AddScheduleModal 
-            onClose={() => setIsOpen(false)} 
+            onClose={() => {
+                setIsOpen(false);
+                setEditingSchedule(null);
+            }} 
             pets={pets} 
             onAdded={fetchPetsAndSchedules}
+            editingSchedule={editingSchedule}
           />
         )}
       </AnimatePresence>
@@ -180,15 +201,15 @@ export default function CareScheduleList() {
   );
 }
 
-function AddScheduleModal({ onClose, pets, onAdded }) {
+function AddScheduleModal({ onClose, pets, onAdded, editingSchedule }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    petId: pets[0]?.id || "",
-    type: "Feeding",
-    title: "",
-    scheduled_time: "",
-    frequency: "Daily",
-    notes: "",
+    petId: editingSchedule?.petId || pets[0]?.id || "",
+    type: editingSchedule?.type || "Feeding",
+    title: editingSchedule?.title || "",
+    scheduled_time: editingSchedule?.scheduled_time || "",
+    frequency: editingSchedule?.frequency || "Daily",
+    notes: editingSchedule?.notes || "",
   });
 
   const handleChange = (e) => {
@@ -202,19 +223,32 @@ function AddScheduleModal({ onClose, pets, onAdded }) {
 
     try {
       setLoading(true);
-      const res = await api.post(`/pets/${formData.petId}/schedules`, {
-        ...formData,
-        scheduled_date: new Date().toISOString(), // Current date as default for schedule
-      });
-
-      if (res.data.success) {
-        toast.success("Schedule added successfully!");
-        onAdded();
-        onClose();
+      if (editingSchedule) {
+        // Update
+        const res = await api.put(`/pets/schedules/${editingSchedule.id}`, {
+            ...formData,
+            scheduled_date: editingSchedule.scheduled_date // Keep original date or update if logic requires
+        });
+        if (res.data.success) {
+            toast.success("Schedule updated!");
+            onAdded();
+            onClose();
+        }
+      } else {
+        // Create
+        const res = await api.post(`/pets/${formData.petId}/schedules`, {
+            ...formData,
+            scheduled_date: new Date().toISOString(),
+        });
+        if (res.data.success) {
+            toast.success("Schedule added successfully!");
+            onAdded();
+            onClose();
+        }
       }
     } catch (error) {
-      console.error("Add Schedule Error:", error);
-      toast.error("Failed to add schedule");
+      console.error("Save Schedule Error:", error);
+      toast.error("Failed to save schedule");
     } finally {
       setLoading(false);
     }
@@ -238,22 +272,28 @@ function AddScheduleModal({ onClose, pets, onAdded }) {
         backdrop-blur-2xl border border-[#8b6b4c]/50
         shadow-[0_35px_110px_rgba(0,0,0,0.22)]"
       >
-        <h3 className="text-xl font-bold text-[#2f3e2c] mb-1">Add Care Schedule</h3>
-        <p className="text-sm text-[#6b7d67] mb-5">Set feeding, grooming or exercise reminders.</p>
+        <h3 className="text-xl font-bold text-[#2f3e2c] mb-1">
+          {editingSchedule ? "Edit Care Schedule" : "Add Care Schedule"}
+        </h3>
+        <p className="text-sm text-[#6b7d67] mb-5">
+          {editingSchedule ? "Update this reminder's details." : "Set feeding, grooming or exercise reminders."}
+        </p>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <Field label="Target Pet">
-            <select 
-              name="petId"
-              value={formData.petId}
-              onChange={handleChange}
-              className={baseInputClass()}
-            >
-              {pets.map((p) => (
-                <option key={p.id} value={p.id} className="bg-[#f3eee8]">{p.name}</option>
-              ))}
-            </select>
-          </Field>
+          {!editingSchedule && (
+            <Field label="Target Pet">
+              <select 
+                name="petId"
+                value={formData.petId}
+                onChange={handleChange}
+                className={baseInputClass()}
+              >
+                {pets.map((p) => (
+                  <option key={p.id} value={p.id} className="bg-[#f3eee8]">{p.name}</option>
+                ))}
+              </select>
+            </Field>
+          )}
 
           <Field label="Schedule Type">
             <select 

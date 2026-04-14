@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import api from "../utils/api";
+import { getPetImageUrl } from "../utils/helpers";
 import { toast } from "react-hot-toast";
 
 // Helper to format age months to readable string
@@ -106,8 +107,8 @@ export default function PetDetails() {
               ← Back
             </Link>
 
-            <button
-              onClick={() => setIsEditOpen(true)}
+            <Link
+              to={`/pets/${pet.id}/edit`}
               className="px-5 py-2.5 rounded-xl
               bg-gradient-to-r from-[#5f7d5a]/55 via-[#7fa37a] to-[#8b6b4c]
               border border-[#d6e2d3]
@@ -115,7 +116,7 @@ export default function PetDetails() {
               hover:scale-[1.02] hover:shadow-lg transition duration-300"
             >
               ✏️ Edit Pet
-            </button>
+            </Link>
           </div>
         </motion.div>
 
@@ -133,7 +134,7 @@ export default function PetDetails() {
           >
             <div className="relative h-64 sm:h-80 bg-[#f3eee8]">
               <img
-                src={pet.photo || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=1200&q=80"}
+                src={getPetImageUrl(pet.photos)}
                 alt={`${pet.name} main`}
                 className="w-full h-full object-cover"
               />

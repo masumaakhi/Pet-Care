@@ -96,6 +96,49 @@ const getAdminStats = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Admin: queue-style alert counts (rescues, adoptions, donations)
+ * @route   GET /api/dashboard/admin-summary
+ * @access  Private (admin)
+ */
+const getAdminSummary = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "owner") {
+      return sendError(res, 403, "Not authorized");
+    }
+
+    const [
+      pendingRescues,
+      pendingAdoptions,
+      pendingDonationsAgg,
+      activeRescues,
+    ] = await Promise.all([
+      prisma.rescueRequest.count({ where: { status: "PENDING" } }),
+      prisma.adoptionPet.count({ where: { status: "PENDING" } }),
+      prisma.donation.aggregate({
+        where: { status: "pending" },
+        _sum: { amount: true },
+        _count: { _all: true },
+      }),
+      prisma.rescueRequest.count({
+        where: { status: { in: ["ASSIGNED", "IN_PROGRESS", "PICKED", "VET", "RESCUED", "SHELTER"] } },
+      }),
+    ]);
+
+    return sendSuccess(res, 200, "Admin summary fetched", {
+      pendingRescues,
+      pendingAdoptions,
+      pendingDonationsCount: pendingDonationsAgg._count?._all ?? 0,
+      pendingDonationsAmount: pendingDonationsAgg._sum.amount || 0,
+      activeRescueMissions: activeRescues,
+    });
+  } catch (error) {
+    console.error("getAdminSummary", error);
+    return sendError(res, 500, "Server error");
+  }
+};
+
 module.exports = {
   getAdminStats,
+  getAdminSummary,
 };

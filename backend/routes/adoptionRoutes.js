@@ -2,20 +2,26 @@
 const express = require("express");
 const router = express.Router();
 const adoptionController = require("../controllers/adoptionController");
+const { protect, optionalProtect } = require("../middleware/authMiddleware");
+const upload = require("../middleware/uploadMiddleware");
 
-// If you want middleware, import it: (const { protect } = require("../middleware/authMiddleware");)
-// But to ensure it works interchangeably for any caller right now, we keep it standard:
-
-// GET /api/adoptions -> Fetch all
+// Public routes
 router.get("/", adoptionController.getAdoptions);
 
-// POST /api/adoptions -> List a new pet
-router.post("/", adoptionController.createAdoption);
+// Admin routes (before /:id so paths like /admin/all are never captured as an id)
+router.get("/admin/all", protect, adoptionController.adminGetAllAdoptions);
+router.patch("/admin/status/:id", protect, adoptionController.updateAdoptionStatus);
+router.post(
+  "/admin/listing",
+  protect,
+  upload.single("image"),
+  adoptionController.adminCreateListing
+);
 
-// GET /api/adoptions/:id -> Fetch single adoption
-router.get("/:id", adoptionController.getAdoptionById);
+router.get("/:id", optionalProtect, adoptionController.getAdoptionById);
 
-// POST /api/adoptions/apply -> Submit form
-router.post("/apply", adoptionController.applyForAdoption);
+// Protected routes
+router.post("/request/:petId", protect, adoptionController.requestAdoption);
+router.post("/apply", protect, adoptionController.applyForAdoption);
 
 module.exports = router;

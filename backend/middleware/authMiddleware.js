@@ -30,6 +30,9 @@ const protect = async (req, res, next) => {
           role: true,
           googleId: true,
           createdAt: true,
+          phone: true,
+          latitude: true,
+          longitude: true,
         },
       });
 
@@ -61,4 +64,33 @@ const authorize = (...roles) => {
   };
 };
 
-module.exports = { protect, authorize };
+/**
+ * Middleware to optionally attach user to request if JWT exists
+ */
+const optionalProtect = async (req, res, next) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      token = req.headers.authorization.split(" ")[1];
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = await prisma.user.findUnique({
+        where: { id: decoded.id },
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          role: true,
+        },
+      });
+    } catch (error) {
+      // Don't fail the request, just don't attach user
+    }
+  }
+  next();
+};
+
+module.exports = { protect, authorize, optionalProtect };

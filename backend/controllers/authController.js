@@ -3,6 +3,7 @@
 const authService = require("../services/authService");
 const generateToken = require("../utils/generateToken");
 const { sendSuccess, sendError } = require("../utils/response");
+const prisma = require("../prisma/prismaClient");
 
 /**
  * @desc    Register new user
@@ -41,6 +42,15 @@ const registerUser = async (req, res) => {
     });
 
     if (user) {
+      if (user.role === "volunteer" && user.id && !String(user.id).startsWith("mock")) {
+        try {
+          await prisma.volunteerProfile.create({ data: { userId: user.id } });
+        } catch (e) {
+          if (!String(e.message || "").includes("Unique")) {
+            console.error("Volunteer profile create:", e);
+          }
+        }
+      }
       const token = generateToken(user.id);
       return sendSuccess(res, 201, "User registered successfully", {
         id: user.id,
@@ -132,9 +142,6 @@ const googleLogin = async (req, res) => {
         googleId,
         role: "user", // Default role
       });
-    } else if (!user.googleId) {
-      // If user exists but hasn't linked Google, you could link it here (optional)
-      // This is optional depending on requirements, but useful
     }
 
     const token = generateToken(user.id);
@@ -168,11 +175,9 @@ const forgotPassword = async (req, res) => {
     const user = await authService.getUserByEmail(email);
 
     if (!user) {
-      // For security, don't reveal that the user does not exist
       return sendSuccess(res, 200, "If your email is registered, you will receive password reset instructions");
     }
 
-    // Usually you'd send an email here. As per instructions, no email sending.
     return sendSuccess(res, 200, "If your email is registered, you will receive password reset instructions");
   } catch (error) {
     console.error(error);
@@ -215,7 +220,6 @@ const resetPassword = async (req, res) => {
  */
 const getMe = async (req, res) => {
   try {
-    // req.user is set in authMiddleware
     if (req.user) {
       return sendSuccess(res, 200, "User fetched successfully", req.user);
     } else {
@@ -234,7 +238,7 @@ const getMe = async (req, res) => {
  */
 const updateProfile = async (req, res) => {
   try {
-    const { fullName, email, role, userId } = req.body;
+    const { fullName, email, role, userId, phone, address, bio, status, latitude, longitude } = req.body;
     
     // Determine target user ID
     let targetUserId = req.user.id;
@@ -268,21 +272,102 @@ const updateProfile = async (req, res) => {
           return sendError(res, 400, "Invalid role provided");
         }
         roleToUpdate = role;
-      } else {
-        return sendError(res, 403, "Not authorized to update role");
       }
     }
 
     const updatedUser = await authService.updateUserProfile(targetUserId, {
       fullName: fullName || targetUser.fullName,
       email: email || targetUser.email,
-      role: roleToUpdate
+      role: roleToUpdate,
+      phone: phone !== undefined ? phone : targetUser.phone,
+      address: address !== undefined ? address : targetUser.address,
+      bio: bio !== undefined ? bio : targetUser.bio,
+      latitude: latitude !== undefined ? parseFloat(latitude) : targetUser.latitude,
+      longitude: longitude !== undefined ? parseFloat(longitude) : targetUser.longitude,
+      status: (status && (req.user.role === "admin" || req.user.role === "owner")) ? status : (targetUser.status || "active")
     });
+
+    const syncLat =
+      latitude !== undefined ? parseFloat(latitude) : updatedUser.latitude;
+    const syncLng =
+      longitude !== undefined ? parseFloat(longitude) : updatedUser.longitude;
+    if (
+      (updatedUser.role === "volunteer" || updatedUser.role === "admin") &&
+      syncLat != null &&
+      syncLng != null &&
+      Number.isFinite(syncLat) &&
+      Number.isFinite(syncLng)
+    ) {
+      try {
+        await prisma.volunteerProfile.upsert({
+          where: { userId: targetUserId },
+          create: {
+            userId: targetUserId,
+            lastLat: syncLat,
+            lastLng: syncLng,
+            lastActive: new Date(),
+          },
+          update: {
+            lastLat: syncLat,
+            lastLng: syncLng,
+            lastActive: new Date(),
+          },
+        });
+      } catch (e) {
+        console.error("Volunteer profile GPS sync:", e);
+      }
+    }
 
     return sendSuccess(res, 200, "Profile updated successfully", updatedUser);
   } catch (error) {
     console.error(error);
     return sendError(res, 500, "Server error updating profile");
+  }
+};
+
+/**
+ * @desc    Admin update user
+ * @route   PUT /api/auth/users/:id
+ * @access  Private (Admin/Owner)
+ */
+const updateUser = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "owner") {
+      return sendError(res, 403, "Not authorized to update users");
+    }
+
+    const { id } = req.params;
+    const { fullName, email, role, phone, address, bio, status, latitude, longitude } = req.body;
+
+    const user = await authService.getUserById(id);
+    if (!user) {
+      return sendError(res, 404, "User not found");
+    }
+
+    // Check email uniqueness if changing
+    if (email && email !== user.email) {
+      const emailExists = await authService.getUserByEmail(email);
+      if (emailExists) {
+        return sendError(res, 400, "Email already in use");
+      }
+    }
+
+    const updatedUser = await authService.updateUserProfile(id, {
+      fullName: fullName || user.fullName,
+      email: email || user.email,
+      role: role || user.role,
+      phone: phone !== undefined ? phone : user.phone,
+      address: address !== undefined ? address : user.address,
+      bio: bio !== undefined ? bio : user.bio,
+      latitude: latitude !== undefined ? parseFloat(latitude) : user.latitude,
+      longitude: longitude !== undefined ? parseFloat(longitude) : user.longitude,
+      status: status || user.status || "active"
+    });
+
+    return sendSuccess(res, 200, "User updated successfully", updatedUser);
+  } catch (error) {
+    console.error(error);
+    return sendError(res, 500, "Server error updating user");
   }
 };
 
@@ -305,12 +390,32 @@ const getAllUsers = async (req, res) => {
 };
 
 /**
+ * @desc    Get user by ID
+ * @route   GET /api/auth/users/:id
+ * @access  Private (Admin/Owner)
+ */
+const getUserById = async (req, res) => {
+  try {
+    if (req.user.role !== "admin" && req.user.role !== "owner") {
+      return sendError(res, 403, "Not authorized to access user details");
+    }
+    const user = await authService.getUserById(req.params.id);
+    if (!user) {
+      return sendError(res, 404, "User not found");
+    }
+    return sendSuccess(res, 200, "User fetched successfully", user);
+  } catch (error) {
+    console.error(error);
+    return sendError(res, 500, "Server error fetching user");
+  }
+};
+
+/**
  * @desc    Logout user
  * @route   POST /api/auth/logout
  * @access  Public
  */
 const logoutUser = (req, res) => {
-  // Since JWT is stateless, logout is handled client-side.
   return sendSuccess(res, 200, "Logged out successfully");
 };
 
@@ -322,6 +427,8 @@ module.exports = {
   resetPassword,
   getMe,
   updateProfile,
+  updateUser,
   getAllUsers,
+  getUserById,
   logoutUser,
 };

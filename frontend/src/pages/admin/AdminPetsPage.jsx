@@ -3,6 +3,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../../utils/api";
 import { toast } from "react-hot-toast";
+import { getPetImageUrl } from "../../utils/helpers";
 
 const BACKEND_URL = process.env.REACT_APP_UPLOAD_URL || "http://localhost:5250";
 
@@ -173,7 +174,7 @@ export default function AdminPetsPage() {
                         >
                           <td className="py-5 px-8 text-center">
                             <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-white/50 shadow-md group-hover:scale-105 transition mx-auto">
-                              <img src={pet.photo || "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=200&q=80"} alt={pet.name} className="w-full h-full object-cover" />
+                               <img src={getPetImageUrl(pet.photos)} alt={pet.name} className="w-full h-full object-cover" />
                             </div>
                           </td>
                           <td className="py-5 px-8">

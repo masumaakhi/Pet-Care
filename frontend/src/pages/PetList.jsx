@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import api from "../utils/api";
 import { toast } from "react-hot-toast";
+import { getPetImageUrl } from "../utils/helpers";
 
 // Helper to format age months to readable string
 const formatAge = (months) => {
@@ -48,6 +49,20 @@ export default function PetList() {
     } catch (error) {
       console.error("Delete Pet Error:", error);
       toast.error("Failed to delete pet");
+    }
+  };
+
+  const handleListForAdoption = async (petId) => {
+    if (!window.confirm("Are you sure you want to put this pet up for adoption? This will require admin approval.")) return;
+    try {
+      const res = await api.post(`/adoptions/request/${petId}`);
+      if (res.data.success) {
+        toast.success("Adoption request sent successfully!");
+        fetchPets(); // Refresh to show status
+      }
+    } catch (error) {
+      console.error("List for Adoption Error:", error);
+      toast.error(error.response?.data?.message || "Failed to submit request");
     }
   };
 
@@ -154,7 +169,7 @@ export default function PetList() {
               >
                 <div className="relative h-44 sm:h-48 bg-[#f3eee8]">
                   <img
-                    src={pet.photo || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?w=800&q=80"}
+                    src={getPetImageUrl(pet.photos)}
                     alt={pet.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
                   />
@@ -164,7 +179,22 @@ export default function PetList() {
                   </div>
                   {pet.status === "PENDING" && (
                     <div className="absolute top-3 right-3 px-2 py-1 rounded-lg bg-amber-500/80 text-white text-[10px] font-bold">
-                       Pending
+                       Pending Profile
+                    </div>
+                  )}
+                  {pet.adoptionStatus === "PENDING" && (
+                    <div className="absolute top-10 right-3 px-2 py-1 rounded-lg bg-indigo-500/80 text-white text-[10px] font-bold">
+                       Adoption Pending
+                    </div>
+                  )}
+                  {pet.adoptionStatus === "APPROVED" && (
+                    <div className="absolute top-10 right-3 px-2 py-1 rounded-lg bg-emerald-500/80 text-white text-[10px] font-bold">
+                       Listed for Adoption
+                    </div>
+                  )}
+                  {pet.adoptionStatus === "REJECTED" && (
+                    <div className="absolute top-10 right-3 px-2 py-1 rounded-lg bg-rose-500/80 text-white text-[10px] font-bold">
+                       Adoption rejected
                     </div>
                   )}
                 </div>
@@ -185,19 +215,34 @@ export default function PetList() {
                     </button>
                   </div>
 
-                  <div className="mt-6 flex gap-3">
-                    <Link
-                      to={`/pets/${pet.id}`}
-                      className="flex-1 text-center py-3 rounded-2xl bg-gradient-to-r from-[#5f7d5a] to-[#7fa37a] text-white font-black hover:shadow-lg transition"
-                    >
-                      Details
-                    </Link>
-                    <Link
-                       to={`/pets/${pet.id}`} // Using Details for edit logic in Phase 1
-                       className="px-4 py-3 rounded-2xl bg-white border border-[#8b6b4c]/20 text-[#2f3e2c] font-bold hover:bg-[#f3eee8] transition"
-                    >
-                      Edit
-                    </Link>
+                  <div className="mt-6 flex flex-col gap-3">
+                    <div className="flex gap-3">
+                      <Link
+                        to={`/pets/${pet.id}`}
+                        className="flex-1 text-center py-3 rounded-2xl bg-gradient-to-r from-[#5f7d5a] to-[#7fa37a] text-white font-black hover:shadow-lg transition"
+                      >
+                        Details
+                      </Link>
+                      <Link
+                        to={`/pets/${pet.id}/edit`} // Using Details for edit logic in Phase 1
+                        className="px-4 py-3 rounded-2xl bg-white border border-[#8b6b4c]/20 text-[#2f3e2c] font-bold hover:bg-[#f3eee8] transition"
+                      >
+                        Edit
+                      </Link>
+                    </div>
+
+                    {(!pet.adoptionStatus ||
+                      pet.adoptionStatus === "NONE" ||
+                      pet.adoptionStatus === "REJECTED") && (
+                      <button
+                        onClick={() => handleListForAdoption(pet.id)}
+                        className="w-full py-2.5 rounded-xl border-2 border-dashed border-[#5f7d5a]/40 text-[#5f7d5a] font-black text-sm hover:bg-[#5f7d5a]/10 transition"
+                      >
+                        {pet.adoptionStatus === "REJECTED"
+                          ? "🏡 Request adoption listing again"
+                          : "🏡 Put for Adoption"}
+                      </button>
+                    )}
                   </div>
                 </div>
               </motion.div>

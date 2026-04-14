@@ -11,6 +11,7 @@ export default function WeightLog() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
+  const [editingLog, setEditingLog] = useState(null);
 
   useEffect(() => {
     fetchPetsAndLogs();
@@ -40,6 +41,19 @@ export default function WeightLog() {
       toast.error("Failed to load weight history");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (logId) => {
+    if (!window.confirm("Are you sure you want to delete this weight log?")) return;
+    try {
+      const res = await api.delete(`/pets/weights/${logId}`);
+      if (res.data.success) {
+        toast.success("Log deleted");
+        setLogs(prev => prev.filter(l => l.id !== logId));
+      }
+    } catch (error) {
+      toast.error("Delete failed");
     }
   };
 
@@ -164,11 +178,17 @@ export default function WeightLog() {
                       <Line 
                         type="monotone" 
                         dataKey="weight" 
-                        stroke="#5f7d5a" 
+                        stroke="url(#colorWeight)" 
                         strokeWidth={4} 
                         dot={{ r: 6, fill: "#5f7d5a", strokeWidth: 2, stroke: "#fff" }}
                         activeDot={{ r: 8, strokeWidth: 0 }}
                       />
+                      <defs>
+                        <linearGradient id="colorWeight" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="5%" stopColor="#5f7d5a" stopOpacity={0.8}/>
+                          <stop offset="95%" stopColor="#7fa37a" stopOpacity={1}/>
+                        </linearGradient>
+                      </defs>
                     </LineChart>
                   </ResponsiveContainer>
                 ) : (
@@ -207,13 +227,25 @@ export default function WeightLog() {
                       {l.note && <p className="text-xs text-[#6b7d67] mt-1 italic">Note: {l.note}</p>}
                     </div>
 
-                    <button
-                      className="px-5 py-2 rounded-2xl bg-white/70 border border-red-300/40
-                      text-red-600 font-bold hover:bg-rose-50 transition shadow-sm"
-                      onClick={() => toast.error("Delete coming later")}
-                    >
-                      🗑️
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="w-10 h-10 rounded-xl bg-white/70 border border-[#8b6b4c]/30
+                        text-[#2f3e2c] flex items-center justify-center hover:bg-white transition shadow-sm"
+                        onClick={() => {
+                          setEditingLog(l);
+                          setIsOpen(true);
+                        }}
+                      >
+                        ✏️
+                      </button>
+                      <button
+                        className="w-10 h-10 rounded-xl bg-white/70 border border-red-300/40
+                        text-red-500 flex items-center justify-center hover:bg-rose-50 transition shadow-sm"
+                        onClick={() => handleDelete(l.id)}
+                      >
+                        🗑️
+                      </button>
+                    </div>
                   </motion.div>
                 ))}
               </AnimatePresence>
@@ -233,9 +265,13 @@ export default function WeightLog() {
       <AnimatePresence>
         {isOpen && (
           <AddWeightModal
-            onClose={() => setIsOpen(false)}
+            onClose={() => {
+                setIsOpen(false);
+                setEditingLog(null);
+            }}
             pets={pets}
             onAdded={fetchPetsAndLogs}
+            editingLog={editingLog}
           />
         )}
       </AnimatePresence>
@@ -243,13 +279,13 @@ export default function WeightLog() {
   );
 }
 
-function AddWeightModal({ onClose, pets, onAdded }) {
+function AddWeightModal({ onClose, pets, onAdded, editingLog }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    petId: pets[0]?.id || "",
-    weight_kg: "",
-    date: new Date().toISOString().split('T')[0],
-    note: "",
+    petId: editingLog?.petId || pets[0]?.id || "",
+    weight_kg: editingLog?.weight_kg || "",
+    date: editingLog ? new Date(editingLog.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+    note: editingLog?.note || "",
   });
 
   const handleChange = (e) => {
@@ -263,19 +299,33 @@ function AddWeightModal({ onClose, pets, onAdded }) {
 
     try {
       setLoading(true);
-      const res = await api.post(`/pets/${formData.petId}/weights`, {
-        weight_kg: parseFloat(formData.weight_kg),
-        date: new Date(formData.date).toISOString(),
-        note: formData.note,
-      });
-
-      if (res.data.success) {
-        toast.success("Weight log added!");
-        onAdded();
-        onClose();
+      if (editingLog) {
+        // Update
+        const res = await api.put(`/pets/weights/${editingLog.id}`, {
+          weight_kg: parseFloat(formData.weight_kg),
+          date: new Date(formData.date).toISOString(),
+          note: formData.note,
+        });
+        if (res.data.success) {
+          toast.success("Weight log updated!");
+          onAdded();
+          onClose();
+        }
+      } else {
+        // Create
+        const res = await api.post(`/pets/${formData.petId}/weights`, {
+          weight_kg: parseFloat(formData.weight_kg),
+          date: new Date(formData.date).toISOString(),
+          note: formData.note,
+        });
+        if (res.data.success) {
+          toast.success("Weight log added!");
+          onAdded();
+          onClose();
+        }
       }
     } catch (error) {
-      console.error("Add Weight Error:", error);
+      console.error("Save Weight Error:", error);
       toast.error("Failed to save weight log");
     } finally {
       setLoading(false);
@@ -299,22 +349,28 @@ function AddWeightModal({ onClose, pets, onAdded }) {
         bg-white/90 backdrop-blur-2xl border border-[#8b6b4c]/40
         shadow-[0_45px_120px_rgba(0,0,0,0.25)]"
       >
-        <h3 className="text-2xl font-extrabold text-[#2f3e2c] mb-1">Add weight Log</h3>
-        <p className="text-sm font-medium text-[#6b7d67] mb-6">Keep track of your pet's body progress.</p>
+        <h3 className="text-2xl font-extrabold text-[#2f3e2c] mb-1">
+          {editingLog ? "Edit Weight Log" : "Add Weight Log"}
+        </h3>
+        <p className="text-sm font-medium text-[#6b7d67] mb-6">
+          {editingLog ? "Update this entry's details." : "Keep track of your pet's body progress."}
+        </p>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <Field label="Who is this for?">
-            <select 
-              name="petId" 
-              value={formData.petId} 
-              onChange={handleChange} 
-              className={baseInputClass()}
-            >
-              {pets.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
-          </Field>
+          {!editingLog && (
+            <Field label="Who is this for?">
+              <select 
+                name="petId" 
+                value={formData.petId} 
+                onChange={handleChange} 
+                className={baseInputClass()}
+              >
+                {pets.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </Field>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <Field label="Weight (kg)">

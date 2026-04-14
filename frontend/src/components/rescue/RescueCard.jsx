@@ -1,114 +1,115 @@
 import React from 'react';
-import { MapPin, Clock } from 'lucide-react';
+import { MapPin, Clock, Shield, ArrowRight, User, AlertTriangle } from 'lucide-react';
 import RescueStatusBadge from './RescueStatusBadge';
 import PriorityBadge from './PriorityBadge';
 import { formatDate } from '../../utils/rescueHelpers';
 import { Link } from 'react-router-dom';
+import api from '../../utils/api';
 
 const RescueCard = ({ rescue, showActions = true, actionButton, linkTo }) => {
   if (!rescue) return null;
 
+  // Get base URL for images
+  const apiBaseURL = api.defaults.baseURL.replace('/api', '');
+
+  const getPhotoUrl = (path) => {
+    if (!path) return "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=400";
+    if (path.startsWith('http')) return path;
+    return `${apiBaseURL.endsWith('/') ? apiBaseURL.slice(0, -1) : apiBaseURL}${path.startsWith('/') ? '' : '/'}${path}`;
+  };
+
   const content = (
-    <>
-      <div className="relative h-48 w-full overflow-hidden sm:h-auto sm:w-48 shrink-0">
+    <div className="flex flex-col sm:flex-row h-full">
+      {/* Thumbnail Section */}
+      <div className="relative h-48 sm:h-auto sm:w-48 xl:w-56 shrink-0 overflow-hidden">
         <img 
-          src={rescue.image || "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=400"} 
-          alt="Rescue subject" 
-          className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+          src={getPhotoUrl(rescue.photoUrl)} 
+          alt={rescue.problemType} 
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={(e) => {
+            e.target.src = "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=400";
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-black/0 to-black/0" />
-        <div className="absolute top-3 left-3 flex gap-2">
+        <div className="absolute top-3 left-3 flex flex-col gap-2">
           <PriorityBadge priority={rescue.priority} />
         </div>
       </div>
       
-      <div className="flex flex-1 flex-col justify-between p-5">
+      {/* Content Section */}
+      <div className="flex-1 p-5 flex flex-col justify-between">
         <div>
-          <div className="flex justify-between items-start gap-3 mb-2">
-            <h3 className="text-lg font-bold text-[#2f3e2c] capitalize leading-tight">
-              {rescue.problemType} Pet Rescue
-            </h3>
+          <div className="flex justify-between items-start gap-4 mb-3">
+            <div>
+              <h3 className="text-lg font-bold text-[#2f3e2c] capitalize group-hover:text-[#5f7d5a] transition-colors">
+                {rescue.problemType} Emergency
+              </h3>
+              <div className="flex items-center gap-2 mt-1 text-[11px] font-semibold text-[#6b7d67] uppercase tracking-wider">
+                <Clock className="w-3.5 h-3.5 text-[#5f7d5a]" />
+                {formatDate(rescue.createdAt)}
+              </div>
+            </div>
             <RescueStatusBadge status={rescue.status} />
           </div>
           
-          <p className="mt-2 text-sm text-[#4e5f4a] line-clamp-2 leading-relaxed">
+          <p className="text-sm text-[#4e5f4a] line-clamp-2 leading-relaxed mb-4">
             {rescue.description}
           </p>
           
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-4 text-sm text-[#6b7d67]">
-            <div className="flex items-center gap-2 text-[#4e5f4a]">
-              <MapPin className="w-4 h-4 text-[#5f7d5a]" />
-              <span className="truncate">{rescue.location.address}</span>
-            </div>
-
-            {rescue.location.distance && (
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-[#2f3e2c]">{rescue.location.distance} away</span>
-              </div>
-            )}
-
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[#6b7d67]" />
-              {formatDate(rescue.createdAt)}
-            </div>
+          <div className="flex items-start gap-2 text-sm text-[#6b7d67]">
+            <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-[#8b6b4c]" />
+            <span className="truncate font-medium">
+              {rescue.incidentAddress || rescue.address || "Location Hidden"}
+            </span>
           </div>
         </div>
 
         {showActions && (
-          <div className="mt-5 pt-4 border-t border-[#8b6b4c]/20 flex items-center justify-between">
-            <div className="flex -space-x-2">
+          <div className="mt-5 pt-4 border-t border-[#8b6b4c]/10 flex items-center justify-between">
+            <div className="flex items-center gap-2">
               {rescue.assignedVolunteer ? (
-                <div className="flex items-center text-sm font-medium text-[#4e5f4a]">
-                  <div
-                    className="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center
-                    bg-white/60 text-[#2f3e2c] text-xs mr-2 shadow-sm"
-                  >
-                    {rescue.assignedVolunteer.name.charAt(0)}
-                  </div>
-                  {rescue.assignedVolunteer.name}
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-white/50 rounded-lg border border-[#8b6b4c]/10 shadow-sm">
+                  <User className="w-3.5 h-3.5 text-[#5f7d5a]" />
+                  <span className="text-[11px] font-bold text-[#4e5f4a]">{rescue.assignedVolunteer.fullName}</span>
                 </div>
               ) : (
-                <span
-                  className="text-sm font-medium text-[#2f3e2c]
-                  bg-white/55 px-3 py-1 rounded-full border border-[#8b6b4c]/30"
-                >
-                  Needs Volunteer
-                </span>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-white/40 rounded-lg border border-[#8b6b4c]/10 italic">
+                  <AlertTriangle className="w-3.5 h-3.5 text-[#8b6b4c] animate-pulse" />
+                  <span className="text-[11px] font-semibold text-[#6b7d67]">Awaiting Hero</span>
+                </div>
               )}
             </div>
 
             <div>
               {actionButton ? actionButton : (
-                <button className="text-[#2f3e2c] font-semibold text-sm hover:text-[#5f7d5a] transition">
-                  View Details &rarr;
-                </button>
+                <span className="text-[#2f3e2c] font-bold text-xs uppercase tracking-widest flex items-center gap-1 group-hover:gap-2 transition-all duration-300">
+                  Mission Intel <ArrowRight className="w-4 h-4" />
+                </span>
               )}
             </div>
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 
-  const wrapperClass =
-    "flex flex-col sm:flex-row rounded-3xl overflow-hidden group cursor-pointer " +
-    "bg-gradient-to-br from-white/75 via-[#e5e3df]/75 to-[#a18463]/30 " +
-    "backdrop-blur-2xl border border-[#8b6b4c]/45 " +
-    "shadow-[0_25px_80px_rgba(0,0,0,0.12)] hover:shadow-[0_55px_160px_rgba(95,125,90,0.35)] transition duration-500";
+  const cardStyle = "block relative rounded-2xl overflow-hidden group " + 
+                    "bg-white/60 backdrop-blur-xl border border-white/60 " +
+                    "shadow-[0_10px_40px_rgba(0,0,0,0.06)] hover:shadow-[0_25px_80px_rgba(95,125,90,0.18)] " +
+                    "transition-all duration-500 transform hover:-translate-y-1";
 
   if (linkTo) {
     return (
-      <Link to={linkTo} className={wrapperClass}>
+      <Link to={linkTo} className={cardStyle}>
         {content}
       </Link>
     );
   }
 
   return (
-    <div className={wrapperClass}>
+    <div className={cardStyle}>
       {content}
     </div>
   );
 };
 
-export default RescueCard;
+export default RescueCard;

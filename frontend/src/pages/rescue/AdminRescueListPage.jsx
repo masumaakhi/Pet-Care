@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import SectionHeader from '../../components/rescue/SectionHeader';
 import KPIStatCard from '../../components/rescue/KPIStatCard';
@@ -6,23 +6,88 @@ import RescueFilters from '../../components/rescue/RescueFilters';
 import RescueTable from '../../components/rescue/RescueTable';
 import RescueStatusBadge from '../../components/rescue/RescueStatusBadge';
 import PriorityBadge from '../../components/rescue/PriorityBadge';
-import { rescueRequests, adminAnalytics } from '../../data/rescueMockData';
 import { formatDate } from '../../utils/rescueHelpers';
-import { Activity, ShieldAlert, CheckCircle2, Search, Filter, MoreVertical, Eye } from 'lucide-react';
+import { Activity, ShieldAlert, CheckCircle2, MoreVertical, Eye } from 'lucide-react';
+import rescueService from '../../utils/rescueService';
+import { toast } from 'react-hot-toast';
+import { useSocket } from '../../context/SocketContext';
 
 const AdminRescueListPage = () => {
   const [filters, setFilters] = useState({ search: '', status: '', priority: '', problemType: '' });
+  const [duplicateOnly, setDuplicateOnly] = useState(false);
+  const [rescues, setRescues] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const socket = useSocket();
 
-  const filteredRequests = rescueRequests.filter(req => {
-    if (filters.status && req.status !== filters.status) return false;
-    if (filters.priority && req.priority !== filters.priority) return false;
-    if (filters.problemType && req.problemType !== filters.problemType) return false;
-    if (filters.search) {
-      const s = filters.search.toLowerCase();
-      if (!req.id.toLowerCase().includes(s) && !req.description.toLowerCase().includes(s) && !req.requester.name.toLowerCase().includes(s)) return false;
+
+  // Real-time admin socket room updates
+  const fetchRescues = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = {};
+      if (filters.status) params.status = filters.status;
+      if (filters.priority) params.priority = String(filters.priority).toUpperCase();
+      if (duplicateOnly) params.duplicate = 'true';
+      const res = await rescueService.getAdminRescues(params);
+      if (res.data.success) {
+        setRescues(res.data.data);
+      }
+    } catch (error) {
+      console.error("Fetch Rescues Error:", error);
+      toast.error("Failed to load rescue requests");
+    } finally {
+      setLoading(false);
     }
-    return true;
-  });
+  }, [filters.status, filters.priority, duplicateOnly]);
+
+  useEffect(() => {
+    fetchRescues();
+  }, [fetchRescues]);
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.emit('join:admin');
+    const refresh = () => fetchRescues();
+    socket.on('rescue:new', refresh);
+    socket.on('rescue:status-updated', refresh);
+    socket.on('rescue:duplicate-flagged', refresh);
+    socket.on('rescue:unassigned', refresh);
+    socket.on('notification:new', refresh);
+    return () => {
+      socket.off('rescue:new', refresh);
+      socket.off('rescue:status-updated', refresh);
+      socket.off('rescue:duplicate-flagged', refresh);
+      socket.off('rescue:unassigned', refresh);
+      socket.off('notification:new', refresh);
+    };
+  }, [socket, fetchRescues]);
+
+  const filteredRequests = useMemo(() => {
+    return rescues.filter(req => {
+      if (filters.status && req.status.toLowerCase() !== filters.status.toLowerCase()) return false;
+      if (filters.priority && req.priority.toLowerCase() !== filters.priority.toLowerCase()) return false;
+      if (filters.problemType && req.problemType.toLowerCase() !== filters.problemType.toLowerCase()) return false;
+      if (filters.search) {
+        const s = filters.search.toLowerCase();
+        if (!req.id.toLowerCase().includes(s) && !req.description.toLowerCase().includes(s) && !req.reporter?.fullName?.toLowerCase().includes(s)) return false;
+      }
+      return true;
+    });
+  }, [rescues, filters]);
+
+  const stats = useMemo(() => {
+    const active = rescues.filter(r => r.status === 'PENDING' || r.status === 'ASSIGNED').length;
+    const critical = rescues.filter(r => r.priority === 'CRITICAL').length;
+    const completed = rescues.filter(r =>
+      ['RESCUED', 'SHELTER', 'COMPLETED'].includes(r.status)
+    ).length;
+    return {
+      total: rescues.length,
+      active,
+      critical,
+      completed
+    };
+  }, [rescues]);
 
   return (
     <div
@@ -44,48 +109,37 @@ const AdminRescueListPage = () => {
           description="Monitor, manage, and dispatch all incoming emergency requests."
         />
 
-        {/* Quick Admin Links */}
-        <div className="flex flex-wrap gap-3 mt-4 justify-start">
-          <Link
-            to="/admin/rescues/map"
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-white/70 to-white/50 backdrop-blur-md border border-[#8b6b4c]/30 text-[#2f3e2c] text-sm font-semibold hover:scale-[1.02] hover:shadow-md transition duration-300 shadow-sm"
-          >
-            Live Map Radar
+        {/* Quick Navigation */}
+        <div className="flex flex-wrap gap-3 mb-6 mt-2 items-center">
+          <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/60 border border-[#8b6b4c]/30 text-sm font-semibold text-[#2f3e2c] cursor-pointer">
+            <input
+              type="checkbox"
+              checked={duplicateOnly}
+              onChange={(e) => setDuplicateOnly(e.target.checked)}
+              className="rounded border-[#8b6b4c]/40"
+            />
+            Duplicates only
+          </label>
+          <Link to="/admin/rescues/map" className="px-4 py-2 rounded-xl bg-white/60 border border-[#8b6b4c]/30 text-sm font-bold text-[#5f7d5a] hover:bg-white/80 transition shadow-sm">
+            🗺️ Live Radar Map
           </Link>
-          <Link
-            to="/admin/rescues/analytics"
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-white/70 to-white/50 backdrop-blur-md border border-[#8b6b4c]/30 text-[#2f3e2c] text-sm font-semibold hover:scale-[1.02] hover:shadow-md transition duration-300 shadow-sm"
-          >
-            Analytics & Reports
+          <Link to="/admin/rescues/analytics" className="px-4 py-2 rounded-xl bg-white/60 border border-[#8b6b4c]/30 text-sm font-bold text-[#8b6b4c] hover:bg-white/80 transition shadow-sm">
+            📊 Mission Analytics
           </Link>
-          <Link
-            to="/admin/rescues/duplicates"
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-white/70 to-white/50 backdrop-blur-md border border-[#8b6b4c]/30 text-[#2f3e2c] text-sm font-semibold hover:scale-[1.02] hover:shadow-md transition duration-300 shadow-sm"
-          >
-            Manage Duplicates
+          <Link to="/admin/rescues/duplicates" className="px-4 py-2 rounded-xl bg-white/60 border border-[#8b6b4c]/30 text-sm font-bold text-[#4e5f4a] hover:bg-white/80 transition shadow-sm">
+            👯 Duplicate Reports
           </Link>
-          <Link
-            to="/admin/rescues/notifications"
-            className="px-4 py-2 rounded-xl bg-gradient-to-r from-white/70 to-white/50 backdrop-blur-md border border-[#8b6b4c]/30 text-[#2f3e2c] text-sm font-semibold hover:scale-[1.02] hover:shadow-md transition duration-300 shadow-sm"
-          >
-            Broadcast Notifications
+          <Link to="/admin/rescues/notifications" className="px-4 py-2 rounded-xl bg-white/60 border border-[#8b6b4c]/30 text-sm font-bold text-[#2f3e2c] hover:bg-white/80 transition shadow-sm">
+            🔔 Transmission Logs
           </Link>
         </div>
 
         {/* KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 mt-4">
-          <div className="rounded-2xl bg-white/55 backdrop-blur-xl border border-[#8b6b4c]/35 shadow-[0_16px_50px_rgba(0,0,0,0.10)]">
-            <KPIStatCard title="Total Rescues" value={adminAnalytics.monthlyTrend.reduce((acc, curr) => acc + curr.rescues, 0)} icon={Activity} color="blue" />
-          </div>
-          <div className="rounded-2xl bg-white/55 backdrop-blur-xl border border-[#8b6b4c]/35 shadow-[0_16px_50px_rgba(0,0,0,0.10)]">
-            <KPIStatCard title="Active Rescues" value={adminAnalytics.activeCount} icon={Activity} color="orange" trend="up" trendValue="+12%" />
-          </div>
-          <div className="rounded-2xl bg-white/55 backdrop-blur-xl border border-[#8b6b4c]/35 shadow-[0_16px_50px_rgba(0,0,0,0.10)]">
-            <KPIStatCard title="Critical Needs" value={adminAnalytics.byPriority.find(p => p.name === 'Critical').value} icon={ShieldAlert} color="red" trend="down" trendValue="-5%" />
-          </div>
-          <div className="rounded-2xl bg-white/55 backdrop-blur-xl border border-[#8b6b4c]/35 shadow-[0_16px_50px_rgba(0,0,0,0.10)]">
-            <KPIStatCard title="Total Completed" value="125" icon={CheckCircle2} color="green" />
-          </div>
+          <KPIStatCard title="Total Rescues" value={stats.total} icon={Activity} color="blue" />
+          <KPIStatCard title="Active Rescues" value={stats.active} icon={Activity} color="orange" />
+          <KPIStatCard title="Critical Needs" value={stats.critical} icon={ShieldAlert} color="red" />
+          <KPIStatCard title="Total Completed" value={stats.completed} icon={CheckCircle2} color="green" />
         </div>
 
         <div
@@ -110,23 +164,23 @@ const AdminRescueListPage = () => {
               </button>
 
               <button
-                onClick={() => setFilters({ ...filters, status: 'pending' })}
-                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${filters.status === 'pending'
+                onClick={() => setFilters({ ...filters, status: 'PENDING' })}
+                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${filters.status === 'PENDING'
                     ? 'bg-white/80 border text-[#8b6b4c] shadow-sm border-[#8b6b4c]/25'
                     : 'text-[#6b7d67] hover:text-[#2f3e2c]'
                   }`}
               >
-                Pending Team
+                Pending
               </button>
 
               <button
-                onClick={() => setFilters({ ...filters, status: 'in_progress' })}
-                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${filters.status === 'in_progress'
+                onClick={() => setFilters({ ...filters, status: 'ASSIGNED' })}
+                className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all ${filters.status === 'ASSIGNED'
                     ? 'bg-white/80 border text-[#5f7d5a] shadow-sm border-[#5f7d5a]/25'
                     : 'text-[#6b7d67] hover:text-[#2f3e2c]'
                   }`}
               >
-                Active
+                Assigned
               </button>
             </div>
           </div>
@@ -136,15 +190,22 @@ const AdminRescueListPage = () => {
           </div>
 
           <RescueTable headers={['Request ID', 'Reporter', 'Problem', 'Priority', 'Assigned To', 'Status', 'Started', 'Actions']}>
-            {filteredRequests.map((rescue) => (
+            {loading ? (
+               <tr>
+                  <td colSpan="8" className="px-6 py-12 text-center">
+                    <div className="w-8 h-8 border-4 border-[#7fa37a]/30 border-t-[#5f7d5a] rounded-full animate-spin mx-auto mb-2" />
+                    <p className="text-sm text-[#6b7d67]">Loading rescues...</p>
+                  </td>
+               </tr>
+            ) : filteredRequests.map((rescue) => (
               <tr key={rescue.id} className="hover:bg-white/30 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className="text-sm font-bold text-[#2f3e2c]">{rescue.id}</span>
+                  <span className="text-sm font-bold text-[#2f3e2c]">{rescue.id.split('-')[0]}</span>
                 </td>
 
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-[#2f3e2c]">{rescue.requester.name}</div>
-                  <div className="text-xs text-[#6b7d67]">{rescue.requester.phone}</div>
+                  <div className="text-sm font-medium text-[#2f3e2c]">{rescue.reporter?.fullName || "Anonymous"}</div>
+                  <div className="text-xs text-[#6b7d67]">{rescue.reporter?.email}</div>
                 </td>
 
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-[#4e5f4a] capitalize font-medium">
@@ -162,9 +223,9 @@ const AdminRescueListPage = () => {
                         className="w-6 h-6 rounded-full bg-white/65 border border-[#8b6b4c]/25
                         flex items-center justify-center text-[#8b6b4c] text-[10px] mr-2 shrink-0"
                       >
-                        {rescue.assignedVolunteer.name.charAt(0)}
+                        {rescue.assignedVolunteer.fullName.charAt(0)}
                       </div>
-                      {rescue.assignedVolunteer.name}
+                      {rescue.assignedVolunteer.fullName}
                     </div>
                   ) : (
                     <span
@@ -203,7 +264,7 @@ const AdminRescueListPage = () => {
               </tr>
             ))}
 
-            {filteredRequests.length === 0 && (
+            {!loading && filteredRequests.length === 0 && (
               <tr>
                 <td colSpan="8" className="px-6 py-12 text-center text-sm text-[#6b7d67]">
                   No rescues found matching the current filters.

@@ -9,6 +9,7 @@ import ForgotPassword from "../pages/ForgotPassword";
 import UserProfile from "../pages/UserProfile";
 import PetList from "../pages/PetList";
 import AddPet from "../pages/AddPet";
+import EditPet from "../pages/EditPet";
 import PetDetails from "../pages/PetDetails";
 import CareScheduleList from "../pages/CareScheduleList";
 import WeightLog from "../pages/WeightLog";
@@ -32,6 +33,7 @@ import AdminLayout from "../pages/admin/AdminLayout";
 import AdminUserManagementPage from "../pages/admin/AdminUserManagementPage";
 import AdminAdoptionManagementPage from "../pages/admin/AdminAdoptionManagementPage";
 import AdminAdoptionDetailPage from "../pages/admin/AdminAdoptionDetailPage";
+import AdminAddAdoptionListingPage from "../pages/admin/AdminAddAdoptionListingPage";
 
 // Rescue User Pages
 import RescueRequestPage from '../pages/rescue/RescueRequestPage';
@@ -55,10 +57,14 @@ import AdminRescueNotificationsPage from '../pages/rescue/AdminRescueNotificatio
 import DonatePage from '../pages/donations/DonatePage';
 import DonationCampaignDetailsPage from '../pages/donations/DonationCampaignDetailsPage';
 import MyDonationsPage from '../pages/donations/MyDonationsPage';
+import SponsorPetDonatePage from '../pages/donations/SponsorPetDonatePage';
 
 // Donation Admin Pages
 import AdminDonationsPage from '../pages/admin/AdminDonationsPage';
 import AdminDonationReportsPage from '../pages/admin/AdminDonationReportsPage';
+import AdminPlatformReportsPage from '../pages/admin/AdminPlatformReportsPage';
+import AdminPlatformAlertsPage from '../pages/admin/AdminPlatformAlertsPage';
+import AdminSettingsPage from '../pages/admin/AdminSettingsPage';
 import AdminUserProfilePage from "../pages/admin/AdminUserProfilePage";
 import AdminEditUserPage from "../pages/admin/AdminEditUserPage";
 import AdminPetsPage from "../pages/admin/AdminPetsPage";
@@ -89,6 +95,7 @@ export const router = createBrowserRouter([
       { path: "/pets", element: <PetList /> },
       { path: "/pets/add", element: <AddPet /> },
       { path: "/pets/:id", element: <PetDetails /> },
+      { path: "/pets/:id/edit", element: <EditPet /> },
       { path: "/pets/schedule", element: <CareScheduleList /> },
       { path: "/pets/weight", element: <WeightLog /> },
       { path: "/vaccines", element: <VaccinationRecords /> },
@@ -110,6 +117,7 @@ export const router = createBrowserRouter([
       // Donation Routes
       { path: "/donate", element: <DonatePage /> },
       { path: "/donations", element: <MyDonationsPage /> },
+      { path: "/donations/sponsor/:id", element: <SponsorPetDonatePage /> },
       { path: "/donations/campaign/:id", element: <DonationCampaignDetailsPage /> },
 
       // Admin inside App (so Nav/Footer/bg stays)
@@ -132,7 +140,11 @@ export const router = createBrowserRouter([
           // Donation Admin Routes
           { path: "donations", element: <AdminDonationsPage /> },
           { path: "donations/reports", element: <AdminDonationReportsPage /> },
-          // Adoption Admin Routes
+          { path: "reports", element: <AdminPlatformReportsPage /> },
+          { path: "alerts", element: <AdminPlatformAlertsPage /> },
+          { path: "settings", element: <AdminSettingsPage /> },
+          // Adoption Admin Routes (specific paths before :id)
+          { path: "adoptions/add", element: <AdminAddAdoptionListingPage /> },
           { path: "adoptions", element: <AdminAdoptionManagementPage /> },
           { path: "adoptions/:id", element: <AdminAdoptionDetailPage /> },
         ],

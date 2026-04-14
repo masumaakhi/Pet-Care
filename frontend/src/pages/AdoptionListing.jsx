@@ -2,7 +2,8 @@ import React, { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import api from "../utils/api";
 import { Link } from "react-router-dom";
-import { FaArrowLeft, FaTimes } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
+import { getAdoptionListingImage } from "../utils/helpers";
 
 // Fallback image if API doesn't provide one
 import b1 from "../assets/b1.jpg";
@@ -22,33 +23,17 @@ function AdoptionListing() {
         const fetchAdoptions = async () => {
             try {
                 setLoading(true);
-
-                // 1. Fetch from LocalStorage first (immediate)
-                const localData = JSON.parse(localStorage.getItem("adoptions") || "[]");
-
-                // 2. Fetch from API
-                try {
-                    const response = await api.get("/adoptions");
-                    const apiData = response.data || [];
-
-                    // Merge data, prioritizing local if there are ID conflicts (or just combine)
-                    // For now, let's just combine and unique by ID
-                    const combined = [...localData];
-                    apiData.forEach(apiPet => {
-                        if (!combined.find(p => p.id === apiPet.id)) {
-                            combined.push(apiPet);
-                        }
-                    });
-                    setPets(combined);
-                } catch (apiErr) {
-                    console.warn("API fetch failed, using local data only:", apiErr.message);
-                    setPets(localData);
-                }
-
+                const response = await api.get("/adoptions");
+                const apiData =
+                    response.data?.success && Array.isArray(response.data.data)
+                        ? response.data.data
+                        : [];
+                setPets(apiData);
                 setError(null);
             } catch (err) {
                 console.error("Error fetching adoptions:", err);
                 setError("Failed to load adoption listings. Please try again later.");
+                setPets([]);
             } finally {
                 setLoading(false);
             }
@@ -57,20 +42,8 @@ function AdoptionListing() {
         fetchAdoptions();
     }, []);
 
-    const handleDeletePet = (petId) => {
-        // 1. Update UI state
-        setPets(prevPets => prevPets.filter(p => p.id !== petId));
-
-        // 2. Update LocalStorage
-        const localData = JSON.parse(localStorage.getItem("adoptions") || "[]");
-        const updatedLocal = localData.filter(p => p.id !== petId);
-        localStorage.setItem("adoptions", JSON.stringify(updatedLocal));
-
-        // (Optional) If there's an API, you'd call axios.delete(`/adoptions/${petId}`) here.
-    };
-
     const filteredPets = useMemo(() => {
-        let base = pets.filter(p => p.status !== "ADOPTED");
+        let base = pets.filter((p) => p.status === "APPROVED");
         if (activeFilter === "All") return base;
         return base.filter((p) => p.type === activeFilter);
     }, [activeFilter, pets]);
@@ -194,7 +167,7 @@ function AdoptionListing() {
                                     >
                                         <div className="relative h-48 overflow-hidden">
                                             <img
-                                                src={pet.image || b1}
+                                                src={getAdoptionListingImage(pet)}
                                                 alt={pet.name}
                                                 className="w-full h-full object-cover transition group-hover:scale-105 duration-500"
                                                 onError={(e) => {
@@ -204,17 +177,6 @@ function AdoptionListing() {
                                             <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-[11px] font-medium bg-[#f1e9dd]/90 text-[#5a452f]">
                                                 {pet.tag || "Available"}
                                             </div>
-
-                                            {/* Delete Button - Only shown if not pending */}
-                                            {pet.status !== "PENDING" && (
-                                                <button
-                                                    onClick={() => handleDeletePet(pet.id)}
-                                                    className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-full bg-white/20 hover:bg-red-500/80 backdrop-blur-md text-white border border-white/30 transition-all duration-300 shadow-sm"
-                                                    title="Remove Listing"
-                                                >
-                                                    <FaTimes size={12} />
-                                                </button>
-                                            )}
                                         </div>
 
                                         <div className="p-4 flex-1 flex flex-col">
@@ -232,11 +194,9 @@ function AdoptionListing() {
 
                                             <Link
                                                 to={`/adopt/listing/${pet.id}`}
-                                                className={`mt-auto w-full py-2.5 rounded-2xl text-sm font-semibold shadow-sm group-hover:shadow-md transition block text-center ${pet.status === 'PENDING' ? 'bg-orange-100 text-orange-700' :
-                                                    'bg-gradient-to-r from-[#5f7d5a]/60 via-[#7fa37a] to-[#8b6b4c] text-black/80 group-hover:scale-[1.02]'
-                                                    }`}
+                                                className="mt-auto w-full py-2.5 rounded-2xl text-sm font-semibold shadow-sm group-hover:shadow-md transition block text-center bg-gradient-to-r from-[#5f7d5a]/60 via-[#7fa37a] to-[#8b6b4c] text-black/80 group-hover:scale-[1.02]"
                                             >
-                                                {pet.status === 'PENDING' ? 'Request Pending' : 'Adopt Now'}
+                                                Adopt Now
                                             </Link>
                                         </div>
                                     </motion.div>

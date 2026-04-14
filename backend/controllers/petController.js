@@ -9,11 +9,14 @@ const { sendSuccess, sendError } = require("../utils/response");
  */
 const createPet = async (req, res) => {
   try {
-    const { name, species, breed, age_months, gender, weight_kg, description } = req.body;
+    const { name, species, breed, age_months, gender, weight_kg, description, isForAdoption } = req.body;
 
     if (!name || !species || !breed || !age_months || !gender || !weight_kg) {
       return sendError(res, 400, "Please provide all required fields");
     }
+
+    const isAdmin = req.user.role === "admin";
+    const listingApproved = Boolean(isForAdoption && isAdmin);
 
     const pet = await prisma.pet.create({
       data: {
@@ -25,10 +28,36 @@ const createPet = async (req, res) => {
         weight_kg: parseFloat(weight_kg),
         description,
         ownerId: req.user.id,
+        status: isAdmin ? "APPROVED" : "PENDING",
+        adoptionStatus: isForAdoption ? (listingApproved ? "APPROVED" : "PENDING") : "NONE",
       },
     });
 
-    return sendSuccess(res, 201, "Pet created successfully", pet);
+    if (isForAdoption) {
+      await prisma.adoptionPet.create({
+        data: {
+          name: pet.name,
+          type: pet.species,
+          breed: pet.breed,
+          age: pet.age_months.toString() + " months",
+          gender: pet.gender,
+          image: null,
+          petId: pet.id,
+          ownerId: req.user.id,
+          status: listingApproved ? "APPROVED" : "PENDING",
+          tag: listingApproved ? "Available for Adoption" : "Pending Approval",
+        },
+      });
+    }
+
+    const msg =
+      "Pet created successfully" +
+      (isForAdoption
+        ? listingApproved
+          ? " and published on adoption listing"
+          : " and adoption request sent for admin review"
+        : "");
+    return sendSuccess(res, 201, msg, pet);
   } catch (error) {
     console.error("Create Pet Error:", error);
     return sendError(res, 500, "Internal Server Error");
@@ -42,9 +71,15 @@ const createPet = async (req, res) => {
  */
 const getPets = async (req, res) => {
   try {
+    const where = {};
+    if (req.user.role !== "admin" && req.user.role !== "vet") {
+      where.ownerId = req.user.id;
+    }
+
     const pets = await prisma.pet.findMany({
-      where: { ownerId: req.user.id },
+      where,
       include: {
+        photos: { orderBy: { createdAt: "desc" }, take: 1 },
         _count: {
           select: { weightLogs: true, schedules: true },
         },
@@ -70,14 +105,14 @@ const getPetById = async (req, res) => {
 
     const pet = await prisma.pet.findUnique({
       where: { id },
+      include: { photos: { orderBy: { createdAt: "desc" } } },
     });
 
     if (!pet) {
       return sendError(res, 404, "Pet not found");
     }
 
-    // Verify ownership
-    if (pet.ownerId !== req.user.id) {
+    if (pet.ownerId !== req.user.id && req.user.role !== "admin") {
       return sendError(res, 403, "Not authorized to access this pet");
     }
 
@@ -302,6 +337,11 @@ const uploadPetPhoto = async (req, res) => {
       },
     });
 
+    await prisma.adoptionPet.updateMany({
+      where: { petId: id },
+      data: { image: photoUrl },
+    });
+
     return sendSuccess(res, 201, "Photo uploaded successfully", photo);
   } catch (error) {
     console.error(error);
@@ -380,6 +420,7 @@ const adminGetAllPets = async (req, res) => {
 
     const pets = await prisma.pet.findMany({
       include: {
+        photos: { orderBy: { createdAt: "desc" }, take: 1 },
         owner: {
           select: { fullName: true, email: true },
         },
@@ -492,6 +533,109 @@ const getPetPrescriptions = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Update care schedule
+ * @route   PUT /api/pets/schedules/:scheduleId
+ */
+const updateSchedule = async (req, res) => {
+  try {
+    const { scheduleId } = req.params;
+    const { type, title, scheduled_date, scheduled_time, frequency, notes } = req.body;
+
+    const schedule = await prisma.schedule.findUnique({ where: { id: scheduleId } });
+    if (!schedule) return sendError(res, 404, "Schedule not found");
+    if (schedule.ownerId !== req.user.id) return sendError(res, 403, "Forbidden");
+
+    const updated = await prisma.schedule.update({
+      where: { id: scheduleId },
+      data: {
+        type,
+        title,
+        scheduled_date: scheduled_date ? new Date(scheduled_date) : undefined,
+        scheduled_time,
+        frequency,
+        notes,
+      },
+    });
+
+    return sendSuccess(res, 200, "Schedule updated", updated);
+  } catch (error) {
+    console.error(error);
+    return sendError(res, 500, "Server Error");
+  }
+};
+
+/**
+ * @desc    Delete care schedule
+ * @route   DELETE /api/pets/schedules/:scheduleId
+ */
+const deleteSchedule = async (req, res) => {
+  try {
+    const { scheduleId } = req.params;
+
+    const schedule = await prisma.schedule.findUnique({ where: { id: scheduleId } });
+    if (!schedule) return sendError(res, 404, "Schedule not found");
+    if (schedule.ownerId !== req.user.id) return sendError(res, 403, "Forbidden");
+
+    await prisma.schedule.delete({ where: { id: scheduleId } });
+
+    return sendSuccess(res, 200, "Schedule deleted");
+  } catch (error) {
+    console.error(error);
+    return sendError(res, 500, "Server Error");
+  }
+};
+
+/**
+ * @desc    Update weight log
+ * @route   PUT /api/pets/weights/:logId
+ */
+const updateWeightLog = async (req, res) => {
+  try {
+    const { logId } = req.params;
+    const { weight_kg, date, note } = req.body;
+
+    const log = await prisma.weightLog.findUnique({ where: { id: logId } });
+    if (!log) return sendError(res, 404, "Weight log not found");
+    if (log.ownerId !== req.user.id) return sendError(res, 403, "Forbidden");
+
+    const updated = await prisma.weightLog.update({
+      where: { id: logId },
+      data: {
+        weight_kg: weight_kg ? parseFloat(weight_kg) : undefined,
+        date: date ? new Date(date) : undefined,
+        note,
+      },
+    });
+
+    return sendSuccess(res, 200, "Weight log updated", updated);
+  } catch (error) {
+    console.error(error);
+    return sendError(res, 500, "Server Error");
+  }
+};
+
+/**
+ * @desc    Delete weight log
+ * @route   DELETE /api/pets/weights/:logId
+ */
+const deleteWeightLog = async (req, res) => {
+  try {
+    const { logId } = req.params;
+
+    const log = await prisma.weightLog.findUnique({ where: { id: logId } });
+    if (!log) return sendError(res, 404, "Weight log not found");
+    if (log.ownerId !== req.user.id) return sendError(res, 403, "Forbidden");
+
+    await prisma.weightLog.delete({ where: { id: logId } });
+
+    return sendSuccess(res, 200, "Weight log deleted");
+  } catch (error) {
+    console.error(error);
+    return sendError(res, 500, "Server Error");
+  }
+};
+
 module.exports = {
   createPet,
   getPets,
@@ -500,8 +644,12 @@ module.exports = {
   deletePet,
   getPetSchedules,
   createSchedule,
+  updateSchedule,
+  deleteSchedule,
   getPetWeightLogs,
   createWeightLog,
+  updateWeightLog,
+  deleteWeightLog,
   uploadPetPhoto,
   getPetGallery,
   deletePetPhoto,

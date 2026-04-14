@@ -1,10 +1,41 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import SectionHeader from '../../components/rescue/SectionHeader';
 import KPIStatCard from '../../components/rescue/KPIStatCard';
-import { adminAnalytics } from '../../data/rescueMockData';
+import rescueService from '../../utils/rescueService';
 import { Activity, Clock, ShieldCheck, TrendingUp, BarChart3, PieChart } from 'lucide-react';
 
+function countFromGroupRow(row) {
+  if (!row || row._count == null) return 0;
+  if (typeof row._count === 'number') return row._count;
+  return row._count._all ?? 0;
+}
+
 const AdminRescueAnalyticsPage = () => {
+  const [analytics, setAnalytics] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
+
+  const fetchAnalytics = async () => {
+    try {
+      const res = await rescueService.getAnalytics();
+      if (res.data.success) setAnalytics(res.data.data);
+    } catch (e) {
+      console.error("Analytics fetch error:", e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const total = analytics?.overview?.total ?? '--';
+  const active = analytics?.overview?.active ?? '--';
+  const completed = analytics?.overview?.completed ?? '--';
+
+  // Build chart data from API status counts
+  const statusCounts = analytics?.statusCounts || [];
+  const maxCount = Math.max(...statusCounts.map(countFromGroupRow), 1);
 
   return (
     <div
@@ -28,16 +59,16 @@ const AdminRescueAnalyticsPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 mt-4">
           <div className="rounded-2xl bg-white/55 backdrop-blur-xl border border-[#8b6b4c]/35 shadow-[0_16px_50px_rgba(0,0,0,0.10)]">
-            <KPIStatCard title="Overall Success Rate" value={adminAnalytics.successRate} icon={ShieldCheck} color="green" trend="up" trendValue="+2.4%" />
+            <KPIStatCard title="Total Rescues" value={total} icon={ShieldCheck} color="green" />
           </div>
           <div className="rounded-2xl bg-white/55 backdrop-blur-xl border border-[#8b6b4c]/35 shadow-[0_16px_50px_rgba(0,0,0,0.10)]">
-            <KPIStatCard title="Active Rescues Avg" value={adminAnalytics.activeCount} icon={Activity} color="orange" trend="down" trendValue="-1" />
+            <KPIStatCard title="Active Rescues" value={active} icon={Activity} color="orange" />
           </div>
           <div className="rounded-2xl bg-white/55 backdrop-blur-xl border border-[#8b6b4c]/35 shadow-[0_16px_50px_rgba(0,0,0,0.10)]">
-            <KPIStatCard title="Avg Dispatch Time" value={adminAnalytics.avgResponseTime} icon={Clock} color="blue" trend="up" trendValue="-3 mins" />
+            <KPIStatCard title="Total Completed" value={completed} icon={Clock} color="blue" />
           </div>
           <div className="rounded-2xl bg-white/55 backdrop-blur-xl border border-[#8b6b4c]/35 shadow-[0_16px_50px_rgba(0,0,0,0.10)]">
-            <KPIStatCard title="Active Volunteers (Weekly)" value="45" icon={TrendingUp} color="purple" trend="up" trendValue="+5" />
+            <KPIStatCard title="Pending Actions" value={loading ? '...' : countFromGroupRow(analytics?.statusCounts?.find((s) => s.status === 'PENDING'))} icon={TrendingUp} color="purple" />
           </div>
         </div>
 
@@ -67,22 +98,30 @@ const AdminRescueAnalyticsPage = () => {
               </select>
             </div>
 
-            <div className="p-6 h-80 flex items-end justify-center gap-8 border-b-4 border-[#8b6b4c]/10 pb-0">
-              {adminAnalytics.monthlyTrend.map((data, i) => (
-                <div key={i} className="flex flex-col items-center group w-16">
-                  <span className="text-xs font-bold text-[#6b7d67] mb-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {data.rescues}
-                  </span>
-                  <div 
-                    className="w-full rounded-t-2xl transition-all duration-500
-                    bg-gradient-to-t from-[#5f7d5a] via-[#7fa37a] to-[#8b6b4c]
-                    group-hover:scale-y-[1.03]
-                    shadow-[0_12px_30px_rgba(95,125,90,0.25)]"
-                    style={{ height: `${(data.rescues / 60) * 100}%` }}
-                  ></div>
-                  <span className="mt-4 mb-2 text-sm font-medium text-[#4e5f4a]">{data.month}</span>
+            <div className="p-6 h-80 flex items-end justify-center gap-6 border-b-4 border-[#8b6b4c]/10 pb-0">
+              {loading ? (
+                <div className="flex items-center justify-center w-full h-full">
+                  <div className="w-8 h-8 border-4 border-[#7fa37a]/30 border-t-[#5f7d5a] rounded-full animate-spin" />
                 </div>
-              ))}
+              ) : statusCounts.length > 0 ? (
+                statusCounts.map((data, i) => (
+                  <div key={i} className="flex flex-col items-center group flex-1 max-w-[80px]">
+                    <span className="text-xs font-bold text-[#6b7d67] mb-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {countFromGroupRow(data)}
+                    </span>
+                    <div
+                      className="w-full rounded-t-2xl transition-all duration-500
+                      bg-gradient-to-t from-[#5f7d5a] via-[#7fa37a] to-[#8b6b4c]
+                      group-hover:scale-y-[1.03]
+                      shadow-[0_12px_30px_rgba(95,125,90,0.25)]"
+                      style={{ height: `${(countFromGroupRow(data) / maxCount) * 100}%` }}
+                    ></div>
+                    <span className="mt-4 mb-2 text-xs font-medium text-[#4e5f4a] text-center">{data.status?.replace(/_/g,' ')}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-[#6b7d67]">No data yet</p>
+              )}
             </div>
           </div>
 
@@ -102,8 +141,8 @@ const AdminRescueAnalyticsPage = () => {
             </div>
 
             <div className="p-8 flex items-center justify-center h-80 relative">
+              {/* Live donut from type counts */}
               <div className="w-48 h-48 rounded-full border-[16px] border-white/50 relative shadow-[0_20px_60px_rgba(0,0,0,0.10)]">
-                {/* Fake donut chart segments through css conic-gradient */}
                 <div
                   className="absolute inset-[-16px] rounded-full"
                   style={{
@@ -112,31 +151,23 @@ const AdminRescueAnalyticsPage = () => {
                     WebkitMaskImage: 'radial-gradient(transparent 55%, black 56%)'
                   }}
                 ></div>
-
                 <div className="absolute inset-0 flex items-center justify-center flex-col">
-                  <span className="text-2xl font-bold text-[#2f3e2c]">Total</span>
-                  <span className="text-sm font-medium text-[#6b7d67]">100</span>
+                  <span className="text-2xl font-bold text-[#2f3e2c]">{total}</span>
+                  <span className="text-xs font-medium text-[#6b7d67]">Total</span>
                 </div>
               </div>
-               
-              <div className="ml-12 space-y-4">
-                {adminAnalytics.byPriority.map((p, i) => (
+
+              <div className="ml-12 space-y-3">
+                {(analytics?.typeCounts || []).slice(0, 4).map((t, i) => (
                   <div key={i} className="flex items-center">
-                    <span
-                      className={`w-4 h-4 rounded mr-3 ${
-                        p.name === 'Critical'
-                          ? 'bg-[#8b6b4c]'
-                          : p.name === 'High'
-                          ? 'bg-[#7fa37a]'
-                          : 'bg-[#5f7d5a]'
-                      }`}
-                    ></span>
+                    <span className={`w-4 h-4 rounded mr-3 ${i===0?'bg-[#8b6b4c]':i===1?'bg-[#7fa37a]':i===2?'bg-[#5f7d5a]':'bg-[#4e5f4a]'}`}></span>
                     <div>
-                      <p className="font-bold text-[#2f3e2c]">{p.name}</p>
-                      <p className="text-sm text-[#6b7d67]">{p.value}% of rescues</p>
+                      <p className="font-bold text-[#2f3e2c] capitalize">{t.problemType}</p>
+                      <p className="text-sm text-[#6b7d67]">{countFromGroupRow(t)} rescues</p>
                     </div>
                   </div>
                 ))}
+                {!analytics && <p className="text-sm text-[#6b7d67]">Loading...</p>}
               </div>
             </div>
           </div>

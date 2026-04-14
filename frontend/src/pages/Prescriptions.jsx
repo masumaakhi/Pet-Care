@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../utils/api";
 import { toast } from "react-hot-toast";
 import { usePet } from "../context/PetContext";
+import PetSelector from "../components/medical/PetSelector";
 
 export default function Prescriptions() {
-  const { selectedPetId, setSelectedPetId, pets } = usePet();
+  const { selectedPetId, pets } = usePet();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -20,7 +21,7 @@ export default function Prescriptions() {
   const fetchPrescriptions = async () => {
     try {
       setLoading(true);
-      const res = await api.get(`/pets/${selectedPetId}/prescriptions`);
+      const res = await api.get(`/medical/prescriptions?petId=${selectedPetId}`);
       if (res.data.success) {
         setItems(res.data.data);
       }
@@ -53,12 +54,9 @@ export default function Prescriptions() {
             <h1 className="text-3xl font-black">Prescriptions</h1>
             <p className="text-[#6b7d67] mt-1 font-bold">Manage meds & clinical documents.</p>
           </div>
-          <div className="flex gap-3">
-             <select value={selectedPetId || ""} onChange={(e) => setSelectedPetId(e.target.value)} className="px-5 py-2.5 rounded-2xl bg-white/60 border border-[#8b6b4c]/40 font-black">
-                <option value="" disabled>Every Patient</option>
-                {pets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-             </select>
-             <button onClick={() => setIsOpen(true)} className="px-6 py-2.5 rounded-2xl bg-[#5f7d5a] text-white font-black hover:scale-105 transition shadow-lg whitespace-nowrap">➕ Upload Doc</button>
+          <div className="flex flex-col sm:flex-row items-end gap-3 w-full sm:w-auto text-[#2f3e2c]">
+             <PetSelector />
+             <button onClick={() => setIsOpen(true)} className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-[#5f7d5a] text-white font-black hover:scale-105 transition shadow-lg whitespace-nowrap">➕ Upload Doc</button>
           </div>
         </motion.div>
 
@@ -156,8 +154,12 @@ function UploadModal({ onClose, onAdd, pets }) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
              <Field label="Pet">
-                <select className="w-full p-4 rounded-2xl border font-bold" value={petId} onChange={e => setPetId(e.target.value)}>
-                   {pets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                <select 
+                  className="w-full p-4 rounded-2xl border border-[#8b6b4c]/20 bg-[#f3eee8]/50 font-bold text-[#2f3e2c] outline-none focus:ring-2 focus:ring-[#7fa37a]/50 transition" 
+                  value={petId} 
+                  onChange={e => setPetId(e.target.value)}
+                >
+                   {pets.map(p => <option key={p.id} value={p.id}>{p.name} ({p.species})</option>)}
                 </select>
              </Field>
              <Field label="Date"><input type="date" className="w-full p-4 rounded-2xl border font-bold" value={date} onChange={e => setDate(e.target.value)} /></Field>
@@ -166,19 +168,37 @@ function UploadModal({ onClose, onAdd, pets }) {
           <Field label="Prescription File (PDF/Image)"><input type="file" className="w-full p-4 rounded-2xl border font-bold" onChange={e => setFile(e.target.files?.[0])} /></Field>
           
           <div className="pt-4">
-             <label className="text-[10px] font-black uppercase text-[#6b7d67] tracking-widest mb-2 block">Medicine Routine</label>
-             <div className="space-y-2">
+             <div className="flex items-center justify-between mb-3 px-1">
+                <label className="text-[10px] font-black uppercase text-[#6b7d67] tracking-widest">Medicine Routine</label>
+                <button type="button" onClick={() => setMedicines(prev => [...prev, {name:"", time:"Morning", days:1, reminder:true}])} className="text-[10px] font-black uppercase text-[#5f7d5a] hover:underline">+ Add Medicine</button>
+             </div>
+             <div className="space-y-3">
                 {medicines.map((m, i) => (
-                   <div key={i} className="grid grid-cols-4 gap-2">
-                      <input className="col-span-1 p-3 rounded-xl border text-xs font-bold" placeholder="Medicine" value={m.name} onChange={e => updateMed(i, "name", e.target.value)} />
-                      <select className="p-3 rounded-xl border text-xs font-bold" value={m.time} onChange={e => updateMed(i, "time", e.target.value)}>
-                         <option>Morning</option><option>Afternoon</option><option>Evening</option><option>Night</option>
-                      </select>
-                      <input type="number" className="p-3 rounded-xl border text-xs font-bold" value={m.days} onChange={e => updateMed(i, "days", e.target.value)} />
-                      <button type="button" onClick={() => updateMed(i, "reminder", !m.reminder)} className={`p-3 rounded-xl border text-[10px] font-black uppercase transition ${m.reminder ? 'bg-[#5f7d5a] text-white' : 'text-[#6b7d67]'}`}>Alerts</button>
+                   <div key={i} className="flex flex-col sm:flex-row gap-2 bg-[#f3eee8]/40 p-3 rounded-2xl border border-[#8b6b4c]/10">
+                      <div className="flex-1 space-y-2">
+                         <input className="w-full p-2.5 rounded-xl border bg-white/50 text-xs font-bold" placeholder="Medicine name..." value={m.name} onChange={e => updateMed(i, "name", e.target.value)} />
+                         <div className="flex gap-2">
+                            <select className="flex-1 p-2.5 rounded-xl border bg-white/50 text-[10px] font-bold" value={m.time} onChange={e => updateMed(i, "time", e.target.value)}>
+                               <option>Morning</option><option>Afternoon</option><option>Evening</option><option>Night</option>
+                            </select>
+                            <div className="flex items-center gap-1 border rounded-xl bg-white/50 px-2">
+                               <span className="text-[9px] font-black text-[#6b7d67]">Days:</span>
+                               <input type="number" className="w-10 bg-transparent text-[10px] font-bold outline-none" value={m.days} onChange={e => updateMed(i, "days", e.target.value)} />
+                            </div>
+                         </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                         <button type="button" onClick={() => updateMed(i, "reminder", !m.reminder)} className={`flex-1 sm:flex-none px-4 py-2 rounded-xl border text-[9px] font-black uppercase transition shadow-sm ${m.reminder ? 'bg-[#5f7d5a] text-white border-[#5f7d5a]' : 'bg-white text-[#6b7d67] border-[#8b6b4c]/20'}`}>
+                           {m.reminder ? '🔔 Reminder On' : '🔕 No Alerts'}
+                         </button>
+                         {medicines.length > 1 && (
+                            <button type="button" onClick={() => setMedicines(prev => prev.filter((_, idx) => idx !== i))} className="w-9 h-9 flex items-center justify-center rounded-xl bg-rose-50 text-rose-500 border border-rose-100 hover:bg-rose-500 hover:text-white transition">
+                               ✕
+                            </button>
+                         )}
+                      </div>
                    </div>
                 ))}
-                <button type="button" onClick={() => setMedicines(prev => [...prev, {name:"", time:"Morning", days:1, reminder:true}])} className="text-xs font-black uppercase text-[#5f7d5a] mt-2">+ Add Item</button>
              </div>
           </div>
 
