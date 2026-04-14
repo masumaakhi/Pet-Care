@@ -1,4 +1,5 @@
-generator client {
+ //backend/prisma/schema.prisma
+ generator client {
   provider = "prisma-client-js"
 }
 
@@ -14,10 +15,22 @@ model User {
   password  String?
   role      Role     @default(user)
   googleId  String?
+  phone     String?
+  address   String?
+  bio       String?
+  latitude  Float?
+  longitude Float?
+  status    String   @default("active")
   createdAt DateTime @default(now())
   pets      Pet[]
   adoptionApplications AdoptionApplication[]
   serviceBookings ServiceBooking[]
+  rescuesReported       RescueRequest[]       @relation("Reporter")
+  rescuesAssigned       RescueRequest[]       @relation("Volunteer")
+  rescueVolunteerAssignments RescueAssignment[] @relation("AssignmentVolunteer")
+  volunteerProfile      VolunteerProfile?
+  notifications         RescueNotification[]
+  donations             Donation[]
 }
 
 model Pet {
@@ -40,6 +53,10 @@ model Pet {
   vaccinations Vaccination[]
   medicalRecords MedicalRecord[]
   prescriptions Prescription[]
+  adoptionStatus AdoptionStatus @default(NONE)
+  adoptionListing AdoptionPet?
+  donationCampaigns   DonationCampaign[]
+  donationSponsorSlots DonationSponsorPet[]
 }
 
 model PetPhoto {
@@ -91,6 +108,34 @@ enum PetStatus {
   APPROVED
   REJECTED
   FLAGGED
+}
+
+enum AdoptionStatus {
+  NONE
+  PENDING
+  APPROVED
+  REJECTED
+  ADOPTED
+}
+
+enum RescueStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  PICKED
+  VET
+  RESCUED
+  SHELTER
+  CANCELLED
+  COMPLETED
+}
+
+enum AssignmentStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  COMPLETED
 }
 
 model Vaccination {
@@ -152,9 +197,52 @@ model AdoptionPet {
   size      String?
   image     String?
   tag       String?  @default("Available for Adoption")
+  status    AdoptionStatus @default(PENDING)
+  
+  petId     String?  @unique
+  pet       Pet?     @relation(fields: [petId], references: [id])
+  
+  ownerId   String?
   createdAt DateTime @default(now())
 
   applications AdoptionApplication[]
+}
+
+model RescueRequest {
+  id                  String       @id @default(uuid())
+  problemType         String
+  priority            String
+  description         String
+  
+  // New Location details (made nullable for migration safety)
+  incidentAddress     String?
+  incidentLat         Float?
+  incidentLng         Float?
+  locationNote        String?
+  
+  // Original Location details (kept for backward compatibility)
+  address             String?
+  latitude            Float?
+  longitude           Float?
+  
+  photoUrl            String?
+  status              RescueStatus @default(PENDING)
+  
+  duplicateFlag       Boolean      @default(false)
+  duplicateScore      Float        @default(0.0)
+  
+  reporterId          String?
+  reporter            User?        @relation("Reporter", fields: [reporterId], references: [id])
+  
+  assignedVolunteerId String?
+  assignedVolunteer   User?        @relation("Volunteer", fields: [assignedVolunteerId], references: [id])
+  
+  assignments         RescueAssignment[]
+  duplicateReports    DuplicateRescueReport[] @relation("MainRequest")
+  asDuplicateIn       DuplicateRescueReport[] @relation("DuplicateRequest")
+  
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
 }
 
 model AdoptionApplication {
@@ -192,4 +280,124 @@ model ServiceBooking {
   user          User?    @relation(fields: [userId], references: [id])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+model VolunteerProfile {
+  id            String    @id @default(uuid())
+  userId        String    @unique
+  user          User      @relation(fields: [userId], references: [id])
+  availability  Boolean   @default(true)
+  radiusKM      Float     @default(10.0)
+  lastLat       Float?
+  lastLng       Float?
+  lastActive    DateTime? @default(now())
+  
+  movementHistory VolunteerLiveLocation[]
+}
+
+model VolunteerLiveLocation {
+  id          String   @id @default(uuid())
+  volunteerId String
+  volunteer   VolunteerProfile @relation(fields: [volunteerId], references: [id])
+  latitude    Float
+  longitude   Float
+  timestamp   DateTime @default(now())
+}
+
+model RescueAssignment {
+  id            String           @id @default(uuid())
+  rescueId      String
+  rescue        RescueRequest    @relation(fields: [rescueId], references: [id])
+  volunteerId   String
+  volunteer     User             @relation("AssignmentVolunteer", fields: [volunteerId], references: [id])
+  status        AssignmentStatus @default(PENDING)
+  assignedAt    DateTime         @default(now())
+  respondedAt   DateTime?
+  notes         String?
+}
+
+model DuplicateRescueReport {
+  id                  String        @id @default(uuid())
+  mainRequestId       String
+  mainRequest         RescueRequest @relation("MainRequest", fields: [mainRequestId], references: [id])
+  duplicateRequestId  String
+  duplicateRequest    RescueRequest @relation("DuplicateRequest", fields: [duplicateRequestId], references: [id])
+  confidenceScore     Float
+  status              String        @default("PENDING") // PENDING, CONFIRMED, REJECTED
+  createdAt           DateTime      @default(now())
+}
+
+model RescueNotification {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  type      String   // SYSTEM, ASSIGNMENT, STATUS_UPDATE
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+enum DonationCampaignStatus {
+  active
+  completed
+  paused
+}
+
+enum DonationPaymentStatus {
+  pending
+  paid
+  failed
+}
+
+model DonationCampaign {
+  id          String                 @id @default(uuid())
+  title       String
+  description String
+  image       String
+  type        String
+  goalAmount  Float
+  status      DonationCampaignStatus @default(active)
+  petId       String?
+  pet         Pet?                   @relation(fields: [petId], references: [id])
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  donations   Donation[]
+}
+
+model DonationSponsorPet {
+  id                       String   @id @default(uuid())
+  name                     String
+  breed                    String
+  age                      String
+  image                    String
+  story                    String
+  monthlySponsorshipAmount Float
+  status                   String   @default("needs_sponsor")
+  petId                    String?
+  pet                      Pet?     @relation(fields: [petId], references: [id])
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  donations                Donation[]
+}
+
+model Donation {
+  id                 String                @id @default(uuid())
+  userId             String?
+  user               User?                 @relation(fields: [userId], references: [id])
+  donorName          String
+  donorEmail         String
+  amount             Float
+  type               String
+  frequency          String                @default("one_time")
+  status             DonationPaymentStatus @default(paid)
+  message            String?
+  receiptUrl         String?
+  campaignId         String?
+  campaign           DonationCampaign?     @relation(fields: [campaignId], references: [id])
+  sponsorPetId       String?
+  sponsorPet         DonationSponsorPet?   @relation(fields: [sponsorPetId], references: [id])
+  designationLabel   String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
 }

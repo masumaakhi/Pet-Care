@@ -82,6 +82,12 @@ const getUserById = async (id) => {
         email: true,
         role: true,
         googleId: true,
+        phone: true,
+        address: true,
+        bio: true,
+        latitude: true,
+        longitude: true,
+        status: true,
         createdAt: true,
       },
     });
@@ -135,7 +141,7 @@ const updatePassword = async (email, newPassword) => {
 };
 
 /**
- * Update user profile (name, email)
+ * Update user profile (name, email, phone, address, bio, status)
  * @param {String} id
  * @param {Object} data 
  * @returns {Object} Updated User
@@ -151,6 +157,12 @@ const updateUserProfile = async (id, data) => {
         email: true,
         role: true,
         googleId: true,
+        phone: true,
+        address: true,
+        bio: true,
+        latitude: true,
+        longitude: true,
+        status: true,
         createdAt: true,
       },
     });
@@ -172,6 +184,9 @@ const getAllUsers = async () => {
         email: true,
         role: true,
         googleId: true,
+        phone: true,
+        address: true,
+        status: true,
         createdAt: true,
         _count: {
           select: {

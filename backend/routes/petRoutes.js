@@ -7,8 +7,12 @@ const {
   updatePet,
   getPetSchedules,
   createSchedule,
+  updateSchedule,
+  deleteSchedule,
   getPetWeightLogs,
   createWeightLog,
+  updateWeightLog,
+  deleteWeightLog,
   uploadPetPhoto,
   getPetGallery,
   deletePetPhoto,
@@ -31,6 +35,10 @@ router.route("/")
   .post(createPet)
   .get(getPets);
 
+// Must be before "/:id" so "admin" is not captured as an id
+router.get("/admin/all", adminGetAllPets);
+router.patch("/admin/status/:id", adminUpdatePetStatus);
+
 router.route("/:id")
   .get(getPetById)
   .patch(updatePet)
@@ -40,22 +48,22 @@ router.route("/:id/schedules")
   .get(getPetSchedules)
   .post(createSchedule);
 
+router.route("/schedules/:scheduleId")
+  .put(updateSchedule)
+  .delete(deleteSchedule);
+
 router.route("/:id/weights")
   .get(getPetWeightLogs)
   .post(createWeightLog);
+
+router.route("/weights/:logId")
+  .put(updateWeightLog)
+  .delete(deleteWeightLog);
 
 router.route("/:id/gallery")
   .get(getPetGallery)
   .post(upload.single("photo"), uploadPetPhoto);
 
-router.get("/:id/vaccines", getPetVaccines);
-router.get("/:id/medical", getPetMedicalRecords);
-router.get("/:id/prescriptions", getPetPrescriptions);
-
 router.delete("/gallery/:photoId", deletePetPhoto);
-
-// Admin Routes
-router.get("/admin/all", adminGetAllPets);
-router.patch("/admin/status/:id", adminUpdatePetStatus);
 
 module.exports = router;

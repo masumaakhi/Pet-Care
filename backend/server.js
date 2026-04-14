@@ -1,3 +1,4 @@
+// backend/server.js
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -7,12 +8,20 @@ const medicalRoutes = require("./routes/medicalRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const adoptionRoutes = require("./routes/adoptionRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
+const rescueRoutes = require("./routes/rescueRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+const donationRoutes = require("./routes/donationRoutes");
 
 const path = require("path");
+const http = require("http");
+const socketService = require("./services/SocketService");
 
 const app = express();
+const server = http.createServer(app);
 
-// Middleware
+// Initialize Socket Service
+socketService.init(server);
+
 // Middleware
 const allowedOrigins = [
   "http://localhost:3000",
@@ -21,7 +30,6 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) === -1) {
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
@@ -43,6 +51,9 @@ app.use("/api/medical", medicalRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/adoptions", adoptionRoutes);
 app.use("/api/services", serviceRoutes);
+app.use("/api/rescues", rescueRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/donations", donationRoutes);
 
 // Root route for testing
 app.get("/", (req, res) => {
@@ -53,6 +64,6 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 // Start Server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

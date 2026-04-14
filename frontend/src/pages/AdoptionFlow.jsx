@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaArrowLeft, FaCheckCircle, FaExclamationTriangle, FaRegClipboard, FaPhoneAlt, FaUsers, FaHome, FaCheck, FaHeart } from "react-icons/fa";
 import api from "../utils/api";
 import Toast from "../components/Toast";
+import { getAdoptionListingImage } from "../utils/helpers";
 
 // Fallback image
 import b1 from "../assets/b1.jpg";
@@ -42,29 +43,21 @@ export default function AdoptionFlow() {
         const fetchPetDetails = async () => {
             try {
                 setLoading(true);
-                const localData = JSON.parse(localStorage.getItem("adoptions") || "[]");
-                let foundPet = localData.find(p => String(p.id) === String(id));
-
-                if (!foundPet) {
-                    try {
-                        const response = await api.get(`/adoptions/${id}`);
-                        foundPet = response.data;
-                    } catch (apiErr) {
-                        console.warn("API fetch failed", apiErr);
-                    }
-                }
-
-                if (foundPet) {
+                const response = await api.get(`/adoptions/${id}`);
+                if (response.data?.success && response.data.data) {
+                    const foundPet = response.data.data;
                     setPet(foundPet);
-                    // Match tracking step if previously adopted or pending
                     if (foundPet.status === "ADOPTED") setTrackingStep(5);
                     else if (foundPet.status === "PENDING") setTrackingStep(2);
+                    else if (foundPet.status === "APPROVED") setTrackingStep(1);
                 } else {
                     setError("Pet details not found.");
                 }
             } catch (err) {
                 console.error("Error fetching pet details:", err);
-                setError("Failed to load pet details.");
+                setError(
+                    err.response?.data?.message || "Failed to load pet details."
+                );
             } finally {
                 setLoading(false);
             }
@@ -80,23 +73,21 @@ export default function AdoptionFlow() {
         }
         if (isAgreed && isFormValid) {
             try {
-                await api.post("/adoptions/apply", {
+                const applyRes = await api.post("/adoptions/apply", {
                     petId: id,
                     fullName: formData.fullName,
                     email: formData.email,
                     phone: formData.phone,
                     livingSituation: formData.livingSituation
                 });
-                // Update LocalStorage status to PENDING
-                const localData = JSON.parse(localStorage.getItem("adoptions") || "[]");
-                const updatedData = localData.map(p =>
-                    String(p.id) === String(id) ? { ...p, status: "PENDING" } : p
-                );
-                localStorage.setItem("adoptions", JSON.stringify(updatedData));
-
-                // Update local pet state so UI knows instantly
-                if (pet) setPet({ ...pet, status: "PENDING" });
-
+                const newApp = applyRes.data?.success ? applyRes.data.data : null;
+                if (pet && newApp) {
+                    setPet({
+                        ...pet,
+                        applications: [...(pet.applications || []), newApp],
+                    });
+                }
+                setTrackingStep(2);
                 setStep(2);
                 window.scrollTo({ top: 0, behavior: "smooth" });
             } catch (err) {
@@ -155,8 +146,11 @@ export default function AdoptionFlow() {
                             {/* Summary Header */}
                             <div className="bg-[#5f7d5a]/10 p-8 md:p-10 border-b border-[#5f7d5a]/20 flex flex-col md:flex-row items-center gap-6">
                                 <img
-                                    src={pet.image || b1}
+                                    src={getAdoptionListingImage(pet)}
                                     alt={pet.name}
+                                    onError={(e) => {
+                                        e.target.src = b1;
+                                    }}
                                     className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md flex-shrink-0"
                                     onError={(e) => { e.target.src = b1; }}
                                 />
@@ -312,16 +306,16 @@ export default function AdoptionFlow() {
                                                 onClick={() => {
                                                     setTrackingStep(stage.id);
                                                     if (stage.id === 5) {
-                                                        const localData = JSON.parse(localStorage.getItem("adoptions") || "[]");
-                                                        const updatedData = localData.map(p =>
-                                                            String(p.id) === String(id) ? { ...p, status: "ADOPTED" } : p
+                                                        setPet((prev) =>
+                                                            prev ? { ...prev, status: "ADOPTED" } : prev
                                                         );
-                                                        localStorage.setItem("adoptions", JSON.stringify(updatedData));
-                                                        setPet(prev => ({ ...prev, status: "ADOPTED" }));
-                                                        showToast("Pet officially adopted!", "success");
+                                                        showToast(
+                                                            "Demo only: final adoption is updated by admin in the system.",
+                                                            "success"
+                                                        );
                                                     }
                                                 }}
-                                                title="Click to simulate advancing stages for testing!"
+                                                title="Click to preview tracker stages (final step is illustrative)"
                                             >
 
                                                 {/* Icon Node */}

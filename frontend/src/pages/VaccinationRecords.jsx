@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../utils/api";
 import { toast } from "react-hot-toast";
 import { usePet } from "../context/PetContext";
+import PetSelector from "../components/medical/PetSelector";
 
 function computeStatus(nextDueDate) {
   if (!nextDueDate) return "Completed";
@@ -22,7 +23,7 @@ function statusStyles(status) {
 }
 
 export default function VaccinationRecords() {
-  const { selectedPetId, setSelectedPetId, pets, loading: contextLoading } = usePet();
+  const { selectedPetId, pets, loading: contextLoading } = usePet();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
@@ -36,7 +37,7 @@ export default function VaccinationRecords() {
   const fetchVaccines = async () => {
     try {
       setLoading(true);
-      const res = await api.get(`/pets/${selectedPetId}/vaccines`);
+      const res = await api.get(`/medical/vaccines?petId=${selectedPetId}`);
       if (res.data.success) {
         setItems(res.data.data);
       }
@@ -79,12 +80,9 @@ export default function VaccinationRecords() {
             <h1 className="text-3xl font-black text-[#2f3e2c]">Vaccination Records</h1>
             <p className="text-[#6b7d67] mt-1 font-bold">Track vaccines & due dates.</p>
           </div>
-          <div className="flex gap-3">
-            <select value={selectedPetId || ""} onChange={(e) => setSelectedPetId(e.target.value)} className="px-5 py-2.5 rounded-2xl bg-white/60 border border-[#8b6b4c]/40 text-[#2f3e2c] font-black">
-              <option value="" disabled>Select Pet</option>
-              {pets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-            <button onClick={() => setIsOpen(true)} className="px-6 py-2.5 rounded-2xl bg-[#5f7d5a] text-white font-black hover:scale-105 transition shadow-lg">➕ Add</button>
+          <div className="flex flex-col sm:flex-row items-end gap-3 w-full sm:w-auto">
+            <PetSelector />
+            <button onClick={() => setIsOpen(true)} className="w-full sm:w-auto px-8 py-3.5 rounded-2xl bg-[#5f7d5a] text-white font-black hover:scale-105 transition shadow-lg whitespace-nowrap">➕ Add Record</button>
           </div>
         </motion.div>
 
@@ -167,8 +165,12 @@ function AddVaccineModal({ onClose, onAdd, pets }) {
         <h3 className="text-2xl font-black text-[#2f3e2c] mb-6">New Vaccination</h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <Field label="Pet">
-             <select className="w-full px-5 py-3 rounded-2xl border bg-transparent font-bold" value={petId} onChange={e => setPetId(e.target.value)}>
-                {pets.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+             <select 
+               className="w-full px-5 py-3.5 rounded-2xl border border-[#8b6b4c]/20 bg-[#f3eee8]/50 font-bold text-[#2f3e2c] outline-none focus:ring-2 focus:ring-[#7fa37a]/50 transition" 
+               value={petId} 
+               onChange={e => setPetId(e.target.value)}
+             >
+                {pets.map(p => <option key={p.id} value={p.id}>{p.name} ({p.species})</option>)}
              </select>
           </Field>
           <Field label="Vaccine Name">

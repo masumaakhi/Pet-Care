@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaArrowLeft, FaHeart, FaMapMarkerAlt, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import api from "../utils/api";
+import { getAdoptionListingImage } from "../utils/helpers";
 
 // Fallback image
 import b1 from "../assets/b1.jpg";
@@ -18,34 +19,19 @@ export default function AdoptionDetails() {
         const fetchPetDetails = async () => {
             try {
                 setLoading(true);
-
-                // First check localStorage as it's our primary source for "stored" requests
-                const localData = JSON.parse(localStorage.getItem("adoptions") || "[]");
-
-                // Use strict equality for numbers if ID is numeric, or loose if string vs number
-                let foundPet = localData.find(p => String(p.id) === String(id));
-
-                if (!foundPet) {
-                    // Fallback to API if not in localStorage. 
-                    // This assumes an endpoint like /adoptions/:id exists.
-                    try {
-                        const response = await api.get(`/adoptions/${id}`);
-                        foundPet = response.data;
-                    } catch (apiErr) {
-                        console.warn("API fetch for details failed, using only local storage", apiErr);
-                    }
-                }
-
-                if (foundPet) {
-                    setPet(foundPet);
+                const response = await api.get(`/adoptions/${id}`);
+                if (response.data?.success && response.data.data) {
+                    setPet(response.data.data);
                     setError(null);
                 } else {
-                    setError("Pet details not found. It may have been removed or already adopted.");
+                    setError("Pet details not found.");
                 }
-
             } catch (err) {
                 console.error("Error fetching pet details:", err);
-                setError("Failed to load pet details.");
+                setError(
+                    err.response?.data?.message ||
+                        "Pet details not found. It may have been removed or is not available yet."
+                );
             } finally {
                 setLoading(false);
             }
@@ -102,7 +88,7 @@ export default function AdoptionDetails() {
                     {/* Image Section */}
                     <div className="relative h-[40vh] lg:h-auto overflow-hidden">
                         <img
-                            src={pet.image || b1}
+                            src={getAdoptionListingImage(pet)}
                             alt={pet.name}
                             className="w-full h-full object-cover"
                             onError={(e) => { e.target.src = b1; }}
@@ -167,16 +153,17 @@ export default function AdoptionDetails() {
                         <motion.button
                             initial={{ scale: 0.95 }}
                             animate={{ scale: 1 }}
-                            whileHover={pet.status !== "PENDING" && pet.status !== "ADOPTED" ? { scale: 1.02 } : {}}
-                            whileTap={pet.status !== "PENDING" && pet.status !== "ADOPTED" ? { scale: 0.98 } : {}}
-                            disabled={pet.status === "PENDING" || pet.status === "ADOPTED"}
+                            whileHover={!["PENDING", "ADOPTED", "REJECTED"].includes(pet.status) ? { scale: 1.02 } : {}}
+                            whileTap={!["PENDING", "ADOPTED", "REJECTED"].includes(pet.status) ? { scale: 0.98 } : {}}
+                            disabled={["PENDING", "ADOPTED", "REJECTED"].includes(pet.status)}
                             onClick={() => navigate(`/adopt/flow/${pet.id}`)}
                             className={`mt-10 w-full py-4 rounded-2xl text-white text-lg font-bold transition-all duration-300 ${pet.status === 'PENDING' ? 'bg-orange-400 cursor-not-allowed shadow-none' :
                                     pet.status === 'ADOPTED' ? 'bg-gray-400 cursor-not-allowed shadow-none' :
+                                    pet.status === 'REJECTED' ? 'bg-gray-400 cursor-not-allowed shadow-none' :
                                         'bg-gradient-to-r from-[#5f7d5a] via-[#7fa37a] to-[#8b6b4c] shadow-[0_15px_40px_rgba(95,125,90,0.3)] hover:shadow-[0_20px_50px_rgba(95,125,90,0.4)]'
                                 }`}
                         >
-                            {pet.status === 'PENDING' ? 'Request Pending' : pet.status === 'ADOPTED' ? 'Already Adopted' : 'Confirm Adoption'}
+                            {pet.status === 'PENDING' ? 'Request Pending' : pet.status === 'ADOPTED' ? 'Already Adopted' : pet.status === 'REJECTED' ? 'Not available' : 'Confirm Adoption'}
                         </motion.button>
                         <p className="text-center text-xs text-[#6b7d67] mt-4">
                             By clicking this, you agree to our adoption terms & conditions.

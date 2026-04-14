@@ -4,10 +4,18 @@ const { sendSuccess, sendError } = require("../utils/response");
 
 /* --- Vaccination Controllers --- */
 
+/* --- Vaccination Controllers --- */
+
 const getVaccinations = async (req, res) => {
   try {
     const { petId } = req.query;
-    const where = { ownerId: req.user.id };
+    
+    // Role-based logic: Admin/Vet can see all, Users see only their own
+    const where = {};
+    if (req.user.role !== "admin" && req.user.role !== "vet") {
+      where.ownerId = req.user.id;
+    }
+    
     if (petId) where.petId = petId;
 
     const vaccinations = await prisma.vaccination.findMany({
@@ -26,17 +34,25 @@ const addVaccination = async (req, res) => {
   try {
     const { petId, vaccineName, dose, givenDate, nextDueDate, vetName, reminder } = req.body;
     
+    // Verify pet exists and user has access
+    const pet = await prisma.pet.findUnique({ where: { id: petId } });
+    if (!pet) return sendError(res, 404, "Pet not found");
+    
+    if (req.user.role !== "admin" && req.user.role !== "vet" && pet.ownerId !== req.user.id) {
+      return sendError(res, 403, "Not authorized to add records for this pet");
+    }
+
     const vaccination = await prisma.vaccination.create({
       data: {
         vaccineName,
-        dose,
+        dose: dose || "Primary",
         givenDate: new Date(givenDate),
         nextDueDate: nextDueDate ? new Date(nextDueDate) : null,
         vetName,
         reminder: reminder === "true" || reminder === true,
         petId,
-        ownerId: req.user.id,
-        status: "Completed", // Default
+        ownerId: pet.ownerId, // Always use the pet's actual owner
+        status: "Completed",
         proofUrl: req.file ? `/uploads/pets/${req.file.filename}` : null,
       },
     });
@@ -50,7 +66,15 @@ const addVaccination = async (req, res) => {
 const deleteVaccination = async (req, res) => {
   try {
     const { id } = req.params;
-    await prisma.vaccination.delete({ where: { id, ownerId: req.user.id } });
+    
+    const record = await prisma.vaccination.findUnique({ where: { id } });
+    if (!record) return sendError(res, 404, "Record not found");
+
+    if (req.user.role !== "admin" && req.user.role !== "vet" && record.ownerId !== req.user.id) {
+      return sendError(res, 403, "Not authorized to delete this record");
+    }
+
+    await prisma.vaccination.delete({ where: { id } });
     return sendSuccess(res, 200, "Vaccination deleted");
   } catch (error) {
     console.error(error);
@@ -63,7 +87,12 @@ const deleteVaccination = async (req, res) => {
 const getMedicalHistory = async (req, res) => {
   try {
     const { petId } = req.query;
-    const where = { ownerId: req.user.id };
+    
+    const where = {};
+    if (req.user.role !== "admin" && req.user.role !== "vet") {
+      where.ownerId = req.user.id;
+    }
+    
     if (petId) where.petId = petId;
 
     const records = await prisma.medicalRecord.findMany({
@@ -82,6 +111,13 @@ const addMedicalRecord = async (req, res) => {
   try {
     const { petId, date, diagnosis, treatment, vet, followUp, cost, emergency } = req.body;
 
+    const pet = await prisma.pet.findUnique({ where: { id: petId } });
+    if (!pet) return sendError(res, 404, "Pet not found");
+    
+    if (req.user.role !== "admin" && req.user.role !== "vet" && pet.ownerId !== req.user.id) {
+      return sendError(res, 403, "Not authorized to add records for this pet");
+    }
+
     const record = await prisma.medicalRecord.create({
       data: {
         date: new Date(date),
@@ -92,7 +128,7 @@ const addMedicalRecord = async (req, res) => {
         cost: parseFloat(cost || 0),
         emergency: emergency === "true" || emergency === true,
         petId,
-        ownerId: req.user.id,
+        ownerId: pet.ownerId,
         reportUrl: req.file ? `/uploads/pets/${req.file.filename}` : null,
       },
     });
@@ -106,7 +142,15 @@ const addMedicalRecord = async (req, res) => {
 const deleteMedicalRecord = async (req, res) => {
   try {
     const { id } = req.params;
-    await prisma.medicalRecord.delete({ where: { id, ownerId: req.user.id } });
+    
+    const record = await prisma.medicalRecord.findUnique({ where: { id } });
+    if (!record) return sendError(res, 404, "Record not found");
+
+    if (req.user.role !== "admin" && req.user.role !== "vet" && record.ownerId !== req.user.id) {
+      return sendError(res, 403, "Not authorized to delete this record");
+    }
+
+    await prisma.medicalRecord.delete({ where: { id } });
     return sendSuccess(res, 200, "Record deleted");
   } catch (error) {
     console.error(error);
@@ -119,7 +163,12 @@ const deleteMedicalRecord = async (req, res) => {
 const getPrescriptions = async (req, res) => {
   try {
     const { petId } = req.query;
-    const where = { ownerId: req.user.id };
+    
+    const where = {};
+    if (req.user.role !== "admin" && req.user.role !== "vet") {
+      where.ownerId = req.user.id;
+    }
+    
     if (petId) where.petId = petId;
 
     const prescriptions = await prisma.prescription.findMany({
@@ -138,14 +187,21 @@ const addPrescription = async (req, res) => {
   try {
     const { petId, date, vet, medicines, notes } = req.body;
 
+    const pet = await prisma.pet.findUnique({ where: { id: petId } });
+    if (!pet) return sendError(res, 404, "Pet not found");
+    
+    if (req.user.role !== "admin" && req.user.role !== "vet" && pet.ownerId !== req.user.id) {
+      return sendError(res, 403, "Not authorized to add records for this pet");
+    }
+
     const prescription = await prisma.prescription.create({
       data: {
         date: new Date(date),
         vet,
         notes,
-        medicines: medicines ? JSON.parse(medicines) : [],
+        medicines: medicines ? (typeof medicines === 'string' ? JSON.parse(medicines) : medicines) : [],
         petId,
-        ownerId: req.user.id,
+        ownerId: pet.ownerId,
         fileName: req.file ? req.file.originalname : null,
         fileUrl: req.file ? `/uploads/pets/${req.file.filename}` : null,
       },
@@ -160,7 +216,15 @@ const addPrescription = async (req, res) => {
 const deletePrescription = async (req, res) => {
   try {
     const { id } = req.params;
-    await prisma.prescription.delete({ where: { id, ownerId: req.user.id } });
+    
+    const record = await prisma.prescription.findUnique({ where: { id } });
+    if (!record) return sendError(res, 404, "Record not found");
+
+    if (req.user.role !== "admin" && req.user.role !== "vet" && record.ownerId !== req.user.id) {
+      return sendError(res, 403, "Not authorized to delete this record");
+    }
+
+    await prisma.prescription.delete({ where: { id } });
     return sendSuccess(res, 200, "Prescription deleted");
   } catch (error) {
     console.error(error);

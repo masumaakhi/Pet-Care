@@ -1,10 +1,18 @@
 import React from 'react';
-import { TIMELINE_STAGES } from '../../utils/rescueHelpers';
+import { TIMELINE_STAGES, getRescueTimelineIndex } from '../../utils/rescueHelpers';
 import { Check } from 'lucide-react';
 
 const RescueTimeline = ({ currentStatus, updates = [] }) => {
-  const currentIndex = TIMELINE_STAGES.findIndex(s => s.id === currentStatus);
+  const currentIndex = getRescueTimelineIndex(currentStatus);
   
+  if (currentIndex < 0) {
+    return (
+      <div className="py-6 text-center text-sm font-semibold text-[#8b6b4c]">
+        This rescue was cancelled.
+      </div>
+    );
+  }
+
   return (
     <div className="py-6">
       <div className="relative">

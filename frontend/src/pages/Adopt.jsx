@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Toast from "../components/Toast";
-import api from "../utils/api";
 import { Link, useNavigate } from "react-router-dom";
 import { FaPaw, FaTimes, FaShieldAlt, FaIdCard, FaMapMarkerAlt } from "react-icons/fa";
 
@@ -334,34 +333,12 @@ function Adopt() {
   const [activeModal, setActiveModal] = useState(null); // 'idTips' | 'insurance' | null
 
   React.useEffect(() => {
-    // Hide pets that are already in active adoptions list
-    const existingAdoptions = JSON.parse(localStorage.getItem("adoptions") || "[]");
-    setAvailablePets(pets.filter(p => !existingAdoptions.find(ex => String(ex.id) === String(p.id))));
+    setAvailablePets(pets);
   }, []);
   const showToast = (message, type = "error") => setToast({ message, type });
 
-  const handleAdoptionRequest = async (pet) => {
-    try {
-      // 1. Save to localStorage for local persistence
-      const existingAdoptions = JSON.parse(localStorage.getItem("adoptions") || "[]");
-      // Check if already exists to avoid duplicates
-      if (!existingAdoptions.find(p => p.id === pet.id)) {
-        existingAdoptions.push(pet);
-        localStorage.setItem("adoptions", JSON.stringify(existingAdoptions));
-      }
-
-      // 2. Try to sync with backend to log it in terminal
-      try {
-        await api.post("/adoptions", pet);
-      } catch (apiErr) {
-        console.warn("Backend storage failed, using localStorage only:", apiErr.message);
-      }
-
-      navigate("/adopt/listing");
-    } catch (err) {
-      console.error("Error handling adoption request:", err);
-      showToast("Something went wrong. Please try again.");
-    }
+  const goToLiveListings = () => {
+    navigate("/adopt/listing");
   };
 
   const filteredPets = useMemo(() => {
@@ -577,7 +554,7 @@ function Adopt() {
 
                   <button
                     type="button"
-                    onClick={() => handleAdoptionRequest(pet)}
+                    onClick={goToLiveListings}
                     className="mt-auto w-full py-2.5 rounded-2xl bg-gradient-to-r from-[#5f7d5a]/60 via-[#7fa37a] to-[#8b6b4c] text-black/80 text-sm font-semibold shadow-sm group-hover:shadow-md group-hover:scale-[1.02] transition"
                   >
                     Start Adoption Request

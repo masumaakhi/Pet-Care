@@ -5,7 +5,7 @@ import DonationStatusBadge from './DonationStatusBadge';
 import DonationTypeBadge from './DonationTypeBadge';
 import { formatCurrency, formatDate } from '../../utils/donationHelpers';
 
-const DonationHistoryTable = ({ donations = [] }) => {
+const DonationHistoryTable = ({ donations = [], onReceipt }) => {
   if (donations.length === 0) {
     return <div className="text-center p-8 text-[#6b7d67]">No donation history available.</div>;
   }
@@ -31,7 +31,7 @@ const DonationHistoryTable = ({ donations = [] }) => {
               </td>
               <td className="py-4 px-6">
                 <p className="text-sm font-bold text-[#2f3e2c]">{donation.campaignName}</p>
-                <p className="text-xs text-[#6b7d67]">ID: {donation.id}</p>
+                <p className="text-xs text-[#6b7d67]">ID: {String(donation.id).slice(0, 8)}…</p>
               </td>
               <td className="py-4 px-6">
                 <DonationTypeBadge type={donation.type} />
@@ -44,7 +44,11 @@ const DonationHistoryTable = ({ donations = [] }) => {
               </td>
               <td className="py-4 px-6 text-right">
                 {donation.status === 'paid' ? (
-                  <button className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/60 hover:bg-white/80 border border-[#8b6b4c]/30 text-[#2f3e2c] rounded-xl text-xs font-semibold transition-colors">
+                  <button
+                    type="button"
+                    onClick={() => onReceipt?.(donation)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/60 hover:bg-white/80 border border-[#8b6b4c]/30 text-[#2f3e2c] rounded-xl text-xs font-semibold transition-colors"
+                  >
                     <Download className="w-3.5 h-3.5" /> Receipt
                   </button>
                 ) : (

@@ -15,6 +15,7 @@ import {
 
 import logo from "../assets/logo.png";
 import { useAuth } from "../context/AuthContext";
+import NavNotificationsBell from "./NavNotificationsBell";
 
 const navItems = [
   { name: "Home", path: "/", icon: <FaHome /> },
@@ -126,6 +127,8 @@ export default function Nav() {
                     >
                       My Donations
                     </NavLink>
+
+                    <NavNotificationsBell />
 
                     <NavLink
                       to="/profile"

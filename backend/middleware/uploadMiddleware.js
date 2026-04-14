@@ -3,30 +3,46 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-// Ensure upload directory exists
-const uploadDir = path.join(__dirname, "..", "uploads", "pets");
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// Base upload directory
+const baseDir = path.join(__dirname, "..", "uploads");
 
 // Storage configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);
+    // Determine subdirectory based on route or custom logic
+    let subDir = "others";
+    if (req.originalUrl.includes("pets")) subDir = "pets";
+    if (req.originalUrl.includes("rescues")) subDir = "rescues";
+    if (req.originalUrl.includes("adoptions")) subDir = "adoptions";
+    if (req.originalUrl.includes("community")) subDir = "community";
+
+    const targetDir = path.join(baseDir, subDir);
+    
+    // Ensure directory exists
+    if (!fs.existsSync(targetDir)) {
+      fs.mkdirSync(targetDir, { recursive: true });
+    }
+    
+    cb(null, targetDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, `pet-${req.params.id}-${uniqueSuffix}${path.extname(file.originalname)}`);
+    const prefix = req.originalUrl.includes("rescues")
+      ? "rescue"
+      : req.originalUrl.includes("adoptions")
+        ? "adoption"
+        : "upload";
+    cb(null, `${prefix}-${uniqueSuffix}${path.extname(file.originalname)}`);
   },
 });
 
 // File filter (Images only)
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+  const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Only JPEG, PNG, WebP and PDF files are allowed"), false);
+    cb(new Error("Only JPEG, PNG and WebP files are allowed"), false);
   }
 };
 

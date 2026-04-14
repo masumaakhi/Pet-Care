@@ -1,6 +1,7 @@
 // src/pages/admin/AdminDashboard.jsx
 import React, { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import api from "../../utils/api";
 
 /**
@@ -340,12 +341,12 @@ export default function AdminDashboard() {
             <GlassCard className="p-5">
               <CardTitle icon="🗂️" title="Quick Actions" />
               <div className="mt-4 grid sm:grid-cols-2 gap-3">
-                <ActionBtn label="➕ Add / Approve Shelter" onClick={() => toast("Shelter action (UI only)")} />
-                <ActionBtn label="👥 Manage Users" onClick={() => toast("Users panel (UI only)")} />
-                <ActionBtn label="🐾 Review Pet Listings" onClick={() => toast("Review listings (UI only)")} />
-                <ActionBtn label="🏠 Review Adoption Requests" onClick={() => toast("Review adoption (UI only)")} />
-                <ActionBtn label="🚨 View Rescue Map" onClick={() => toast("Rescue map (UI only)")} />
-                <ActionBtn label="📜 Admin Activity Logs" onClick={() => toast("Logs (UI only)")} />
+                <ActionBtn label="🚨 Manage Rescues" to="/admin/rescues" />
+                <ActionBtn label="🗺️ View Rescue Map" to="/admin/rescues/map" />
+                <ActionBtn label="📊 Rescue Analytics" to="/admin/rescues/analytics" />
+                <ActionBtn label="👯 Duplicate Reports" to="/admin/rescues/duplicates" />
+                <ActionBtn label="🔔 Transmission Logs" to="/admin/rescues/notifications" />
+                <ActionBtn label="👥 Manage Users" to="/admin/users" />
               </div>
             </GlassCard>
 
@@ -514,17 +515,24 @@ function ActivityItem({ title, meta }) {
   );
 }
 
-function ActionBtn({ label, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className="py-3 px-4 rounded-2xl text-left
+function ActionBtn({ label, onClick, to }) {
+  const content = (
+    <div className="py-3 px-4 rounded-2xl text-left
       bg-gradient-to-r from-[#5f7d5a]/45 via-[#7fa37a]/55 to-[#8b6b4c]/40
       border border-[#d6e2d3]
       text-black/75 font-semibold
-      hover:scale-[1.02] hover:shadow-lg transition duration-300"
-    >
+      hover:scale-[1.02] hover:shadow-lg transition duration-300 w-full">
       {label}
+    </div>
+  );
+
+  if (to) {
+    return <Link to={to} className="block w-full">{content}</Link>;
+  }
+
+  return (
+    <button onClick={onClick} className="block w-full">
+      {content}
     </button>
   );
 }
