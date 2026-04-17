@@ -1,6 +1,7 @@
 // backend/controllers/adoptionController.js
 const prisma = require("../prisma/prismaClient");
 const { sendSuccess, sendError } = require("../utils/response");
+const { getUploadedFileUrl } = require("../utils/uploadUrl");
 
 /**
  * @desc    Request to list a pet for adoption
@@ -94,8 +95,9 @@ const adminCreateListing = async (req, res) => {
         if (req.user.role !== "admin") return sendError(res, 403, "Admin only");
 
         let image = null;
-        if (req.file?.filename) {
-            image = `/uploads/adoptions/${req.file.filename}`;
+        if (req.file) {
+            const fallback = req.file.filename ? `/uploads/adoptions/${req.file.filename}` : null;
+            image = getUploadedFileUrl(req.file, fallback);
         }
 
         const rawPetId = req.body.petId;
@@ -193,6 +195,79 @@ const getAdoptions = async (req, res) => {
 };
 
 /**
+ * @desc    Owner: Get my adoption listings with adopter requests
+ * @route   GET /api/adoptions/my/listings
+ * @access  Private
+ */
+const getMyAdoptionListings = async (req, res) => {
+    try {
+        const ownerId = req.user.id;
+
+        const listings = await prisma.adoptionPet.findMany({
+            where: { ownerId },
+            include: {
+                pet: {
+                    include: {
+                        photos: { orderBy: { createdAt: "desc" }, take: 1 }
+                    }
+                },
+                applications: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                fullName: true,
+                                email: true,
+                                phone: true,
+                            }
+                        }
+                    },
+                    orderBy: { createdAt: "desc" },
+                }
+            },
+            orderBy: { createdAt: "desc" },
+        });
+
+        return sendSuccess(res, 200, "My adoption listings fetched", listings);
+    } catch (error) {
+        console.error("Get My Adoption Listings Error:", error);
+        return sendError(res, 500, "Server Error");
+    }
+};
+
+/**
+ * @desc    User (adopter): Get my adoption applications
+ * @route   GET /api/adoptions/my/applications
+ * @access  Private
+ */
+const getMyAdoptionApplications = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const applications = await prisma.adoptionApplication.findMany({
+            where: { userId },
+            include: {
+                adoptionPet: {
+                    include: {
+                        pet: {
+                            include: {
+                                photos: { orderBy: { createdAt: "desc" }, take: 1 }
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: { createdAt: "desc" },
+        });
+
+        return sendSuccess(res, 200, "My adoption applications fetched", applications);
+    } catch (error) {
+        console.error("Get My Adoption Applications Error:", error);
+        return sendError(res, 500, "Server Error");
+    }
+};
+
+/**
  * @desc    Admin: Get all adoption listings for moderation
  * @route   GET /api/adoptions/admin/all
  * @access  Admin
@@ -215,6 +290,70 @@ const adminGetAllAdoptions = async (req, res) => {
         return sendSuccess(res, 200, "All adoptions fetched for admin", adoptions);
     } catch (error) {
         console.error("Admin Get Adoptions Error:", error);
+        return sendError(res, 500, "Server Error");
+    }
+};
+
+/**
+ * @desc    Admin: Get all adoption applications with owner/adopter linkage
+ * @route   GET /api/adoptions/admin/applications
+ * @access  Admin
+ */
+const adminGetAllAdoptionApplications = async (req, res) => {
+    try {
+        if (req.user.role !== "admin") return sendError(res, 403, "Admin only");
+
+        const applications = await prisma.adoptionApplication.findMany({
+            include: {
+                adoptionPet: {
+                    include: {
+                        pet: {
+                            include: {
+                                photos: { orderBy: { createdAt: "desc" }, take: 1 }
+                            }
+                        }
+                    }
+                },
+                user: {
+                    select: {
+                        id: true,
+                        fullName: true,
+                        email: true,
+                        phone: true,
+                    }
+                }
+            },
+            orderBy: { createdAt: "desc" },
+        });
+
+        const ownerIds = [...new Set(
+            applications
+                .map((item) => item.adoptionPet?.ownerId)
+                .filter(Boolean)
+        )];
+
+        const owners = ownerIds.length
+            ? await prisma.user.findMany({
+                where: { id: { in: ownerIds } },
+                select: {
+                    id: true,
+                    fullName: true,
+                    email: true,
+                    phone: true,
+                }
+            })
+            : [];
+
+        const ownersById = new Map(owners.map((owner) => [owner.id, owner]));
+
+        const linkedApplications = applications.map((item) => ({
+            ...item,
+            owner: item.adoptionPet?.ownerId ? ownersById.get(item.adoptionPet.ownerId) || null : null,
+        }));
+
+        return sendSuccess(res, 200, "All adoption applications fetched", linkedApplications);
+    } catch (error) {
+        console.error("Admin Get Adoption Applications Error:", error);
         return sendError(res, 500, "Server Error");
     }
 };
@@ -248,6 +387,13 @@ const getAdoptionById = async (req, res) => {
 
         if (!isApproved && !isAdmin && !isOwner) {
             return sendError(res, 404, "Adoption listing not found");
+        }
+
+        // Keep adopter application data isolated per-user for non-admin/non-owner viewers.
+        if (!isAdmin && !isOwner) {
+            adoption.applications = (adoption.applications || []).filter(
+                (app) => app.userId && app.userId === uid
+            );
         }
 
         return sendSuccess(res, 200, "Adoption details fetched", adoption);
@@ -305,6 +451,74 @@ const updateAdoptionStatus = async (req, res) => {
 };
 
 /**
+ * @desc    Admin: Approve/Reject a specific adoption application
+ * @route   PATCH /api/adoptions/admin/application-status/:applicationId
+ * @access  Admin
+ */
+const updateApplicationStatus = async (req, res) => {
+    try {
+        const { applicationId } = req.params;
+        const nextStatus = String(req.body?.status || "").toUpperCase();
+
+        if (req.user.role !== "admin") return sendError(res, 403, "Admin only");
+        if (!["PENDING", "APPROVED", "REJECTED"].includes(nextStatus)) {
+            return sendError(res, 400, "Invalid status. Use PENDING, APPROVED or REJECTED");
+        }
+
+        const existing = await prisma.adoptionApplication.findUnique({
+            where: { id: applicationId },
+            include: { adoptionPet: true },
+        });
+
+        if (!existing) return sendError(res, 404, "Adoption application not found");
+
+        if (nextStatus === "APPROVED" && existing.adoptionPet?.status !== "APPROVED") {
+            return sendError(res, 400, "Listing must be approved before approving an adopter");
+        }
+
+        let application = null;
+
+        await prisma.$transaction(async (tx) => {
+            application = await tx.adoptionApplication.update({
+                where: { id: applicationId },
+                data: { status: nextStatus },
+            });
+
+            if (nextStatus === "APPROVED") {
+                await tx.adoptionApplication.updateMany({
+                    where: {
+                        adoptionPetId: existing.adoptionPetId,
+                        id: { not: applicationId },
+                        status: { in: ["PENDING", "APPROVED"] },
+                    },
+                    data: { status: "REJECTED" },
+                });
+
+                await tx.adoptionPet.update({
+                    where: { id: existing.adoptionPetId },
+                    data: {
+                        status: "ADOPTED",
+                        tag: "Adopted",
+                    },
+                });
+
+                if (existing.adoptionPet?.petId) {
+                    await tx.pet.update({
+                        where: { id: existing.adoptionPet.petId },
+                        data: { adoptionStatus: "ADOPTED" },
+                    });
+                }
+            }
+        });
+
+        return sendSuccess(res, 200, `Application status updated to ${nextStatus}`, application);
+    } catch (error) {
+        console.error("Update Application Status Error:", error);
+        return sendError(res, 500, "Server Error");
+    }
+};
+
+/**
  * @desc    Apply for adoption
  * @route   POST /api/adoptions/apply
  * @access  Private
@@ -324,6 +538,18 @@ const applyForAdoption = async (req, res) => {
         }
         if (listing.status !== "APPROVED") {
             return sendError(res, 400, "This pet is not open for applications yet");
+        }
+
+        const existingApplication = await prisma.adoptionApplication.findFirst({
+            where: {
+                adoptionPetId: petId,
+                userId,
+            },
+            orderBy: { createdAt: "desc" },
+        });
+
+        if (existingApplication && String(existingApplication.status || "").toUpperCase() === "PENDING") {
+            return sendError(res, 400, "Your adoption request is already pending admin review");
         }
 
         const application = await prisma.adoptionApplication.create({
@@ -348,9 +574,13 @@ const applyForAdoption = async (req, res) => {
 module.exports = {
     requestAdoption,
     getAdoptions,
+    getMyAdoptionListings,
+    getMyAdoptionApplications,
     getAdoptionById,
     adminGetAllAdoptions,
+    adminGetAllAdoptionApplications,
     adminCreateListing,
     updateAdoptionStatus,
+    updateApplicationStatus,
     applyForAdoption
 };

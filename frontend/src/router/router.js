@@ -22,6 +22,8 @@ import HealthAndMedical from "../pages/HealthAndMedical";
 import AdoptionListing from "../pages/AdoptionListing";
 import AdoptionDetails from "../pages/AdoptionDetails";
 import AdoptionFlow from "../pages/AdoptionFlow";
+import MyAdoptionSubmissions from "../pages/MyAdoptionSubmissions";
+import MyAdoptionRequests from "../pages/MyAdoptionRequests";
 import Services from "../pages/Services";
 import ServiceDetails from "../pages/ServiceDetails";
 import MyBookings from "../pages/MyBookings";
@@ -34,6 +36,7 @@ import AdminUserManagementPage from "../pages/admin/AdminUserManagementPage";
 import AdminAdoptionManagementPage from "../pages/admin/AdminAdoptionManagementPage";
 import AdminAdoptionDetailPage from "../pages/admin/AdminAdoptionDetailPage";
 import AdminAddAdoptionListingPage from "../pages/admin/AdminAddAdoptionListingPage";
+import AdminAdoptionRequestsPage from "../pages/admin/AdminAdoptionRequestsPage";
 
 // Rescue User Pages
 import RescueRequestPage from '../pages/rescue/RescueRequestPage';
@@ -93,6 +96,8 @@ export const router = createBrowserRouter([
       // User Profile & Pet Management Routes
       { path: "/profile", element: <UserProfile /> },
       { path: "/pets", element: <PetList /> },
+      { path: "/pets/adoption-submissions", element: <MyAdoptionSubmissions /> },
+      { path: "/adopt/my-requests", element: <MyAdoptionRequests /> },
       { path: "/pets/add", element: <AddPet /> },
       { path: "/pets/:id", element: <PetDetails /> },
       { path: "/pets/:id/edit", element: <EditPet /> },
@@ -145,6 +150,7 @@ export const router = createBrowserRouter([
           { path: "settings", element: <AdminSettingsPage /> },
           // Adoption Admin Routes (specific paths before :id)
           { path: "adoptions/add", element: <AdminAddAdoptionListingPage /> },
+          { path: "adoptions/requests", element: <AdminAdoptionRequestsPage /> },
           { path: "adoptions", element: <AdminAdoptionManagementPage /> },
           { path: "adoptions/:id", element: <AdminAdoptionDetailPage /> },
         ],

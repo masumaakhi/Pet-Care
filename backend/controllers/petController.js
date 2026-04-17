@@ -1,6 +1,7 @@
 //backend/controllers/petController.js
 const prisma = require("../prisma/prismaClient");
 const { sendSuccess, sendError } = require("../utils/response");
+const { getUploadedFileUrl } = require("../utils/uploadUrl");
 
 /**
  * @desc    Create a new pet
@@ -327,7 +328,8 @@ const uploadPetPhoto = async (req, res) => {
     if (pet.ownerId !== req.user.id) return sendError(res, 403, "Forbidden");
 
     // Construct URL (Relative for static serving)
-    const photoUrl = `/uploads/pets/${req.file.filename}`;
+    const fallbackPhotoUrl = req.file.filename ? `/uploads/pets/${req.file.filename}` : null;
+    const photoUrl = getUploadedFileUrl(req.file, fallbackPhotoUrl);
 
     const photo = await prisma.petPhoto.create({
       data: {
@@ -390,9 +392,11 @@ const deletePetPhoto = async (req, res) => {
     if (photo.ownerId !== req.user.id) return sendError(res, 403, "Forbidden");
 
     // Remove from disk
-    const filePath = path.join(__dirname, "..", photo.url);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    if (photo.url && !/^https?:\/\//i.test(photo.url)) {
+      const filePath = path.join(__dirname, "..", photo.url);
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
 
     // Remove from DB

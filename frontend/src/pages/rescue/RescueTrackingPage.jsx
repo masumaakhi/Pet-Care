@@ -7,7 +7,7 @@ import RescueStatusBadge from '../../components/rescue/RescueStatusBadge';
 import PriorityBadge from '../../components/rescue/PriorityBadge';
 import LoadingState from '../../components/rescue/LoadingState';
 import rescueService from '../../utils/rescueService';
-import api from '../../utils/api';
+import { resolveApiMediaUrl } from '../../utils/helpers';
 import { formatDate } from '../../utils/rescueHelpers';
 import { ChevronLeft, Calendar, MapPin, Navigation, Shield, Image as ImageIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -20,8 +20,6 @@ const RescueTrackingPage = () => {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const socket = useSocket();
-
-  const apiBaseURL = api.defaults.baseURL.replace('/api', '');
 
   useEffect(() => {
     let cancelled = false;
@@ -149,8 +147,7 @@ const RescueTrackingPage = () => {
 
   const getPhotoUrl = (path) => {
     if (!path) return "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=600";
-    if (path.startsWith('http')) return path;
-    return `${apiBaseURL.endsWith('/') ? apiBaseURL.slice(0, -1) : apiBaseURL}${path.startsWith('/') ? '' : '/'}${path}`;
+    return resolveApiMediaUrl(path);
   };
 
   return (

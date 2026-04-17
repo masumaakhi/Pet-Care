@@ -65,6 +65,20 @@ const items = [
     ),
   },
   {
+    label: "Adopt Requests",
+    to: "/admin/adoptions/requests",
+    icon: (
+      <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M16 3h5v5" />
+        <path d="M8 21H3v-5" />
+        <path d="M21 3l-7 7" />
+        <path d="M3 21l7-7" />
+        <path d="M9 7h2" />
+        <path d="M13 7h2" />
+      </svg>
+    ),
+  },
+  {
     label: "Rescues",
     to: "/admin/rescues",
     icon: (

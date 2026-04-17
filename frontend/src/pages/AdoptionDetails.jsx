@@ -163,7 +163,7 @@ export default function AdoptionDetails() {
                                         'bg-gradient-to-r from-[#5f7d5a] via-[#7fa37a] to-[#8b6b4c] shadow-[0_15px_40px_rgba(95,125,90,0.3)] hover:shadow-[0_20px_50px_rgba(95,125,90,0.4)]'
                                 }`}
                         >
-                            {pet.status === 'PENDING' ? 'Request Pending' : pet.status === 'ADOPTED' ? 'Already Adopted' : pet.status === 'REJECTED' ? 'Not available' : 'Confirm Adoption'}
+                            {pet.status === 'PENDING' ? 'Request Pending' : pet.status === 'ADOPTED' ? 'Already Adopted' : pet.status === 'REJECTED' ? 'Not available' : 'Start Adoption Request'}
                         </motion.button>
                         <p className="text-center text-xs text-[#6b7d67] mt-4">
                             By clicking this, you agree to our adoption terms & conditions.

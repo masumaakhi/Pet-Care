@@ -5,6 +5,7 @@ const { sendSuccess, sendError } = require("../utils/response");
 const rescueService = require("../services/RescueService");
 const notificationService = require("../services/NotificationService");
 const socketService = require("../services/SocketService");
+const { getUploadedFileUrl } = require("../utils/uploadUrl");
 
 /**
  * Controller for User-facing Rescue actions
@@ -33,7 +34,8 @@ const createRescueRequest = async (req, res) => {
 
     let photoUrl = req.body.photoUrl;
     if (req.file) {
-      photoUrl = `/uploads/rescues/${req.file.filename}`;
+      const fallbackPhotoUrl = req.file.filename ? `/uploads/rescues/${req.file.filename}` : null;
+      photoUrl = getUploadedFileUrl(req.file, fallbackPhotoUrl);
     }
 
     const latN = parseFloat(incidentLat);

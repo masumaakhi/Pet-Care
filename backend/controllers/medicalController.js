@@ -1,6 +1,7 @@
 // backend/controllers/medicalController.js
 const prisma = require("../prisma/prismaClient");
 const { sendSuccess, sendError } = require("../utils/response");
+const { getUploadedFileUrl } = require("../utils/uploadUrl");
 
 /* --- Vaccination Controllers --- */
 
@@ -53,7 +54,9 @@ const addVaccination = async (req, res) => {
         petId,
         ownerId: pet.ownerId, // Always use the pet's actual owner
         status: "Completed",
-        proofUrl: req.file ? `/uploads/pets/${req.file.filename}` : null,
+        proofUrl: req.file
+          ? getUploadedFileUrl(req.file, req.file.filename ? `/uploads/pets/${req.file.filename}` : null)
+          : null,
       },
     });
     return sendSuccess(res, 201, "Vaccination added", vaccination);
@@ -129,7 +132,9 @@ const addMedicalRecord = async (req, res) => {
         emergency: emergency === "true" || emergency === true,
         petId,
         ownerId: pet.ownerId,
-        reportUrl: req.file ? `/uploads/pets/${req.file.filename}` : null,
+        reportUrl: req.file
+          ? getUploadedFileUrl(req.file, req.file.filename ? `/uploads/pets/${req.file.filename}` : null)
+          : null,
       },
     });
     return sendSuccess(res, 201, "Medical record added", record);
@@ -203,7 +208,9 @@ const addPrescription = async (req, res) => {
         petId,
         ownerId: pet.ownerId,
         fileName: req.file ? req.file.originalname : null,
-        fileUrl: req.file ? `/uploads/pets/${req.file.filename}` : null,
+        fileUrl: req.file
+          ? getUploadedFileUrl(req.file, req.file.filename ? `/uploads/pets/${req.file.filename}` : null)
+          : null,
       },
     });
     return sendSuccess(res, 201, "Prescription added", prescription);
