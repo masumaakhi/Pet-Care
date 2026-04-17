@@ -107,17 +107,29 @@ export default function PetList() {
             </p>
           </div>
 
-          <Link
-            to="/pets/add"
-            className="inline-flex items-center justify-center gap-2
-            px-5 py-2.5 rounded-xl
-            bg-gradient-to-r from-[#5f7d5a]/55 via-[#7fa37a] to-[#8b6b4c]
-            border border-[#d6e2d3]
-            text-black/75 font-semibold
-            hover:scale-[1.02] hover:shadow-lg transition duration-300"
-          >
-            ➕ Add Pet
-          </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              to="/pets/adoption-submissions"
+              className="inline-flex items-center justify-center gap-2
+              px-4 py-2.5 rounded-xl
+              bg-white/80 border border-[#8b6b4c]/25
+              text-[#2f3e2c] font-semibold
+              hover:shadow-lg transition duration-300"
+            >
+              🧾 Adoption Status
+            </Link>
+            <Link
+              to="/pets/add"
+              className="inline-flex items-center justify-center gap-2
+              px-5 py-2.5 rounded-xl
+              bg-gradient-to-r from-[#5f7d5a]/55 via-[#7fa37a] to-[#8b6b4c]
+              border border-[#d6e2d3]
+              text-black/75 font-semibold
+              hover:scale-[1.02] hover:shadow-lg transition duration-300"
+            >
+              ➕ Add Pet
+            </Link>
+          </div>
         </motion.div>
 
         {/* Stats Row */}

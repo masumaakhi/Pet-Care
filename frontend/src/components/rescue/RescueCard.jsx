@@ -4,18 +4,14 @@ import RescueStatusBadge from './RescueStatusBadge';
 import PriorityBadge from './PriorityBadge';
 import { formatDate } from '../../utils/rescueHelpers';
 import { Link } from 'react-router-dom';
-import api from '../../utils/api';
+import { resolveApiMediaUrl } from '../../utils/helpers';
 
 const RescueCard = ({ rescue, showActions = true, actionButton, linkTo }) => {
   if (!rescue) return null;
 
-  // Get base URL for images
-  const apiBaseURL = api.defaults.baseURL.replace('/api', '');
-
   const getPhotoUrl = (path) => {
     if (!path) return "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=400";
-    if (path.startsWith('http')) return path;
-    return `${apiBaseURL.endsWith('/') ? apiBaseURL.slice(0, -1) : apiBaseURL}${path.startsWith('/') ? '' : '/'}${path}`;
+    return resolveApiMediaUrl(path);
   };
 
   const content = (
@@ -112,4 +108,4 @@ const RescueCard = ({ rescue, showActions = true, actionButton, linkTo }) => {
   );
 };
 
-export default RescueCard;
+export default RescueCard;

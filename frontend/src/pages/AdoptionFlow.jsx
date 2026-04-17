@@ -35,8 +35,9 @@ export default function AdoptionFlow() {
         formData.email.trim() !== "" &&
         formData.phone.trim() !== "";
 
-    // Simulate current tracking progress step (1 to 5)
-    // For demo purposes, we'll start at 2 (Admin Review) after submitting
+    const [applicationStatus, setApplicationStatus] = useState(null);
+
+    // Tracker now reflects server-side approval progress only.
     const [trackingStep, setTrackingStep] = useState(2);
 
     useEffect(() => {
@@ -47,9 +48,30 @@ export default function AdoptionFlow() {
                 if (response.data?.success && response.data.data) {
                     const foundPet = response.data.data;
                     setPet(foundPet);
-                    if (foundPet.status === "ADOPTED") setTrackingStep(5);
-                    else if (foundPet.status === "PENDING") setTrackingStep(2);
-                    else if (foundPet.status === "APPROVED") setTrackingStep(1);
+                    const latestApplication = Array.isArray(foundPet.applications)
+                        ? [...foundPet.applications].sort(
+                            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+                        )[0]
+                        : null;
+
+                    const currentStatus = latestApplication
+                        ? String(latestApplication.status || "PENDING").toUpperCase()
+                        : null;
+
+                    setApplicationStatus(currentStatus);
+
+                    if (currentStatus === "APPROVED") {
+                        setTrackingStep(foundPet.status === "ADOPTED" ? 5 : 3);
+                        setStep(2);
+                    } else if (currentStatus === "REJECTED") {
+                        setTrackingStep(2);
+                        setStep(2);
+                    } else if (currentStatus === "PENDING") {
+                        setTrackingStep(2);
+                        setStep(2);
+                    } else {
+                        setTrackingStep(foundPet.status === "ADOPTED" ? 5 : 1);
+                    }
                 } else {
                     setError("Pet details not found.");
                 }
@@ -87,6 +109,7 @@ export default function AdoptionFlow() {
                         applications: [...(pet.applications || []), newApp],
                     });
                 }
+                setApplicationStatus("PENDING");
                 setTrackingStep(2);
                 setStep(2);
                 window.scrollTo({ top: 0, behavior: "smooth" });
@@ -280,6 +303,11 @@ export default function AdoptionFlow() {
                                 <p className="text-[#4e5f4a] max-w-lg mx-auto">
                                     Thank you for applying to adopt <span className="font-semibold">{pet.name}</span>. Your application is now in our system. Track your progress below.
                                 </p>
+                                {applicationStatus && (
+                                    <p className="text-xs text-[#6b7d67] mt-3">
+                                        Current approval state: <span className="font-semibold">{applicationStatus}</span>
+                                    </p>
+                                )}
                             </div>
 
                             {/* Vertical Tracker */}
@@ -302,20 +330,7 @@ export default function AdoptionFlow() {
                                         return (
                                             <div
                                                 key={stage.id}
-                                                className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group cursor-pointer"
-                                                onClick={() => {
-                                                    setTrackingStep(stage.id);
-                                                    if (stage.id === 5) {
-                                                        setPet((prev) =>
-                                                            prev ? { ...prev, status: "ADOPTED" } : prev
-                                                        );
-                                                        showToast(
-                                                            "Demo only: final adoption is updated by admin in the system.",
-                                                            "success"
-                                                        );
-                                                    }
-                                                }}
-                                                title="Click to preview tracker stages (final step is illustrative)"
+                                                className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group"
                                             >
 
                                                 {/* Icon Node */}
@@ -344,7 +359,7 @@ export default function AdoptionFlow() {
 
                                 <div className="mt-12 text-center">
                                     <p className="text-sm text-[#4e5f4a] bg-[#f8faf5] py-3 px-6 rounded-xl border border-[#e4efe0] inline-block">
-                                        We will update this tracker and notify you via email as your application progresses.
+                                        This tracker updates from admin decisions and verified adoption progress.
                                     </p>
                                 </div>
                             </div>

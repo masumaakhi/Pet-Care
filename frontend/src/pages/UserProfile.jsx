@@ -23,6 +23,8 @@ export default function UserProfile() {
   const [pets, setPets] = useState([]);
   const [vaccines, setVaccines] = useState([]);
   const [prescriptions, setPrescriptions] = useState([]);
+  const [myAdoptionListings, setMyAdoptionListings] = useState([]);
+  const [myAdoptionRequests, setMyAdoptionRequests] = useState([]);
   const [isFetchingData, setIsFetchingData] = useState(false);
 
   useEffect(() => {
@@ -41,15 +43,19 @@ export default function UserProfile() {
   const fetchExtraData = async () => {
     try {
       setIsFetchingData(true);
-      const [petsRes, vaccineRes, presRes] = await Promise.all([
+      const [petsRes, vaccineRes, presRes, myListingsRes, myRequestsRes] = await Promise.all([
         api.get("/pets"),
         api.get("/medical/vaccines"),
         api.get("/medical/prescriptions"),
+        api.get("/adoptions/my/listings"),
+        api.get("/adoptions/my/applications"),
       ]);
 
       if (petsRes.data.success) setPets(petsRes.data.data);
       if (vaccineRes.data.success) setVaccines(vaccineRes.data.data);
       if (presRes.data.success) setPrescriptions(presRes.data.data);
+      if (myListingsRes?.data?.success) setMyAdoptionListings(myListingsRes.data.data || []);
+      if (myRequestsRes?.data?.success) setMyAdoptionRequests(myRequestsRes.data.data || []);
     } catch (error) {
       console.error("Fetch Profile Data Error:", error);
     } finally {
@@ -312,6 +318,23 @@ export default function UserProfile() {
                 hint="Currently ongoing prescriptions"
                 ctaLabel="Open Prescriptions →"
                 to="/prescriptions"
+              />
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-6 mb-10">
+              <MiniStat
+                title="Pets Given for Adoption"
+                value={myAdoptionListings.length}
+                hint="Your submitted listings and adopter status"
+                ctaLabel="Open Submissions →"
+                to="/pets/adoption-submissions"
+              />
+              <MiniStat
+                title="Pets You Requested to Adopt"
+                value={myAdoptionRequests.length}
+                hint="Your adopter-side requests and admin decisions"
+                ctaLabel="Open Requests →"
+                to="/adopt/my-requests"
               />
             </div>
           </>

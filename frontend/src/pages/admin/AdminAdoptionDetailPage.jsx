@@ -54,6 +54,34 @@ export default function AdminAdoptionDetailPage() {
     }
   };
 
+  const handleApplicationStatus = async (applicationId, nextStatus) => {
+    try {
+      const res = await api.patch(`/adoptions/admin/application-status/${applicationId}`, {
+        status: nextStatus,
+      });
+      if (res.data?.success) {
+        toast.success(`Application ${nextStatus.toLowerCase()}`);
+        setListing((prev) => {
+          if (!prev) return prev;
+          const updatedListingStatus = nextStatus === "APPROVED" ? "ADOPTED" : prev.status;
+          return {
+            ...prev,
+            status: updatedListingStatus,
+            applications: (prev.applications || []).map((app) =>
+              app.id === applicationId
+                ? { ...app, status: nextStatus }
+                : nextStatus === "APPROVED" && (app.status === "PENDING" || app.status === "APPROVED")
+                  ? { ...app, status: "REJECTED" }
+                  : app
+            ),
+          };
+        });
+      }
+    } catch (e) {
+      toast.error(e.response?.data?.message || "Failed to update application status");
+    }
+  };
+
   if (loading) {
     return (
       <div className="relative min-h-screen pt-24 flex justify-center">
@@ -174,6 +202,35 @@ export default function AdminAdoptionDetailPage() {
                         <span className="font-bold text-[#5f7d5a]">Living situation:</span>{" "}
                         {app.livingSituation}
                       </p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {app.status !== "APPROVED" && (
+                          <button
+                            type="button"
+                            onClick={() => handleApplicationStatus(app.id, "APPROVED")}
+                            className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-[#5f7d5a] to-[#7fa37a] text-white font-bold text-xs"
+                          >
+                            Approve applicant
+                          </button>
+                        )}
+                        {app.status !== "REJECTED" && (
+                          <button
+                            type="button"
+                            onClick={() => handleApplicationStatus(app.id, "REJECTED")}
+                            className="px-3 py-1.5 rounded-xl border border-rose-300 text-rose-700 font-bold text-xs"
+                          >
+                            Reject applicant
+                          </button>
+                        )}
+                        {app.status !== "PENDING" && (
+                          <button
+                            type="button"
+                            onClick={() => handleApplicationStatus(app.id, "PENDING")}
+                            className="px-3 py-1.5 rounded-xl border border-amber-300 text-amber-700 font-bold text-xs"
+                          >
+                            Mark pending
+                          </button>
+                        )}
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -189,7 +246,7 @@ export default function AdminAdoptionDetailPage() {
                 className="w-full mt-6 p-5 rounded-2xl bg-white/40 border border-[#8b6b4c]/30 outline-none focus:ring-2 focus:ring-[#7fa37a]/50 text-[#2f3e2c] font-medium h-32"
               />
               <p className="text-[10px] text-[#6b7d67] mt-2">
-                Application-level approve/reject API is not implemented; manage listing status from here or the main table.
+                Notes are local only. Application decisions are now handled above per applicant.
               </p>
             </GlassCard>
 

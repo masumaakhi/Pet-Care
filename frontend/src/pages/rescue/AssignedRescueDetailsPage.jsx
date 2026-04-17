@@ -6,6 +6,7 @@ import PriorityBadge from '../../components/rescue/PriorityBadge';
 import LoadingState from '../../components/rescue/LoadingState';
 import rescueService from '../../utils/rescueService';
 import api from '../../utils/api';
+import { resolveApiMediaUrl } from '../../utils/helpers';
 import { ChevronLeft, Camera, Navigation, CheckCircle, Navigation2, MessageSquare, Phone } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
@@ -99,12 +100,9 @@ const AssignedRescueDetailsPage = () => {
   const incidentLat = rescue.incidentLat || rescue.latitude;
   const incidentLng = rescue.incidentLng || rescue.longitude;
 
-  const apiBaseURL = api.defaults.baseURL.replace('/api', '');
   const getPhotoUrl = (path) => {
     if (!path) return null;
-    if (path.startsWith('http')) return path;
-    const base = apiBaseURL.endsWith('/') ? apiBaseURL.slice(0, -1) : apiBaseURL;
-    return `${base}${path.startsWith('/') ? '' : '/'}${path}`;
+    return resolveApiMediaUrl(path);
   };
   const photoSrc = getPhotoUrl(rescue.photoUrl);
 

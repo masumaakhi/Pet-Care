@@ -33,6 +33,18 @@ export const getPetImageUrl = (photos) => {
 };
 
 /**
+ * Resolve API-hosted media path to full URL.
+ * Accepts absolute urls, relative "/uploads/..." urls, and bare "uploads/..." urls.
+ */
+export const resolveApiMediaUrl = (value) => {
+  if (!value || typeof value !== "string") return "";
+  if (/^https?:\/\//i.test(value)) return value;
+  const SERVER_URL = process.env.REACT_APP_SERVER_URL || "http://localhost:5250";
+  const cleanPath = value.startsWith("/") ? value : `/${value}`;
+  return `${SERVER_URL}${cleanPath}`;
+};
+
+/**
  * Image for adoption grid/detail: API listing (pet.photos or AdoptionPet.image) or local mock (image import/string).
  */
 export const getAdoptionListingImage = (pet) => {

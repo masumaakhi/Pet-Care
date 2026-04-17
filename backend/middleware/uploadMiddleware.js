@@ -2,19 +2,24 @@
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const { cloudinary, isCloudinaryConfigured } = require("../config/cloudinary");
 
 // Base upload directory
 const baseDir = path.join(__dirname, "..", "uploads");
 
+const getSubDir = (originalUrl = "") => {
+  if (originalUrl.includes("pets")) return "pets";
+  if (originalUrl.includes("rescues")) return "rescues";
+  if (originalUrl.includes("adoptions")) return "adoptions";
+  if (originalUrl.includes("community")) return "community";
+  return "others";
+};
+
 // Storage configuration
-const storage = multer.diskStorage({
+const diskStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Determine subdirectory based on route or custom logic
-    let subDir = "others";
-    if (req.originalUrl.includes("pets")) subDir = "pets";
-    if (req.originalUrl.includes("rescues")) subDir = "rescues";
-    if (req.originalUrl.includes("adoptions")) subDir = "adoptions";
-    if (req.originalUrl.includes("community")) subDir = "community";
+    const subDir = getSubDir(req.originalUrl);
 
     const targetDir = path.join(baseDir, subDir);
     
@@ -36,6 +41,19 @@ const storage = multer.diskStorage({
   },
 });
 
+const cloudinaryStorage = new CloudinaryStorage({
+  cloudinary,
+  params: async (req, file) => {
+    const subDir = getSubDir(req.originalUrl);
+    return {
+      folder: `pet-care/${subDir}`,
+      resource_type: "image",
+      allowed_formats: ["jpg", "jpeg", "png", "webp"],
+      public_id: `${subDir}-${Date.now()}-${Math.round(Math.random() * 1e9)}`,
+    };
+  },
+});
+
 // File filter (Images only)
 const fileFilter = (req, file, cb) => {
   const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
@@ -47,7 +65,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({
-  storage,
+  storage: isCloudinaryConfigured ? cloudinaryStorage : diskStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB Limit
   fileFilter,
 });
