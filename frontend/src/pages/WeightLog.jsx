@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import api from "../utils/api";
 import { toast } from "react-hot-toast";
+import BackNavButton from "../components/BackNavButton";
 
 export default function WeightLog() {
   const [pets, setPets] = useState([]);
@@ -78,6 +79,7 @@ export default function WeightLog() {
         rounded-full blur-[160px] opacity-60 pointer-events-none" />
 
       <div className="relative z-10 max-w-6xl mx-auto">
+        <BackNavButton className="mb-3" />
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}
