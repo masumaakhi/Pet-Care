@@ -11,6 +11,7 @@ const serviceRoutes = require("./routes/serviceRoutes");
 const rescueRoutes = require("./routes/rescueRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const donationRoutes = require("./routes/donationRoutes");
+const communityRoutes = require("./routes/communityRoutes");
 
 const path = require("path");
 const http = require("http");
@@ -54,6 +55,7 @@ app.use("/api/services", serviceRoutes);
 app.use("/api/rescues", rescueRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/donations", donationRoutes);
+app.use("/api/community", communityRoutes);
 
 // Root route for testing
 app.get("/", (req, res) => {

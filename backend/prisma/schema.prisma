@@ -31,6 +31,9 @@ model User {
   volunteerProfile      VolunteerProfile?
   notifications         RescueNotification[]
   donations             Donation[]
+  communityPosts        CommunityPost[]    @relation("UserCommunityPosts")
+  communityLikes        CommunityLike[]    @relation("UserCommunityLikes")
+  communityComments     CommunityComment[] @relation("UserCommunityComments")
 }
 
 model Pet {
@@ -400,4 +403,41 @@ model Donation {
   designationLabel   String?
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
+}
+
+model CommunityPost {
+  id          String   @id @default(uuid())
+  authorId    String
+  author      User     @relation("UserCommunityPosts", fields: [authorId], references: [id])
+  category    String
+  type        String   @default("update")
+  content     String
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  likes       CommunityLike[]
+  comments    CommunityComment[]
+}
+
+model CommunityLike {
+  id        String   @id @default(uuid())
+  postId    String
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation("UserCommunityLikes", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([postId, userId])
+}
+
+model CommunityComment {
+  id        String   @id @default(uuid())
+  postId    String
+  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation("UserCommunityComments", fields: [userId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
