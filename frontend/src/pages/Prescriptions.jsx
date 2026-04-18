@@ -5,6 +5,7 @@ import api from "../utils/api";
 import { toast } from "react-hot-toast";
 import { usePet } from "../context/PetContext";
 import PetSelector from "../components/medical/PetSelector";
+import BackNavButton from "../components/BackNavButton";
 
 export default function Prescriptions() {
   const { selectedPetId, pets } = usePet();
@@ -49,6 +50,7 @@ export default function Prescriptions() {
     <div className="min-h-screen pt-[6rem] pb-[4rem] px-4 sm:px-6 relative overflow-hidden text-[#2f3e2c]">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[820px] h-[820px] bg-gradient-to-br from-[#7fa37a]/40 via-[#5f7d5a]/30 to-[#8b6b4c]/30 rounded-full blur-[170px] opacity-60 pointer-events-none" />
       <div className="relative z-10 max-w-6xl mx-auto">
+        <BackNavButton className="mb-3" />
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-black">Prescriptions</h1>

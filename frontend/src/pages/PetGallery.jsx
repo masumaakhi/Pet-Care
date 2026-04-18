@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import api from "../utils/api";
 import { toast } from "react-hot-toast";
 import { getPetImageUrl } from "../utils/helpers";
+import BackNavButton from "../components/BackNavButton";
 
 const BACKEND_URL = process.env.REACT_APP_UPLOAD_URL || "http://localhost:5250";
 
@@ -86,6 +87,7 @@ export default function PetGallery() {
       />
 
       <div className="relative z-10 max-w-6xl mx-auto">
+        <BackNavButton className="mb-3" />
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}

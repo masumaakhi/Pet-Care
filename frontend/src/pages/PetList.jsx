@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import api from "../utils/api";
 import { toast } from "react-hot-toast";
 import { getPetImageUrl } from "../utils/helpers";
+import BackNavButton from "../components/BackNavButton";
 
 // Helper to format age months to readable string
 const formatAge = (months) => {
@@ -91,6 +92,7 @@ export default function PetList() {
       />
 
       <div className="relative z-10 max-w-6xl mx-auto">
+        <BackNavButton className="mb-3" />
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 18 }}

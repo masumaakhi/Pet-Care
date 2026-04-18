@@ -1,8 +1,10 @@
 // frontend/src/pages/CareCalendar.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import api from "../utils/api";
 import { toast } from "react-hot-toast";
+import BackNavButton from "../components/BackNavButton";
 
 const typeColor = {
   Feeding: "from-emerald-200/70 to-emerald-100/70 border-emerald-300/60 text-emerald-800",
@@ -84,40 +86,55 @@ export default function CareCalendar() {
         rounded-full blur-[170px] opacity-60 pointer-events-none" />
 
       <div className="relative z-10 max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-2xl sm:text-4xl font-black text-[#2f3e2c] tracking-tight">
-              Care Calendar
-            </h1>
-            <p className="text-[#6b7d67] mt-1 font-bold">
-              Visual monthly routines for your pets.
-            </p>
-          </div>
+        <BackNavButton className="mb-3" />
 
-          <div className="flex items-center gap-3">
-            <select
-              value={selectedPetId}
-              onChange={(e) => setSelectedPetId(e.target.value)}
-              className="px-5 py-2.5 rounded-2xl bg-white/60 backdrop-blur-3xl
-              border border-[#8b6b4c]/30 text-[#2f3e2c] font-black outline-none focus:ring-2 focus:ring-[#7fa37a]/50"
-            >
-              <option value="all">All Pets</option>
-              {pets.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+        <div className="rounded-2xl sm:rounded-3xl border border-[#8b6b4c]/25 bg-white/45 backdrop-blur-xl p-4 sm:p-6 mb-6 shadow-sm">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black text-[#2f3e2c] tracking-tight">
+                Care Calendar
+              </h1>
+              <p className="text-[#6b7d67] mt-1 font-bold text-sm sm:text-base">
+                Visual monthly routines for your pets.
+              </p>
+              <p className="text-base sm:text-lg font-black text-[#5f7d5a] mt-2 tracking-wide">
+                {current.toLocaleString("default", { month: "long", year: "numeric" })}
+              </p>
+            </div>
 
-            <div className="flex bg-white/60 p-1 rounded-2xl border border-[#8b6b4c]/30 backdrop-blur-md shadow-sm">
-              <button onClick={prevMonth} className="px-4 py-1.5 rounded-xl hover:bg-white transition text-[#2f3e2c] font-bold">◀</button>
-              <button onClick={nextMonth} className="px-4 py-1.5 rounded-xl hover:bg-white transition text-[#2f3e2c] font-bold">▶</button>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <select
+                value={selectedPetId}
+                onChange={(e) => setSelectedPetId(e.target.value)}
+                className="w-full sm:w-auto min-w-[10rem] px-5 py-2.5 rounded-2xl bg-white/70 backdrop-blur-md
+                border border-[#8b6b4c]/30 text-[#2f3e2c] font-black outline-none focus:ring-2 focus:ring-[#7fa37a]/50"
+              >
+                <option value="all">All Pets</option>
+                {pets.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+
+              <div className="flex items-center justify-center sm:justify-end gap-1 rounded-2xl border border-[#8b6b4c]/30 bg-white/60 p-1 backdrop-blur-md shadow-sm">
+                <button
+                  type="button"
+                  onClick={prevMonth}
+                  aria-label="Previous month"
+                  className="p-2.5 rounded-xl text-[#2f3e2c] hover:bg-white/90 transition"
+                >
+                  <FaChevronLeft className="text-sm" />
+                </button>
+                <button
+                  type="button"
+                  onClick={nextMonth}
+                  aria-label="Next month"
+                  className="p-2.5 rounded-xl text-[#2f3e2c] hover:bg-white/90 transition"
+                >
+                  <FaChevronRight className="text-sm" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Month label */}
-        <div className="text-center text-2xl font-black text-[#2f3e2c] mb-6 uppercase tracking-widest">
-          {current.toLocaleString("default", { month: "long", year: "numeric" })}
         </div>
 
         {loading ? (
@@ -126,15 +143,18 @@ export default function CareCalendar() {
              <p className="text-[#6b7d67] font-bold">Mapping your care calendar...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-7 gap-3">
+          <div className="grid grid-cols-7 gap-2 sm:gap-3">
             {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-              <div key={d} className="text-center text-xs text-[#6b7d67] font-black uppercase tracking-tighter opacity-70 mb-2">
+              <div
+                key={d}
+                className="text-center text-[10px] sm:text-xs text-[#5f7d5a] font-black uppercase tracking-wide py-2 rounded-xl bg-white/35 border border-[#8b6b4c]/15"
+              >
                 {d}
               </div>
             ))}
 
             {Array.from({ length: firstDay }).map((_, i) => (
-              <div key={`empty-${i}`} className="min-h-[100px] bg-black/5 rounded-3xl opacity-30" />
+              <div key={`empty-${i}`} className="min-h-[92px] sm:min-h-[100px] bg-black/[0.04] rounded-2xl sm:rounded-3xl opacity-40" />
             ))}
 
             {days.map((d) => {
@@ -145,10 +165,10 @@ export default function CareCalendar() {
                 <motion.div
                   key={d.toISOString()}
                   whileHover={{ scale: 1.02 }}
-                  className={`min-h-[110px] sm:min-h-[130px] rounded-[2rem] p-3
+                  className={`min-h-[104px] sm:min-h-[128px] rounded-2xl sm:rounded-[2rem] p-2.5 sm:p-3
                   bg-white/60 backdrop-blur-3xl flex flex-col
-                  border ${isToday ? "border-[#5f7d5a] ring-2 ring-[#7fa37a]/40 shadow-xl" : "border-[#8b6b4c]/20 shadow-sm"}
-                  transition hover:shadow-lg`}
+                  border ${isToday ? "border-[#5f7d5a] ring-2 ring-[#7fa37a]/40 shadow-lg" : "border-[#8b6b4c]/20 shadow-sm"}
+                  transition hover:shadow-md`}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className={`text-sm font-black ${isToday ? "text-[#5f7d5a]" : "text-[#2f3e2c]"}`}>
