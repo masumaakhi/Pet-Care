@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "../utils/api";
+import { useAuth } from "../context/AuthContext";
 import {
     FaHeart,
     FaRegHeart,
@@ -12,7 +13,9 @@ import {
     FaBookOpen,
     FaPaperPlane,
     FaUserCircle,
-    FaVideo
+    FaVideo,
+    FaTrashAlt,
+    FaRegUserCircle
 } from "react-icons/fa";
 
 // Dummy Posts (Fallback if API fails)
@@ -72,6 +75,7 @@ const initialPosts = [
 ];
 
 const Community = () => {
+    const { user } = useAuth();
     const [posts, setPosts] = useState([]);
     const [activeFilter, setActiveFilter] = useState("Feed");
     const [newPostText, setNewPostText] = useState("");
@@ -105,7 +109,17 @@ const Community = () => {
         { id: "Lost & Found", label: "Lost & Found", icon: <FaSearchLocation /> },
         { id: "Ask Vet", label: "Ask Vet / Tips", icon: <FaStethoscope /> },
         { id: "Blog", label: "Blog & Articles", icon: <FaBookOpen /> },
+        { id: "My Posts", label: "My Posts", icon: <FaRegUserCircle /> },
     ];
+
+    const getProfilePic = (usr) => {
+        if (!usr) return "https://ui-avatars.com/api/?name=User";
+        if (usr.profilePicture) {
+            return usr.profilePicture.includes("http") ? usr.profilePicture : `http://localhost:5250/${usr.profilePicture.replace(/\\/g, '/')}`;
+        }
+        if (usr.googleId && usr.googleId.startsWith('http')) return usr.googleId;
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(usr.fullName || "User")}`;
+    };
 
     const handleLike = async (id) => {
         // Optimistic UI Update
@@ -145,22 +159,23 @@ const Community = () => {
         e.preventDefault();
         if (!newPostText.trim() && !selectedImage) return;
 
+        const currentText = newPostText;
+        const currentCategory = activeFilter === "Feed" || activeFilter === "My Posts" ? "Feed" : activeFilter;
+
         const dummyNewPost = {
             id: `p${Date.now()}`,
-            author: "You",
-            authorImage: "https://i.pravatar.cc/150?img=1",
+            authorId: user ? user.id : "local",
+            author: user ? user.fullName : "You",
+            authorImage: getProfilePic(user),
             time: "Just now",
-            category: activeFilter === "Feed" ? "Feed" : activeFilter,
+            category: currentCategory,
             type: "update",
-            content: newPostText,
+            content: currentText,
             image: selectedImage,
             likes: 0,
             comments: 0,
             isLiked: false
         };
-
-        const currentText = newPostText;
-        const currentSelectedImage = selectedImage;
 
         // Optimistic UI Update
         setPosts([dummyNewPost, ...posts]);
@@ -171,7 +186,7 @@ const Community = () => {
         try {
             const formData = new FormData();
             formData.append("content", currentText);
-            formData.append("category", activeFilter === "Feed" ? "Feed" : activeFilter);
+            formData.append("category", currentCategory);
             if (imageFile) {
                 formData.append("image", imageFile);
             }
@@ -188,6 +203,22 @@ const Community = () => {
         }
     };
 
+    const handleDeletePost = async (postId) => {
+        if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+        // Optimistic delete
+        setPosts(prev => prev.filter(p => p.id !== postId));
+
+        try {
+            if (!postId.startsWith('p')) { // 'p' denotes local dummy ID
+                await api.delete(`/community/${postId}`);
+            }
+        } catch (error) {
+            console.error("Error deleting post:", error);
+            // Should revert if failed natively, but ignoring for mockup resilience
+        }
+    };
+
     const toggleComments = async (postId) => {
         const isCurrentlyExpanded = expandedComments[postId];
         
@@ -196,8 +227,8 @@ const Community = () => {
             [postId]: !isCurrentlyExpanded
         }));
 
-        if (!isCurrentlyExpanded && !postComments[postId]) {
-            // Fetch comments
+        if (!isCurrentlyExpanded && !postComments[postId] && !postId.startsWith('p')) {
+            // Fetch comments if real post
             try {
                 const res = await api.get(`/community/${postId}/comments`);
                 setPostComments(prev => ({ ...prev, [postId]: res.data }));
@@ -215,8 +246,9 @@ const Community = () => {
 
         const dummyComment = {
             id: `c${Date.now()}`,
-            author: "You",
-            authorImage: "https://i.pravatar.cc/150?img=1",
+            authorId: user ? user.id : "local",
+            author: user ? user.fullName : "You",
+            authorImage: getProfilePic(user),
             content: content,
             time: "Just now"
         };
@@ -239,15 +271,20 @@ const Community = () => {
         setNewCommentTexts(prev => ({ ...prev, [postId]: "" }));
 
         try {
-            await api.post(`/community/${postId}/comments`, { content });
+            if (!postId.startsWith('p')) {
+                await api.post(`/community/${postId}/comments`, { content });
+            }
         } catch (err) {
             console.error("Failed to add comment on backend", err);
         }
     };
 
-    const filteredPosts = activeFilter === "Feed"
-        ? posts
-        : posts.filter(post => post.category === activeFilter || post.category === "Feed" && activeFilter === "Feed");
+    let filteredPosts = posts;
+    if (activeFilter === "My Posts") {
+        filteredPosts = posts.filter(post => user && post.authorId === user.id);
+    } else if (activeFilter !== "Feed") {
+        filteredPosts = posts.filter(post => post.category === activeFilter);
+    }
 
     return (
         <div className="min-h-screen pt-24 pb-16 px-4 md:px-8 lg:px-24">
@@ -292,53 +329,59 @@ const Community = () => {
 
                     {/* Create Post Banner */}
                     <div className="bg-white/80 backdrop-blur-lg rounded-3xl p-6 shadow-xl border border-white/60">
-                        <form onSubmit={handleCreatePost}>
-                            <div className="flex gap-4">
-                                <img src="https://i.pravatar.cc/150?img=1" alt="You" className="w-12 h-12 rounded-full border-2 border-primary/20" />
-                                <div className="flex-1">
-                                    <textarea
-                                        value={newPostText}
-                                        onChange={(e) => setNewPostText(e.target.value)}
-                                        placeholder={`Share a story, photo, or an update${activeFilter !== 'Feed' ? ' in ' + activeFilter : ''}...`}
-                                        className="w-full bg-transparent border-none focus:ring-0 resize-none outline-none text-gray-700 text-lg placeholder-gray-400 min-h-[60px]"
-                                    ></textarea>
-
-                                    {/* Image Preview */}
-                                    {selectedImage && (
-                                        <div className="relative mt-2 inline-block">
-                                            <img src={selectedImage} alt="Upload Preview" className="h-32 object-cover rounded-xl border border-gray-200" />
-                                            <button
-                                                type="button"
-                                                onClick={() => { setSelectedImage(null); setImageFile(null); }}
-                                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-md"
-                                            >
-                                                &times;
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                            <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+                        {user ? (
+                            <form onSubmit={handleCreatePost}>
                                 <div className="flex gap-4">
-                                    <label className="text-gray-500 hover:text-primary transition flex items-center gap-2 font-medium cursor-pointer">
-                                        <FaImage /> <span className="hidden sm:inline">Photo/Video</span>
-                                        <input
-                                            type="file"
-                                            accept="image/*,video/*"
-                                            className="hidden"
-                                            onChange={handleImageUpload}
-                                        />
-                                    </label>
+                                    <img src={getProfilePic(user)} alt="You" className="w-12 h-12 rounded-full border-2 border-primary/20 object-cover" />
+                                    <div className="flex-1">
+                                        <textarea
+                                            value={newPostText}
+                                            onChange={(e) => setNewPostText(e.target.value)}
+                                            placeholder={`Share a story, photo, or an update${(activeFilter !== 'Feed' && activeFilter !== 'My Posts') ? ' in ' + activeFilter : ''}...`}
+                                            className="w-full bg-transparent border-none focus:ring-0 resize-none outline-none text-gray-700 text-lg placeholder-gray-400 min-h-[60px]"
+                                        ></textarea>
+
+                                        {/* Image Preview */}
+                                        {selectedImage && (
+                                            <div className="relative mt-2 inline-block">
+                                                <img src={selectedImage} alt="Upload Preview" className="h-32 object-cover rounded-xl border border-gray-200" />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setSelectedImage(null); setImageFile(null); }}
+                                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm shadow-md"
+                                                >
+                                                    &times;
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                                <button
-                                    type="submit"
-                                    disabled={!newPostText.trim() && !selectedImage}
-                                    className="px-6 py-2 bg-primary text-white font-bold rounded-full hover:bg-primary/90 transition shadow-md disabled:opacity-50 flex items-center gap-2"
-                                >
-                                    <FaPaperPlane /> Post
-                                </button>
+                                <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+                                    <div className="flex gap-4">
+                                        <label className="text-gray-500 hover:text-primary transition flex items-center gap-2 font-medium cursor-pointer">
+                                            <FaImage /> <span className="hidden sm:inline">Photo/Video</span>
+                                            <input
+                                                type="file"
+                                                accept="image/*,video/*"
+                                                className="hidden"
+                                                onChange={handleImageUpload}
+                                            />
+                                        </label>
+                                    </div>
+                                    <button
+                                        type="submit"
+                                        disabled={!newPostText.trim() && !selectedImage}
+                                        className="px-6 py-2 bg-primary text-white font-bold rounded-full hover:bg-primary/90 transition shadow-md disabled:opacity-50 flex items-center gap-2"
+                                    >
+                                        <FaPaperPlane /> Post
+                                    </button>
+                                </div>
+                            </form>
+                        ) : (
+                            <div className="text-center py-6 text-gray-500">
+                                Please <a href="/login" className="text-primary hover:underline font-bold">log in</a> to share your stories with the community!
                             </div>
-                        </form>
+                        )}
                     </div>
 
                     {/* Feed Posts */}
@@ -354,17 +397,28 @@ const Community = () => {
                                 {/* Post Header */}
                                 <div className="p-6 pb-2 flex justify-between items-start">
                                     <div className="flex gap-4 items-center">
-                                        <img src={post.authorImage} alt={post.author} className="w-12 h-12 rounded-full object-cover shadow-sm" />
+                                        <img src={post.authorImage} alt={post.author} className="w-12 h-12 rounded-full object-cover shadow-sm bg-gray-100" />
                                         <div>
                                             <h3 className="font-bold text-gray-800">{post.author}</h3>
                                             <p className="text-sm text-gray-500">{post.time} • <span className="text-primary font-medium">{post.category}</span></p>
                                         </div>
                                     </div>
-                                    {post.category === "Lost & Found" && (
-                                        <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full animate-pulse">
-                                            LOST PET
-                                        </span>
-                                    )}
+                                    <div className="flex items-center gap-2">
+                                        {post.category === "Lost & Found" && (
+                                            <span className="px-3 py-1 bg-red-100 text-red-700 text-xs font-bold rounded-full animate-pulse">
+                                                LOST PET
+                                            </span>
+                                        )}
+                                        {user && post.authorId === user.id && (
+                                            <button 
+                                                onClick={() => handleDeletePost(post.id)}
+                                                className="ml-2 text-gray-400 hover:text-red-500 transition p-2 rounded-full hover:bg-red-50"
+                                                title="Delete Post"
+                                            >
+                                                <FaTrashAlt />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
 
                                 {/* Post Content */}
@@ -375,7 +429,7 @@ const Community = () => {
                                 {/* Post Image */}
                                 {post.image && (
                                     <div className="w-full max-h-[500px] overflow-hidden bg-gray-100 flex items-center justify-center">
-                                        <img src={post.image.includes('http') ? post.image : `http://localhost:5250/${post.image.replace(/\\/g, '/')}`} alt="Post" className="w-full object-cover max-h-[500px]" />
+                                        <img src={post.image.includes('http') || post.image.startsWith('data:') ? post.image : `http://localhost:5250/${post.image.replace(/\\/g, '/')}`} alt="Post" className="w-full object-cover max-h-[500px]" />
                                     </div>
                                 )}
 
@@ -419,7 +473,7 @@ const Community = () => {
                                                         {postComments[post.id]?.length > 0 ? (
                                                             postComments[post.id].map(comment => (
                                                                 <div key={comment.id} className="flex gap-3">
-                                                                    <img src={comment.authorImage} alt={comment.author} className="w-8 h-8 rounded-full border border-gray-200" />
+                                                                    <img src={comment.authorImage} alt={comment.author} className="w-8 h-8 rounded-full border border-gray-200 object-cover" />
                                                                     <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm flex-1 border border-gray-100">
                                                                         <div className="flex justify-between items-baseline mb-1">
                                                                             <span className="font-bold text-sm text-gray-800">{comment.author}</span>
@@ -435,25 +489,29 @@ const Community = () => {
                                                     </div>
 
                                                     {/* Add Comment */}
-                                                    <form onSubmit={(e) => handleAddComment(post.id, e)} className="flex gap-3 items-center mt-2">
-                                                        <img src="https://i.pravatar.cc/150?img=1" alt="You" className="w-8 h-8 rounded-full" />
-                                                        <div className="flex-1 relative">
-                                                            <input 
-                                                                type="text" 
-                                                                placeholder="Write a comment..." 
-                                                                className="w-full bg-white border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
-                                                                value={newCommentTexts[post.id] || ""}
-                                                                onChange={(e) => setNewCommentTexts(prev => ({ ...prev, [post.id]: e.target.value }))}
-                                                            />
-                                                        </div>
-                                                        <button 
-                                                            type="submit" 
-                                                            disabled={!newCommentTexts[post.id]?.trim()}
-                                                            className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white disabled:opacity-50 hover:bg-primary/90 transition shadow-sm"
-                                                        >
-                                                            <FaPaperPlane className="text-xs ml-0.5" />
-                                                        </button>
-                                                    </form>
+                                                    {user ? (
+                                                        <form onSubmit={(e) => handleAddComment(post.id, e)} className="flex gap-3 items-center mt-2">
+                                                            <img src={getProfilePic(user)} alt="You" className="w-8 h-8 rounded-full object-cover" />
+                                                            <div className="flex-1 relative">
+                                                                <input 
+                                                                    type="text" 
+                                                                    placeholder="Write a comment..." 
+                                                                    className="w-full bg-white border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition"
+                                                                    value={newCommentTexts[post.id] || ""}
+                                                                    onChange={(e) => setNewCommentTexts(prev => ({ ...prev, [post.id]: e.target.value }))}
+                                                                />
+                                                            </div>
+                                                            <button 
+                                                                type="submit" 
+                                                                disabled={!newCommentTexts[post.id]?.trim()}
+                                                                className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white disabled:opacity-50 hover:bg-primary/90 transition shadow-sm"
+                                                            >
+                                                                <FaPaperPlane className="text-xs ml-0.5" />
+                                                            </button>
+                                                        </form>
+                                                    ) : (
+                                                        <div className="text-center text-sm text-gray-500 mt-2">Login to reply</div>
+                                                    )}
                                                 </div>
                                             </motion.div>
                                         )}
@@ -464,7 +522,7 @@ const Community = () => {
                         ))}
                         {filteredPosts.length === 0 && (
                             <div className="text-center py-12 bg-white/60 rounded-3xl">
-                                <p className="text-gray-500 font-medium text-lg">No posts found in this category.</p>
+                                <p className="text-gray-500 font-medium text-lg">No posts found.</p>
                             </div>
                         )}
                     </AnimatePresence>

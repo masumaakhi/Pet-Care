@@ -15,6 +15,7 @@ const {
   logoutUser,
 } = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
+const upload = require("../middleware/uploadMiddleware");
 
 // Public routes
 router.post("/register", registerUser);
@@ -26,7 +27,7 @@ router.post("/logout", logoutUser);
 
 // Private routes
 router.get("/me", protect, getMe);
-router.put("/profile", protect, updateProfile);
+router.put("/profile", protect, upload.single("profilePicture"), updateProfile);
 router.get("/users", protect, getAllUsers);
 router.get("/users/:id", protect, getUserById);
 

@@ -18,7 +18,7 @@ exports.getPosts = async (req, res) => {
       orderBy: { createdAt: "desc" },
       include: {
         author: {
-          select: { id: true, fullName: true, googleId: true },
+          select: { id: true, fullName: true, googleId: true, profilePicture: true },
         },
         _count: {
           select: { likes: true, comments: true },
@@ -32,8 +32,9 @@ exports.getPosts = async (req, res) => {
     // Formatting for frontend
     const formattedPosts = posts.map(post => ({
       id: post.id,
+      authorId: post.author.id,
       author: post.author.fullName,
-      authorImage: post.author.googleId || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.fullName)}`,
+      authorImage: post.author.profilePicture || post.author.googleId || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.fullName)}`,
       time: new Date(post.createdAt).toLocaleString(), 
       category: post.category,
       type: post.type,
@@ -73,14 +74,15 @@ exports.createPost = async (req, res) => {
         image: imageUrl,
       },
       include: {
-        author: { select: { id: true, fullName: true, googleId: true } },
+        author: { select: { id: true, fullName: true, googleId: true, profilePicture: true } },
       }
     });
 
     res.status(201).json({
       id: post.id,
+      authorId: post.author.id,
       author: post.author.fullName,
-      authorImage: post.author.googleId || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.fullName)}`,
+      authorImage: post.author.profilePicture || post.author.googleId || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author.fullName)}`,
       time: new Date(post.createdAt).toLocaleString(),
       category: post.category,
       type: post.type,
@@ -143,14 +145,15 @@ exports.getComments = async (req, res) => {
             where: { postId: id },
             orderBy: { createdAt: "desc" },
             include: {
-                user: { select: { id: true, fullName: true, googleId: true } }
+                user: { select: { id: true, fullName: true, googleId: true, profilePicture: true } }
             }
         });
 
         const formattedComments = comments.map(c => ({
             id: c.id,
+            authorId: c.user.id,
             author: c.user.fullName,
-            authorImage: c.user.googleId || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.user.fullName)}`,
+            authorImage: c.user.profilePicture || c.user.googleId || `https://ui-avatars.com/api/?name=${encodeURIComponent(c.user.fullName)}`,
             content: c.content,
             time: new Date(c.createdAt).toLocaleString()
         }));
@@ -182,19 +185,51 @@ exports.addComment = async (req, res) => {
                 content
             },
             include: {
-                user: { select: { id: true, fullName: true, googleId: true } }
+                user: { select: { id: true, fullName: true, googleId: true, profilePicture: true } }
             }
         });
 
         res.status(201).json({
             id: comment.id,
+            authorId: comment.user.id,
             author: comment.user.fullName,
-            authorImage: comment.user.googleId || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.user.fullName)}`,
+            authorImage: comment.user.profilePicture || comment.user.googleId || `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.user.fullName)}`,
             content: comment.content,
             time: new Date(comment.createdAt).toLocaleString()
         });
     } catch (error) {
         console.error("Error adding comment:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+// @desc    Delete a post
+// @route   DELETE /api/community/:id
+// @access  Private
+exports.deletePost = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+
+        const post = await prisma.communityPost.findUnique({
+            where: { id }
+        });
+
+        if (!post) {
+            return res.status(404).json({ message: "Post not found" });
+        }
+
+        if (post.authorId !== userId && req.user.role !== "admin") {
+            return res.status(403).json({ message: "Not authorized to delete this post" });
+        }
+
+        await prisma.communityPost.delete({
+            where: { id }
+        });
+
+        res.status(200).json({ message: "Post deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting post:", error);
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };

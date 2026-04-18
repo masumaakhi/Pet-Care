@@ -51,7 +51,7 @@ const registerUser = async (req, res) => {
           }
         }
       }
-      const token = generateToken(user.id);
+      const token = generateToken(user);
       return sendSuccess(res, 201, "User registered successfully", {
         id: user.id,
         fullName: user.fullName,
@@ -92,7 +92,7 @@ const loginUser = async (req, res) => {
     const isMatch = await authService.matchPassword(password, user.password);
 
     if (isMatch) {
-      const token = generateToken(user.id);
+      const token = generateToken(user);
       return sendSuccess(res, 200, "Login successful", {
         id: user.id,
         fullName: user.fullName,
@@ -144,7 +144,7 @@ const googleLogin = async (req, res) => {
       });
     }
 
-    const token = generateToken(user.id);
+    const token = generateToken(user);
     
     return sendSuccess(res, 200, "Google login successful", {
       id: user.id,
@@ -239,6 +239,7 @@ const getMe = async (req, res) => {
 const updateProfile = async (req, res) => {
   try {
     const { fullName, email, role, userId, phone, address, bio, status, latitude, longitude } = req.body;
+    const profilePicture = req.file ? req.file.path : undefined;
     
     // Determine target user ID
     let targetUserId = req.user.id;
@@ -284,6 +285,7 @@ const updateProfile = async (req, res) => {
       bio: bio !== undefined ? bio : targetUser.bio,
       latitude: latitude !== undefined ? parseFloat(latitude) : targetUser.latitude,
       longitude: longitude !== undefined ? parseFloat(longitude) : targetUser.longitude,
+      profilePicture: profilePicture !== undefined ? profilePicture : targetUser.profilePicture,
       status: (status && (req.user.role === "admin" || req.user.role === "owner")) ? status : (targetUser.status || "active")
     });
 

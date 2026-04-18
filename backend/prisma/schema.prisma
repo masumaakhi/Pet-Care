@@ -18,6 +18,7 @@ model User {
   phone     String?
   address   String?
   bio       String?
+  profilePicture String?
   latitude  Float?
   longitude Float?
   status    String   @default("active")

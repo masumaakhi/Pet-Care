@@ -26,6 +26,8 @@ export default function UserProfile() {
   const [myAdoptionListings, setMyAdoptionListings] = useState([]);
   const [myAdoptionRequests, setMyAdoptionRequests] = useState([]);
   const [isFetchingData, setIsFetchingData] = useState(false);
+  const [profilePictureFile, setProfilePictureFile] = useState(null);
+  const [profilePicturePreview, setProfilePicturePreview] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -100,6 +102,14 @@ export default function UserProfile() {
   const displayEmail = user.email || "No email";
   const displayRole = user.role || "user";
   const initial = displayName.charAt(0).toUpperCase();
+  
+  const getProfilePic = () => {
+    if (profilePicturePreview) return profilePicturePreview;
+    if (user.profilePicture) return user.profilePicture.includes("http") ? user.profilePicture : `http://localhost:5250/${user.profilePicture.replace(/\\/g, '/')}`;
+    if (user.googleId && user.googleId.startsWith('http')) return user.googleId;
+    return null;
+  };
+  const profilePicUrl = getProfilePic();
 
   const handleLogout = async () => {
     await logout();
@@ -134,13 +144,35 @@ export default function UserProfile() {
       >
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
           <div className="flex items-center gap-6">
-            <div
-              className="w-24 h-24 rounded-full 
-              bg-gradient-to-br from-[#7fa37a] to-[#8b6b4c] 
-              flex items-center justify-center 
-              text-white text-3xl font-bold shadow-lg"
-            >
-              {initial}
+            <div className="relative group">
+              <div
+                className={`w-24 h-24 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg overflow-hidden border-4 border-white/40 ${profilePicUrl ? 'bg-white' : 'bg-gradient-to-br from-[#7fa37a] to-[#8b6b4c]'}`}
+              >
+                {profilePicUrl ? (
+                  <img src={profilePicUrl} alt={displayName} className="w-full h-full object-cover" />
+                ) : (
+                  initial
+                )}
+              </div>
+              {isEditing && (
+                <label className="absolute inset-0 bg-black/50 text-white flex items-center justify-center rounded-full cursor-pointer opacity-0 group-hover:opacity-100 transition text-xs font-medium backdrop-blur-sm">
+                  Upload Photo
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        setProfilePictureFile(file);
+                        const reader = new FileReader();
+                        reader.onloadend = () => setProfilePicturePreview(reader.result);
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </label>
+              )}
             </div>
 
             <div>
@@ -370,6 +402,8 @@ export default function UserProfile() {
                 <button
                   onClick={() => {
                     setIsEditing(false);
+                    setProfilePictureFile(null);
+                    setProfilePicturePreview(null);
                     setEditForm({ 
                       fullName: user.fullName, 
                       email: user.email,
@@ -389,10 +423,26 @@ export default function UserProfile() {
               e.preventDefault();
               try {
                 setIsUpdating(true);
-                const res = await api.put("/auth/profile", editForm);
+                let res;
+                if (profilePictureFile) {
+                    const formData = new FormData();
+                    formData.append("fullName", editForm.fullName);
+                    formData.append("email", editForm.email);
+                    formData.append("phone", editForm.phone);
+                    formData.append("address", editForm.address);
+                    formData.append("bio", editForm.bio);
+                    formData.append("profilePicture", profilePictureFile);
+                    res = await api.put("/auth/profile", formData, {
+                        headers: { "Content-Type": "multipart/form-data" }
+                    });
+                } else {
+                    res = await api.put("/auth/profile", editForm);
+                }
+                
                 setUser(res.data.data);
                 toast.success(res.data.message || "Profile updated successfully");
                 setIsEditing(false);
+                setProfilePictureFile(null);
               } catch (error) {
                 toast.error(error?.response?.data?.message || "Failed to update profile");
               } finally {

@@ -3,11 +3,19 @@ const jwt = require("jsonwebtoken");
 
 /**
  * Generate a JSON Web Token
- * @param {String} userId - The user's ID
+ * @param {Object|String} user - The user object or user ID string
  * @returns {String} Signed JWT token
  */
-const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+const generateToken = (user) => {
+  const payload = typeof user === 'string' ? { id: user } : {
+    id: user.id,
+    fullName: user.fullName,
+    email: user.email,
+    role: user.role,
+    profilePicture: user.profilePicture
+  };
+
+  return jwt.sign(payload, process.env.JWT_SECRET, {
     expiresIn: "30d", // Token valid for 30 days
   });
 };

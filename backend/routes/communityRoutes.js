@@ -5,7 +5,8 @@ const {
   createPost,
   toggleLike,
   getComments,
-  addComment
+  addComment,
+  deletePost
 } = require("../controllers/communityController");
 const { protect, optionalProtect } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
@@ -26,5 +27,8 @@ router.get("/:id/comments", optionalProtect, getComments);
 
 // POST a new comment
 router.post("/:id/comments", protect, addComment);
+
+// DELETE a post
+router.delete("/:id", protect, deletePost);
 
 module.exports = router;
