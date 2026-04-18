@@ -14,8 +14,14 @@ export function AuthProvider({ children }) {
       const res = await api.get("/auth/me");
       setUser(res.data.data);
     } catch (error) {
-      localStorage.removeItem("token");
-      setUser(null);
+      // Only remove token if it's explicitly an auth error (401/403)
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        localStorage.removeItem("token");
+        setUser(null);
+      } else {
+        console.warn("Network or server error during fetchMe. Keeping session data.");
+        // Fallback user if backend unreachable completely? For now we just keep token.
+      }
     } finally {
       setLoading(false);
     }
