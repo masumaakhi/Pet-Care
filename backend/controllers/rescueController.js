@@ -329,6 +329,35 @@ const cancelMyRescueRequest = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Public urgent rescue alerts for homepage widgets
+ * @route   GET /api/rescues/public-alerts
+ */
+const getPublicUrgentAlerts = async (req, res) => {
+  try {
+    const alerts = await prisma.rescueRequest.findMany({
+      where: {
+        status: { in: ["PENDING", "ASSIGNED", "IN_PROGRESS"] },
+      },
+      select: {
+        id: true,
+        problemType: true,
+        priority: true,
+        incidentAddress: true,
+        address: true,
+        createdAt: true,
+      },
+      orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
+      take: 6,
+    });
+
+    return sendSuccess(res, 200, "Public urgent rescue alerts fetched", alerts);
+  } catch (error) {
+    console.error("getPublicUrgentAlerts:", error);
+    return sendError(res, 500, "Internal Server Error");
+  }
+};
+
 module.exports = {
   createRescueRequest,
   getMyRescues,
@@ -336,4 +365,5 @@ module.exports = {
   getRescueDetails,
   updateMyRescueRequest,
   cancelMyRescueRequest,
+  getPublicUrgentAlerts,
 };

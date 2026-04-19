@@ -202,6 +202,145 @@ const getNotificationLogs = async (req, res) => {
 };
 
 /**
+ * @desc    Rescue listing with volunteer actions and locations
+ * @route   GET /api/rescues/admin/listing
+ */
+const getRescueListing = async (req, res) => {
+  try {
+    const { status, volunteerId, problemType, q } = req.query;
+
+    const where = {};
+    if (status) where.status = String(status).toUpperCase();
+    if (problemType) where.problemType = problemType;
+    if (volunteerId) where.assignedVolunteerId = volunteerId;
+    if (q) {
+      where.OR = [
+        { id: { contains: q } },
+        { incidentAddress: { contains: q, mode: "insensitive" } },
+        { locationNote: { contains: q, mode: "insensitive" } },
+      ];
+    }
+
+    const rescues = await prisma.rescueRequest.findMany({
+      where,
+      include: {
+        reporter: { select: { id: true, fullName: true, email: true, phone: true } },
+        assignedVolunteer: { select: { id: true, fullName: true, phone: true, email: true } },
+        assignments: {
+          orderBy: { assignedAt: "desc" },
+          include: {
+            volunteer: { select: { id: true, fullName: true, email: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const listing = rescues.map((item) => ({
+      id: item.id,
+      problemType: item.problemType,
+      priority: item.priority,
+      status: item.status,
+      createdAt: item.createdAt,
+      incidentAddress: item.incidentAddress || item.address || null,
+      locationNote: item.locationNote || null,
+      coordinates:
+        item.incidentLat != null && item.incidentLng != null
+          ? { lat: item.incidentLat, lng: item.incidentLng }
+          : item.latitude != null && item.longitude != null
+          ? { lat: item.latitude, lng: item.longitude }
+          : null,
+      reporter: item.reporter,
+      assignedVolunteer: item.assignedVolunteer,
+      volunteerActions: item.assignments.map((assignment) => ({
+        assignmentId: assignment.id,
+        volunteer: assignment.volunteer,
+        status: assignment.status,
+        assignedAt: assignment.assignedAt,
+        respondedAt: assignment.respondedAt,
+        notes: assignment.notes,
+      })),
+    }));
+
+    return sendSuccess(res, 200, "Rescue listing fetched", listing);
+  } catch (error) {
+    console.error("getRescueListing", error);
+    return sendError(res, 500, "Internal Server Error");
+  }
+};
+
+/**
+ * @desc    Public volunteer rescue listing with completed counts
+ * @route   GET /api/rescues/listing
+ */
+const getPublicRescueListing = async (req, res) => {
+  try {
+    const { q } = req.query;
+    const completedStatuses = ["RESCUED", "SHELTER", "COMPLETED"];
+
+    const where = {
+      assignedVolunteerId: { not: null },
+      status: { in: completedStatuses },
+    };
+
+    if (q) {
+      where.OR = [
+        { problemType: { contains: q, mode: "insensitive" } },
+        { incidentAddress: { contains: q, mode: "insensitive" } },
+        { assignedVolunteer: { fullName: { contains: q, mode: "insensitive" } } },
+      ];
+    }
+
+    const rescues = await prisma.rescueRequest.findMany({
+      where,
+      include: {
+        assignedVolunteer: {
+          select: { id: true, fullName: true, profilePicture: true, role: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    const volunteerMap = new Map();
+
+    for (const item of rescues) {
+      if (!item.assignedVolunteer) continue;
+
+      const volunteerId = item.assignedVolunteer.id;
+      if (!volunteerMap.has(volunteerId)) {
+        volunteerMap.set(volunteerId, {
+          volunteer: item.assignedVolunteer,
+          rescueCount: 0,
+          rescuedPets: [],
+        });
+      }
+
+      const entry = volunteerMap.get(volunteerId);
+      entry.rescueCount += 1;
+      entry.rescuedPets.push({
+        rescueId: item.id,
+        problemType: item.problemType,
+        status: item.status,
+        incidentAddress: item.incidentAddress || item.address || "Location not set",
+        createdAt: item.createdAt,
+      });
+    }
+
+    const listing = Array.from(volunteerMap.values())
+      .map((entry) => ({
+        ...entry,
+        rescuedPets: entry.rescuedPets.slice(0, 5),
+      }))
+      .sort((a, b) => b.rescueCount - a.rescueCount);
+
+    return sendSuccess(res, 200, "Public rescue listing fetched", listing);
+  } catch (error) {
+    console.error("getPublicRescueListing", error);
+    return sendError(res, 500, "Internal Server Error");
+  }
+};
+
+/**
  * @desc    Action on suspected duplicate (Confirm/Reject)
  * @route   PATCH /api/admin/rescues/duplicate/:id
  */
@@ -235,6 +374,8 @@ module.exports = {
   getAnalytics,
   getMapData,
   manualAssign,
+  getRescueListing,
+  getPublicRescueListing,
   getNotificationLogs,
   handleDuplicateAction
 };

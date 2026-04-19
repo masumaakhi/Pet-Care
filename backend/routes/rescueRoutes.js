@@ -15,12 +15,15 @@ const upload = require("../middleware/uploadMiddleware");
 // Create (public with optional auth for reporter linkage)
 router.post("/", optionalProtect, upload.single("image"), rescueController.createRescueRequest);
 router.get("/my-requests", protect, rescueController.getMyRescues);
+router.get("/listing", optionalProtect, adminController.getPublicRescueListing);
+router.get("/public-alerts", optionalProtect, rescueController.getPublicUrgentAlerts);
 
 // Volunteer
 router.get("/volunteer/nearby", protect, authorize("volunteer", "admin"), volunteerController.getNearbyRescues);
 router.get("/volunteer/history", protect, authorize("volunteer", "admin"), volunteerController.getVolunteerHistory);
 
 // Admin
+router.get("/admin/listing", protect, authorize("admin", "owner"), adminController.getRescueListing);
 router.get("/admin/all", protect, authorize("admin"), adminController.getAllRescues);
 router.get("/admin/analytics", protect, authorize("admin"), adminController.getAnalytics);
 router.get("/admin/map", protect, authorize("admin"), adminController.getMapData);

@@ -174,6 +174,21 @@
     - Donation analytics
     - Cost tracking (medical + food)
 
+---
+
+## **11️⃣ Admin Data Management Suite**
+- **Dynamic CRUD Engine**: Centralized hub to manage all platform data models.
+- **Image Integration**: Real-time thumbnail previews for pets, users, and rescues.
+- **Search & Filters**: Advanced administrative search with pagination.
+- **Unified Actions**: Create, Read, Update, and Delete capabilities for all modules.
+
+---
+
+## 🛠️ Technical Documentation
+For a detailed breakdown of the platform architecture, design system, and modular structure, please refer to:
+👉 **[PET_CARE_DOCUMENTATION.md](./PET_CARE_DOCUMENTATION.md)**
+
+
 ------------------------------------------------------------------------------------------------------
 
 ### Extra: Volunteer System

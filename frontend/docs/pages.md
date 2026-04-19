@@ -52,8 +52,11 @@ This document tracks all project pages, routes, roles, statuses, and required AP
 | Page Name | Route | Role | Status | API Needed | Notes |
 |---|---|---|---|---|---|
 | Pet List | /pets | Owner | UI Done ✅ | GET /pets | |
+| My Adoption Submissions | /pets/adoption-submissions | Owner/User | UI Done ✅ | GET /adoptions/submissions/me | |
+| My Adoption Requests | /adopt/my-requests | User | UI Done ✅ | GET /adoptions/requests/me | |
 | Add Pet | /pets/add | Owner | UI Done ✅ | POST /pets | |
 | Pet Details | /pets/:id | Owner | UI Done ✅ | GET /pets/:id | |
+| Edit Pet | /pets/:id/edit | Owner | UI Done ✅ | PUT /pets/:id | |
 | Care Schedule | /pets/schedule | Owner | UI Done ✅ | GET /pets/:id/schedules | |
 | Weight Log | /pets/weight | Owner | UI Done ✅ | GET /pets/:id/weights | |
 | Pet Gallery | /pets/gallery | Owner | UI Done ✅ | GET /pets/:id/gallery | |
@@ -83,6 +86,8 @@ This document tracks all project pages, routes, roles, statuses, and required AP
 | Adoption Listing | /adopt/listing | All | UI Done ✅ | GET /adoptions | |
 | Adoption Details | /adopt/listing/:id | All | UI Done ✅ | GET /adoptions/:id | |
 | Adoption Flow | /adopt/flow/:id | User | UI Done ✅ | POST /adoptions/apply | |
+| My Adoption Requests | /adopt/my-requests | User | UI Done ✅ | GET /adoptions/requests/me | |
+| My Adoption Submissions | /pets/adoption-submissions | Owner/User | UI Done ✅ | GET /adoptions/submissions/me | |
 
 ---
 
@@ -105,6 +110,7 @@ This document tracks all project pages, routes, roles, statuses, and required AP
 | Nearby Requests | /rescue/nearby | Volunteer | UI Done ✅ | GET /rescues/nearby | |
 | Assigned Rescue | /rescue/assigned/:id | Volunteer | UI Done ✅ | GET /rescues/:id | |
 | Rescue History | /rescue/history | Volunteer | UI Done ✅ | GET /rescues/history | |
+| Rescue Listing | /rescue/listing | Volunteer/User | UI Done ✅ | GET /rescues | |
 
 ---
 
@@ -129,6 +135,7 @@ This document tracks all project pages, routes, roles, statuses, and required AP
 |---|---|---|---|---|---|
 | Donate Page | /donate | All | UI Done ✅ | POST /donations | |
 | My Donations | /donations | User | UI Done ✅ | GET /donations/me | |
+| Sponsor Pet Donate | /donations/sponsor/:id | User | UI Done ✅ | POST /donations/sponsor/:id | |
 | Campaign Details | /donations/campaign/:id | All | UI Done ✅ | GET /campaigns/:id | |
 
 ---
@@ -159,11 +166,16 @@ This document tracks all project pages, routes, roles, statuses, and required AP
 | User Management | /admin/users | Admin | UI Done ✅ | GET /admin/users | |
 | View User | /admin/users/view/:id | Admin | UI Done ✅ | GET /admin/users/:id | |
 | Edit User | /admin/users/edit/:id | Admin | UI Done ✅ | PUT /admin/users/:id | |
-| Pet Moderation | /admin/pets | Admin | Todo ⏳ | GET /admin/pets | Not in router |
-| Adoption Requests | /admin/adoptions | Admin | Todo ⏳ | GET /admin/adoptions | Not in router |
-| Reports & Analytics | /admin/reports | Admin | Todo ⏳ | GET /admin/reports | Not in router |
-| Alerts & Flags | /admin/alerts | Admin | Todo ⏳ | GET /admin/alerts | Not in router |
-| Admin Settings | /admin/settings | Admin | Todo ⏳ | GET /admin/settings | Not in router |
+| Pet Moderation | /admin/pets | Admin | UI Done ✅ | GET /admin/pets | |
+| Adoption Add Listing | /admin/adoptions/add | Admin | UI Done ✅ | POST /admin/adoptions | |
+| Adoption Requests | /admin/adoptions/requests | Admin | UI Done ✅ | GET /admin/adoptions/requests | |
+| Adoption Management | /admin/adoptions | Admin | UI Done ✅ | GET /admin/adoptions | |
+| Adoption Detail | /admin/adoptions/:id | Admin | UI Done ✅ | GET /admin/adoptions/:id | |
+| Reports & Analytics | /admin/reports | Admin | UI Done ✅ | GET /admin/reports | |
+| Alerts & Flags | /admin/alerts | Admin | UI Done ✅ | GET /admin/alerts | |
+| Admin Settings | /admin/settings | Admin | UI Done ✅ | GET /admin/settings | |
+| Data Hub | /admin/data | Admin | UI Done ✅ | GET /admin/data | |
+| Manage Model | /admin/data/:model | Admin | UI Done ✅ | GET /admin/data/:model | |
 
 ---
 
@@ -173,10 +185,3 @@ This document tracks all project pages, routes, roles, statuses, and required AP
 - Todo ⏳ = Planned / Backend pending  
 - Future 🚀 = Phase 2/3  
 - Planned 🧩 = Tab/section inside existing pages  
-
-## 📌 Status Legend
-
-- UI Done ✅ = Frontend UI complete  
-- Todo ⏳ = Planned  
-- Future 🚀 = Phase 2/3  
-- Planned 🧩 = Tab/section inside existing pages

@@ -37,6 +37,8 @@ import AdminAdoptionManagementPage from "../pages/admin/AdminAdoptionManagementP
 import AdminAdoptionDetailPage from "../pages/admin/AdminAdoptionDetailPage";
 import AdminAddAdoptionListingPage from "../pages/admin/AdminAddAdoptionListingPage";
 import AdminAdoptionRequestsPage from "../pages/admin/AdminAdoptionRequestsPage";
+import AdminDataHub from "../pages/admin/data/AdminDataHub";
+import ManageModelPage from "../pages/admin/data/ManageModelPage";
 
 // Rescue User Pages
 import RescueRequestPage from '../pages/rescue/RescueRequestPage';
@@ -47,6 +49,7 @@ import RescueTrackingPage from '../pages/rescue/RescueTrackingPage';
 import NearbyRescueRequestsPage from '../pages/rescue/NearbyRescueRequestsPage';
 import AssignedRescueDetailsPage from '../pages/rescue/AssignedRescueDetailsPage';
 import VolunteerRescueHistoryPage from '../pages/rescue/VolunteerRescueHistoryPage';
+import RescueListingPage from '../pages/rescue/RescueListingPage';
 
 // Rescue Admin Pages
 import AdminRescueListPage from '../pages/rescue/AdminRescueListPage';
@@ -118,6 +121,7 @@ export const router = createBrowserRouter([
       { path: "/rescue/nearby", element: <NearbyRescueRequestsPage /> },
       { path: "/rescue/assigned/:id", element: <AssignedRescueDetailsPage /> },
       { path: "/rescue/history", element: <VolunteerRescueHistoryPage /> },
+      { path: "/rescue/listing", element: <RescueListingPage /> },
 
       // Donation Routes
       { path: "/donate", element: <DonatePage /> },
@@ -153,6 +157,9 @@ export const router = createBrowserRouter([
           { path: "adoptions/requests", element: <AdminAdoptionRequestsPage /> },
           { path: "adoptions", element: <AdminAdoptionManagementPage /> },
           { path: "adoptions/:id", element: <AdminAdoptionDetailPage /> },
+          // Data Management Suite
+          { path: "data", element: <AdminDataHub /> },
+          { path: "data/:model", element: <ManageModelPage /> },
         ],
       },
     ],

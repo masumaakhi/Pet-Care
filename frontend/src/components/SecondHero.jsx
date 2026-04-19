@@ -1,15 +1,26 @@
 import React from "react";
 import { Heart, HelpingHand, Shield, BookOpen, Gift } from "lucide-react";
+import useProtectedNavigation from "../hooks/useProtectedNavigation";
+import useHomeIntegrationData from "../hooks/useHomeIntegrationData";
 
 // ===================== MAIN =====================
 export default function SecondHero() {
+  const { go, goProtected } = useProtectedNavigation();
+  const { featuredPets, urgentAlerts } = useHomeIntegrationData();
+
   return (
     <div className="relative min-h-screen text-[#3b3b3b] bg-cover bg-center">
       {/* Top Navigation */}
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-12 pt-6 sm:pt-8">
   <div className="grid ls:grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:flex lg:grid-cols-5 lg:gap-6 lg:justify-center">
     {navItems.map((item) => (
-      <NavPill key={item.label} {...item} />
+      <NavPill
+        key={item.label}
+        {...item}
+        onClick={() =>
+          item.protected ? goProtected(item.path) : go(item.path)
+        }
+      />
     ))}
   </div>
 </div>
@@ -19,11 +30,11 @@ export default function SecondHero() {
         {/* ✅ mobile: 1 col | tablet: 2 col | desktop: 3 col */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Pets for Adoption */}
-          <GlassCard title="Pets for Adoption" action="View All">
+          <GlassCard title="Pets for Adoption" action="View All" onAction={() => go("/adopt")}>
             {/* ✅ mobile: horizontal scroll | tablet+: grid */}
             <div className="-mx-2 px-2">
               <div className="flex gap-3 overflow-x-auto pb-2 sm:pb-0 sm:overflow-visible sm:grid sm:grid-cols-3 sm:gap-4">
-                {pets.map((pet) => (
+                {featuredPets.map((pet) => (
                   <PetCard key={pet.name} {...pet} />
                 ))}
               </div>
@@ -33,24 +44,42 @@ export default function SecondHero() {
           {/* Urgent Rescue Alerts */}
           <GlassCard title="Urgent Rescue Alerts">
             <div className="space-y-3">
-              <Alert label="Injured Kitten – Downtown" level="Critical" />
-              <Alert label="Sick Cat – Riverside" level="High" />
-              <button className="w-full bg-orange-400 hover:bg-orange-500 text-white py-2.5 rounded-xl font-semibold shadow">
+              {urgentAlerts.map((alert) => (
+                <Alert key={alert.id} label={alert.label} level={alert.level} />
+              ))}
+              <button
+                type="button"
+                onClick={() => go("/rescue")}
+                className="w-full bg-orange-400 hover:bg-orange-500 text-white py-2.5 rounded-xl font-semibold shadow"
+              >
                 Report a Rescue
               </button>
             </div>
           </GlassCard>
 
           {/* Health Tips */}
-          <GlassCard title="Health Tips & Advice" action="Read Articles">
+          <GlassCard
+            title="Health Tips & Advice"
+            action="Read Articles"
+            onAction={() => goProtected("/vaccines")}
+          >
             <ul className="space-y-2 text-sm sm:text-[15px]">
-              <li className="w-full py-2.5 bg-gray-200/80 rounded-2xl px-4">
+              <li
+                onClick={() => goProtected("/vaccines")}
+                className="w-full py-2.5 bg-gray-200/80 rounded-2xl px-4 cursor-pointer"
+              >
                 Vaccination Reminders
               </li>
-              <li className="w-full py-2.5 bg-gray-200/80 rounded-2xl px-4">
+              <li
+                onClick={() => goProtected("/medical")}
+                className="w-full py-2.5 bg-gray-200/80 rounded-2xl px-4 cursor-pointer"
+              >
                 Litter Training Tips
               </li>
-              <li className="w-full py-2.5 bg-gray-200/80 rounded-2xl px-4">
+              <li
+                onClick={() => goProtected("/prescriptions")}
+                className="w-full py-2.5 bg-gray-200/80 rounded-2xl px-4 cursor-pointer"
+              >
                 Seasonal Care Tips
               </li>
             </ul>
@@ -77,9 +106,11 @@ export default function SecondHero() {
 
 // ===================== COMPONENTS =====================
 
-function NavPill({ label, icon: Icon }) {
+function NavPill({ label, icon: Icon, onClick }) {
   return (
     <button
+      type="button"
+      onClick={onClick}
       className="
         w-full lg:w-auto
         flex items-center justify-center lg:justify-start
@@ -100,13 +131,17 @@ function NavPill({ label, icon: Icon }) {
   );
 }
 
-function GlassCard({ title, action, children }) {
+function GlassCard({ title, action, onAction, children }) {
   return (
     <div className="rounded-2xl bg-white/60 backdrop-blur-lg p-4 sm:p-5 shadow-xl border border-white/30">
       <div className="flex justify-between items-center mb-3 sm:mb-4">
         <h3 className="font-semibold text-base sm:text-lg">{title}</h3>
         {action && (
-          <button className="text-xs sm:text-sm text-orange-500 font-medium">
+          <button
+            type="button"
+            onClick={onAction}
+            className="text-xs sm:text-sm text-orange-500 font-medium"
+          >
             {action} →
           </button>
         )}
@@ -197,29 +232,11 @@ function HowCard({ title, img }) {
 // ===================== DATA =====================
 
 const navItems = [
-  { label: "Adopt a Pet", icon: Heart },
-  { label: "Rescue a Pet", icon: HelpingHand },
-  { label: "Pet Health Care", icon: Shield },
-  { label: "Book Pet Services", icon: BookOpen },
-  { label: "Donate & Support", icon: Gift },
-];
-
-const pets = [
-  {
-    name: "Milo",
-    status: "Adopt Me",
-    img: "https://res.cloudinary.com/ddgbit2hg/image/upload/v1772142582/milo_dxkdxw.png?auto=format,compress&w=300",
-  },
-  {
-    name: "Luna",
-    status: "Adopt Me",
-    img: "https://res.cloudinary.com/ddgbit2hg/image/upload/v1772142598/luna_ved9nl.png?auto=format,compress&w=300",
-  },
-  {
-    name: "Tiger",
-    status: "Adopted",
-    img: "https://res.cloudinary.com/ddgbit2hg/image/upload/v1772142616/tiger_omeuoi.png?auto=format,compress&w=300",
-  },
+  { label: "Adopt a Pet", icon: Heart, path: "/adopt" },
+  { label: "Rescue a Pet", icon: HelpingHand, path: "/rescue" },
+  { label: "Pet Health Care", icon: Shield, path: "/vaccines", protected: true },
+  { label: "Book Pet Services", icon: BookOpen, path: "/services" },
+  { label: "Donate & Support", icon: Gift, path: "/donate" },
 ];
 
 const steps = [

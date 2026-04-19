@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaSearch, FaHeart, FaTruck, FaDonate } from "react-icons/fa";
+import useProtectedNavigation from "../hooks/useProtectedNavigation";
+import useHomeIntegrationData from "../hooks/useHomeIntegrationData";
 
 /* ✅ Imgix CDN images */
 const lostFoundImg =
@@ -16,6 +18,9 @@ const volunteerCat =
   "https://res.cloudinary.com/ddgbit2hg/image/upload/v1772142971/volunteer-cat_fj3dns.png?auto=format,compress&w=700";
 
 export default function SmartFeatures() {
+  const { go, goProtected } = useProtectedNavigation();
+  const { adoptionCount, campaignCount } = useHomeIntegrationData();
+
   return (
     <section className="py-16">
       <h2 className="text-center text-2xl font-semibold text-[#5a6b3f] mb-12">
@@ -29,13 +34,15 @@ export default function SmartFeatures() {
           image={lostFoundImg}
           title="Lost & Found Pets"
           desc="Boost the search success rate. Community-driven experiences."
+          onClick={() => go("/community/lost-found")}
         />
 
         <GlassCard
           icon={<FaHeart />}
           image={adoptionImg}
-          title={<Counter to={250} suffix="+" />}
+          title={<Counter to={adoptionCount} suffix="+" />}
           desc="Successful Adoptions. Pets found loving homes."
+          onClick={() => go("/adopt")}
         />
 
         <GlassCard
@@ -43,13 +50,15 @@ export default function SmartFeatures() {
           image={servicesImg}
           title="Find Pet Services"
           desc="Grooming, vets, training & trusted services."
+          onClick={() => go("/services")}
         />
 
         <GlassCard
           icon={<FaDonate />}
           image={donateImg}
-          title="Donate & Support"
+          title={`Donate & Support (${campaignCount} campaigns)`}
           desc="Help rescue and care for animals in need."
+          onClick={() => go("/donate")}
         />
       </div>
 
@@ -61,14 +70,16 @@ export default function SmartFeatures() {
           button="Donate Now →"
           bgImage={donateDog}
           color="orange"
+          onClick={() => go("/donate")}
         />
 
         <CTA
-          title="Looking to Volunteer?"
+          title="Looking to Volunteer as a Rescue Volunteer?"
           text="Make a Difference for Pets in Need."
-          button="Join as Volunteer →"
+          button=" Rescue list with Volunter →"
           bgImage={volunteerCat}
           color="green"
+          onClick={() => goProtected("/rescue/listing")}
         />
       </div>
     </section>
@@ -77,9 +88,13 @@ export default function SmartFeatures() {
 
 /* ================= Components ================= */
 
-function GlassCard({ icon, image, title, desc }) {
+function GlassCard({ icon, image, title, desc, onClick }) {
   return (
-    <div className="rounded-2xl overflow-hidden backdrop-blur-xl bg-white/55 border border-white/40 shadow-lg hover:shadow-xl transition">
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full text-left rounded-2xl overflow-hidden backdrop-blur-xl bg-white/55 border border-white/40 shadow-lg hover:shadow-xl transition"
+    >
       
       {/* ✅ Image wrapper with responsive aspect ratio */}
       <div className="w-full aspect-[16/10] md:aspect-[16/9] bg-white/40">
@@ -104,7 +119,7 @@ function GlassCard({ icon, image, title, desc }) {
 
         <p className="text-sm text-gray-700">{desc}</p>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -137,7 +152,7 @@ function Counter({ to, suffix = "" }) {
   );
 }
 
-const CTA = ({ title, text, button, bgImage, color }) => {
+const CTA = ({ title, text, button, bgImage, color, onClick }) => {
   const colors = {
     orange: "bg-orange-500 hover:bg-orange-600",
     green: "bg-green-500 hover:bg-green-600",
@@ -159,6 +174,8 @@ const CTA = ({ title, text, button, bgImage, color }) => {
           </p>
 
           <button
+            type="button"
+            onClick={onClick}
             className={`mt-4 px-5 py-2.5 rounded-lg text-white text-sm font-medium ${colors[color]}`}
           >
             {button}

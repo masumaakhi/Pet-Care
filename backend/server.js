@@ -12,6 +12,7 @@ const rescueRoutes = require("./routes/rescueRoutes");
 const notificationRoutes = require("./routes/notificationRoutes");
 const donationRoutes = require("./routes/donationRoutes");
 const communityRoutes = require("./routes/communityRoutes");
+const adminDataRoutes = require("./routes/adminDataRoutes");
 
 const path = require("path");
 const http = require("http");
@@ -56,6 +57,7 @@ app.use("/api/rescues", rescueRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/donations", donationRoutes);
 app.use("/api/community", communityRoutes);
+app.use("/api/admin/data", adminDataRoutes);
 
 // Root route for testing
 app.get("/", (req, res) => {

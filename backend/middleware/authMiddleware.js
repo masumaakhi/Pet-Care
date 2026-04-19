@@ -42,6 +42,7 @@ const protect = async (req, res, next) => {
             return sendError(res, 401, "Not authorized, user not found");
           }
       } catch (dbError) {
+          console.error("[Auth Middleware] DB error:", dbError.message);
           console.warn("[Auth Middleware] DB unreachable, falling back to mock user:", decoded.id);
           req.user = {
               id: decoded.id,
