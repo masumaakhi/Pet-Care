@@ -45,6 +45,8 @@ const rescueService = {
 
   getAdminRescues: (params) => api.get("/rescues/admin/all", { params }),
   getAllRescues: (params) => api.get("/rescues/admin/all", { params }),
+  getRescueListing: (params) => api.get("/rescues/listing", { params }),
+  getAdminRescueListing: (params) => api.get("/rescues/admin/listing", { params }),
 
   getAdminRescueAnalytics: () => api.get("/rescues/admin/analytics"),
   getAnalytics: () => api.get("/rescues/admin/analytics"),

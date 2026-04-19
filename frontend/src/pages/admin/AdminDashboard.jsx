@@ -3,6 +3,10 @@ import React, { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import api from "../../utils/api";
+import { 
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, LineChart, Line
+} from 'recharts';
 
 /**
  * Admin Dashboard (UI Only)
@@ -22,12 +26,12 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [range]);
 
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/dashboard/stats");
+      const res = await api.get(`/dashboard/stats?range=${range === '7d' ? 7 : 30}`);
       if (res.data.success) {
         setData(res.data.data);
       }
@@ -61,29 +65,44 @@ export default function AdminDashboard() {
         total: m.pets.total || 0,
         registered: m.pets.approved || 0,
         adoptable: m.pets.approved || 0,
-        adopted: 0, // Not in schema yet
+        adopted: m.pets.adopted || 0,
       },
-      // Keep mock data for missing modules as per instruction
-      adoptionRequests: { total: 27, pending: 15, approved: 22, rejected: 5 },
-      rescueRequests: { total: 15, active: 9, completed: 4, emergency: 2 },
-      donations: { today: 520, month: 2780, total: 18430, todayDisplay: 5320 },
+      adoptionRequests: {
+        total: m.adoptions?.total || 0,
+        pending: m.adoptions?.pending || 0,
+        approved: m.adoptions?.approved || 0,
+        rejected: m.adoptions?.rejected || 0,
+      },
+      rescueRequests: {
+        total: m.rescues?.total || 0,
+        active: m.rescues?.active || 0,
+        completed: m.rescues?.completed || 0,
+        emergency: m.rescues?.emergency || 0,
+      },
+      donations: {
+        today: m.donations?.today || 0,
+        month: m.donations?.month || 0,
+        total: m.donations?.total || 0,
+        todayDisplay: m.donations?.today || 0,
+      },
       kpi: {
-        adoptionSuccess: 68,
-        rescueSuccess: 79,
-        avgRescueResponseMin: 8,
-        volunteerScore: 82,
+        adoptionSuccess: m.kpi?.adoptionSuccess || 0,
+        rescueSuccess: m.kpi?.rescueSuccess || 0,
+        avgRescueResponseMin: m.kpi?.avgRescueResponseMin || 0,
+        volunteerScore: m.kpi?.volunteerScore || 0,
       },
     };
   }, [data]);
 
   const chartData = useMemo(() => {
-    // fake chart data
-    const base = range === "7d" ? [12, 18, 22, 30, 28, 35, 42] : [50, 55, 60, 64, 70, 78, 82, 90, 96, 105, 112, 120];
-    const adopt = range === "7d" ? [2, 3, 4, 3, 5, 6, 7] : [10, 12, 14, 13, 16, 18, 21, 19, 24, 26, 28, 30];
-    const rescue = range === "7d" ? [1, 2, 2, 3, 4, 3, 5] : [8, 9, 10, 11, 12, 12, 13, 15, 16, 18, 19, 20];
-
-    return { users: base, adoption: adopt, rescue };
-  }, [range]);
+    if (!data?.analytics) return [];
+    
+    // Format dates for display
+    return data.analytics.map(item => ({
+      ...item,
+      displayDate: new Date(item.date).toLocaleDateString([], { month: 'short', day: 'numeric' })
+    }));
+  }, [data]);
 
   if (loading) {
     return (
@@ -211,8 +230,26 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="mt-4">
-              <MiniAreaChart data={chartData.users} />
+            <div className="mt-4 h-16">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#5f7d5a" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#5f7d5a" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <Tooltip content={<CustomTooltip />} />
+                  <Area 
+                    type="monotone" 
+                    dataKey="users" 
+                    stroke="#2f3e2c" 
+                    strokeWidth={2}
+                    fillOpacity={1} 
+                    fill="url(#colorUsers)" 
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </GlassCard>
         </div>
@@ -229,8 +266,13 @@ export default function AdminDashboard() {
                 <StatLine label="Rejected" value={metrics.adoptionRequests.rejected} accent="danger" />
               </div>
             </div>
-            <div className="mt-4">
-              <MiniLineChart data={chartData.adoption} />
+            <div className="mt-4 h-16">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="adoptions" fill="#5f7d5a" opacity={0.6} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </GlassCard>
 
@@ -244,8 +286,13 @@ export default function AdminDashboard() {
                 <StatLine label="Emergency" value={metrics.rescueRequests.emergency} accent="danger" />
               </div>
             </div>
-            <div className="mt-4">
-              <MiniBarChart data={chartData.rescue} />
+            <div className="mt-4 h-16">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="rescues" fill="#8b6b4c" opacity={0.6} radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </GlassCard>
 
@@ -297,13 +344,34 @@ export default function AdminDashboard() {
 
             <div className="grid md:grid-cols-3 gap-4 mt-4">
               <SmallChartCard title="User Growth" subtitle={range === "7d" ? "Last 7 days" : "Last 30 days"}>
-                <MiniLineChart data={chartData.users} />
+                <div className="h-24">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <Tooltip content={<CustomTooltip />} />
+                      <Line type="monotone" dataKey="users" stroke="#5f7d5a" strokeWidth={2} dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </SmallChartCard>
-              <SmallChartCard title="Adoption Trend" subtitle="Monthly adoptions">
-                <MiniBarChart data={chartData.adoption} />
+              <SmallChartCard title="Adoption Trend" subtitle="Recent adoptions">
+                <div className="h-24">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData}>
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="adoptions" fill="#5f7d5a" opacity={0.7} radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </SmallChartCard>
-              <SmallChartCard title="Rescue Trend" subtitle="Daily/Weekly cases">
-                <MiniBarChart data={chartData.rescue} />
+              <SmallChartCard title="Rescue Trend" subtitle="Recent cases">
+                <div className="h-24">
+                  <ResponsiveContainer width="100%" height="100%">
+                   <BarChart data={chartData}>
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="rescues" fill="#8b6b4c" opacity={0.7} radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </SmallChartCard>
             </div>
 
@@ -347,17 +415,24 @@ export default function AdminDashboard() {
                 <ActionBtn label="👯 Duplicate Reports" to="/admin/rescues/duplicates" />
                 <ActionBtn label="🔔 Transmission Logs" to="/admin/rescues/notifications" />
                 <ActionBtn label="👥 Manage Users" to="/admin/users" />
+                <ActionBtn label="🗄️ Manage All Data" to="/admin/data" />
               </div>
             </GlassCard>
 
             <GlassCard className="p-5">
               <CardTitle icon="🕒" title="Recent Activity" />
               <div className="mt-4 space-y-3">
-                <ActivityItem title="New user registered" meta="15 mins ago" />
-                <ActivityItem title="Bella (Dog) added by user" meta="2 hours ago" />
-                <ActivityItem title="Adoption request submitted" meta="5 hours ago" />
-                <ActivityItem title="Rescue completed successfully" meta="Yesterday" />
-                <ActivityItem title="Donation received" meta="Yesterday" />
+                {data?.activity && data.activity.length > 0 ? (
+                  data.activity.map((act, idx) => (
+                    <ActivityItem 
+                      key={idx} 
+                      title={act.title} 
+                      meta={new Date(act.time).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })} 
+                    />
+                  ))
+                ) : (
+                  <ActivityItem title="No recent activity found" meta="Check back later" />
+                )}
               </div>
             </GlassCard>
 
@@ -548,71 +623,23 @@ function HealthChip({ title, value }) {
 
 /* ------------------------- Charts (simple SVG) ------------------------- */
 
-function MiniLineChart({ data = [] }) {
-  const { d } = useSvgPath(data);
-  return (
-    <svg viewBox="0 0 120 50" className="w-full h-16">
-      <path d="M0 45 H120" stroke="rgba(0,0,0,0.12)" strokeWidth="1" fill="none" />
-      <path d={d} stroke="rgba(47,62,44,0.75)" strokeWidth="2.5" fill="none" />
-      <path d={`${d} L120 50 L0 50 Z`} fill="rgba(95,125,90,0.14)" />
-    </svg>
-  );
-}
-
-function MiniAreaChart({ data = [] }) {
-  const { d } = useSvgPath(data);
-  return (
-    <svg viewBox="0 0 120 50" className="w-full h-16">
-      <path d={`${d} L120 50 L0 50 Z`} fill="rgba(95,125,90,0.18)" />
-      <path d={d} stroke="rgba(47,62,44,0.70)" strokeWidth="2.5" fill="none" />
-    </svg>
-  );
-}
-
-function MiniBarChart({ data = [] }) {
-  const max = Math.max(...data, 1);
-  const barW = 120 / Math.max(data.length, 1);
-  return (
-    <svg viewBox="0 0 120 50" className="w-full h-16">
-      {data.map((v, i) => {
-        const h = (v / max) * 40;
-        const x = i * barW + 2;
-        const y = 48 - h;
-        return (
-          <rect
-            key={i}
-            x={x}
-            y={y}
-            width={Math.max(barW - 4, 3)}
-            height={h}
-            rx="3"
-            fill="rgba(95,125,90,0.35)"
-            stroke="rgba(139,107,76,0.25)"
-          />
-        );
-      })}
-    </svg>
-  );
-}
-
-function useSvgPath(data) {
-  const max = Math.max(...data, 1);
-  const min = Math.min(...data, 0);
-  const range = Math.max(max - min, 1);
-
-  const points = data.map((v, i) => {
-    const x = (i / Math.max(data.length - 1, 1)) * 120;
-    const y = 48 - ((v - min) / range) * 40;
-    return [x, y];
-  });
-
-  const d = points.length
-    ? points
-      .map((p, i) => (i === 0 ? `M ${p[0].toFixed(2)} ${p[1].toFixed(2)}` : `L ${p[0].toFixed(2)} ${p[1].toFixed(2)}`))
-      .join(" ")
-    : "M 0 48 L 120 48";
-
-  return { d };
+function CustomTooltip({ active, payload, label }) {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="rounded-xl bg-white/80 backdrop-blur-md border border-[#8b6b4c]/30 p-2 shadow-lg text-xs">
+        <div className="font-bold text-[#2f3e2c] mb-1">{data.displayDate}</div>
+        {payload.map((entry, index) => (
+          <div key={index} className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color || entry.fill }} />
+            <span className="text-[#6b7d67] capitalize">{entry.name}:</span>
+            <span className="font-bold text-[#2f3e2c]">{entry.value}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return null;
 }
 
 /* ------------------------- Utils ------------------------- */

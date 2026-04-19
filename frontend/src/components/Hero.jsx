@@ -1,6 +1,9 @@
 import { FaPaw, FaHandHoldingHeart } from "react-icons/fa";
+import useProtectedNavigation from "../hooks/useProtectedNavigation";
 
 const HeroSection = () => {
+  const { go } = useProtectedNavigation();
+
   return (
     <section
       className="relative min-h-[85vh] bg-cover bg-center sm:pt-[92px] md:pt-[96px]"
@@ -30,11 +33,15 @@ const HeroSection = () => {
 
           {/* Buttons */}
           <div className="mt-6 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
-            <button className="w-full sm:w-auto relative flex items-center justify-center gap-2
+            <button
+              type="button"
+              onClick={() => go("/adopt")}
+              className="w-full sm:w-auto relative flex items-center justify-center gap-2
                                bg-gradient-to-r from-green-500 to-green-700
                                px-5 sm:px-6 py-3 rounded-[15px] shadow
                                hover:from-green-600 hover:to-green-800
-                               transition-all duration-300 group overflow-hidden">
+                               transition-all duration-300 group overflow-hidden"
+            >
               <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 via-green-300/30 to-green-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               <FaPaw className="relative z-10 text-white" />
               <span className="relative z-10 text-white font-semibold text-sm sm:text-base">
@@ -42,11 +49,15 @@ const HeroSection = () => {
               </span>
             </button>
 
-            <button className="w-full sm:w-auto relative flex items-center justify-center gap-2
+            <button
+              type="button"
+              onClick={() => go("/rescue")}
+              className="w-full sm:w-auto relative flex items-center justify-center gap-2
                                bg-gradient-to-r from-orange-500 to-orange-700
                                px-5 sm:px-6 py-3 rounded-[15px] shadow
                                hover:from-orange-600 hover:to-orange-800
-                               transition-all duration-300 group overflow-hidden">
+                               transition-all duration-300 group overflow-hidden"
+            >
               <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 via-orange-300/30 to-orange-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
               <FaHandHoldingHeart className="relative z-10 text-white" />
               <span className="relative z-10 text-white font-semibold text-sm sm:text-base">
